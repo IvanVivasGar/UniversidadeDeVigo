@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tiempo Real</title>
+    <script>
+        function actualizarHora() {
+            const ahora = new Date();
+            const horaFormateada = ahora.toLocaleTimeString();
+            document.getElementById('tiempo').textContent = horaFormateada;
+        }
+
+        setInterval(actualizarHora, 1000)
+    </script>
+</head>
+<body>
+    <h1>Tiempo Real</h1>
+    <div id="tiempo"></div>
+</body>
+</html>
