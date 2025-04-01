@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Factura</title>
+</head>
+<body>
+    <h1>Factura</h1>
+    <p>Fecha: {{ fecha }}</p>
+
+    <h2>Emisor</h2>
+    <p>{{ emisor.nombre }} ({{ emisor.cif }})</p>
+    <p>{{ emisor.direccion }}, {{ emisor.poblacion }}, {{ emisor.provincia }}, {{ emisor.cp }}, {{ emisor.pais }}</p>
+    <p>Contacto: {{ emisor.contacto }} - Email: {{ emisor.email }} - Teléfono: {{ emisor.telefono }}</p>
+
+    <h2>Cliente</h2>
+    <p>{{ cliente.nombre }} ({{ cliente.cif }})</p>
+    <p>{{ cliente.direccion }}, {{ cliente.poblacion }}, {{ cliente.provincia }}, {{ cliente.cp }}, {{ cliente.pais }}</p>
+    <p>Contacto: {{ cliente.contacto }} - Email: {{ cliente.email }} - Teléfono: {{ cliente.telefono }}</p>
+
+    <h2>Detalles</h2>
+    <ul>
+        {% for item in detalles %}
+            <li>{{ item.concepto }} - {{ item.unidades }} x {{ item.precio }}€/{{ item.unidad }} (IVA: {{ item.iva }}%) = {{ item.total }}€</li>
+        {% endfor %}
+    </ul>
+    <p><strong>Total Factura: {{ total_factura }}€</strong></p>
+</body>
+</html>
