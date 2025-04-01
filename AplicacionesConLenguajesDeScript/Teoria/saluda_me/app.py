@@ -15,15 +15,12 @@ def saludar():
         nombre = "Invitado"
     ...
 
-    return """
-        <!DOCType html>
-        <html>
-            <head><title>SaludaME</title></head>
-            <body>
-                <h1>Hola, $name!</h1>
-            </body>
-        </html>
-    """.replace("$name", nombre)
+    sust = {
+        "name": nombre,
+        "primos": ()
+    }
+
+    return flask.render_template("saludo.html", **sust)
 
 if __name__ == "__main__":
     app.run(debug = True)

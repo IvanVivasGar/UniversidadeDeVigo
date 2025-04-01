@@ -1,0 +1,16 @@
+<!DOCType html>
+    <html>
+        <head><title>SaludaME</title></head>
+        <body>
+            <h1>Hola, {{ name.title() }}.</h1>
+
+            {%- if primos %}
+                {# Listar los primos... #}
+                <ol> Listado de primos
+                    {%- for primo in primos %}
+                        <li>Numero: {{ primo }}</li>
+                    {%- endfor %}
+                </ol>
+            {%- endif %}
+        </body>
+    </html>

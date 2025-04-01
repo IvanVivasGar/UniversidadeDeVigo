@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Generar Factura</title>
+    <script>
+        function agregarLinea() {
+            let div = document.createElement("div");
+            div.innerHTML = `
+                <input type="text" name="concepto[]" placeholder="Concepto" required>
+                <input type="number" name="precio[]" placeholder="Precio" required>
+                <input type="text" name="unidad[]" placeholder="Unidad" required>
+                <input type="number" name="unidades[]" placeholder="Unidades" required>
+                <input type="number" name="iva[]" placeholder="IVA (%)" required>
+            `;
+            document.getElementById("detalles").appendChild(div);
+        }
+    </script>
+</head>
+<body>
+    <h1>Generar Factura</h1>
+    <form method="POST" action="/generar_factura">
+        <h2>Emisor</h2>
+        <input type="text" name="nombreEmisor" placeholder="Nombre" required>
+        <input type="text" name="cifEmisor" placeholder="CIF" required>
+        <input type="text" name="direccionEmisor" placeholder="Dirección" required>
+        <input type="text" name="poblacionEmisor" placeholder="Población" required>
+        <input type="text" name="provinciaEmisor" placeholder="Provincia" required>
+        <input type="text" name="cpEmisor" placeholder="Código Postal" required>
+        <input type="text" name="paisEmisor" placeholder="País" required>
+        <input type="text" name="contactoEmisor" placeholder="Persona de Contacto" required>
+        <input type="email" name="emailEmisor" placeholder="Email" required>
+        <input type="tel" name="telefonoEmisor" placeholder="Teléfono" required>
+
+        <h2>Cliente</h2>
+        <input type="text" name="nombreCliente" placeholder="Nombre" required>
+        <input type="text" name="cifCliente" placeholder="CIF" required>
+        <input type="text" name="direccionCliente" placeholder="Dirección" required>
+        <input type="text" name="poblacionCliente" placeholder="Población" required>
+        <input type="text" name="provinciaCliente" placeholder="Provincia" required>
+        <input type="text" name="cpCliente" placeholder="Código Postal" required>
+        <input type="text" name="paisCliente" placeholder="País" required>
+        <input type="text" name="contactoCliente" placeholder="Persona de Contacto" required>
+        <input type="email" name="emailCliente" placeholder="Email" required>
+        <input type="tel" name="telefonoCliente" placeholder="Teléfono" required>
+
+        <h2>Detalle</h2>
+        <div id="detalles">
+            <input type="text" name="concepto[]" placeholder="Concepto" required>
+            <input type="number" name="precio[]" placeholder="Precio" required>
+            <input type="text" name="unidad[]" placeholder="Unidad" required>
+            <input type="number" name="unidades[]" placeholder="Unidades" required>
+            <input type="number" name="iva[]" placeholder="IVA (%)" required>
+        </div>
+        <button type="button" onclick="agregarLinea()">Añadir línea</button>
+        <button type="submit">Generar Factura</button>
+    </form>
+</body>
+</html>
