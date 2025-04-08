@@ -2,14 +2,14 @@
     <html>
         <head><title>SaludaME</title></head>
         <body>
-            <h1>Hola, {{ name.title() }}.</h1>
+            <h1>Ultimo mensaje</h1>
+            {{ ultimo_mensaje }}
 
-            {%- if primos %}
-                {# Listar los primos... #}
-                <ol> Listado de primos
-                    {%- for primo in primos %}
-                        <li>Numero: {{ primo }}</li>
-                    {%- endfor %}
+            {%- if mensajes %}
+                <h2>Mensajes anteriores</h2>
+                {# Listar los mensajes... #}
+                <ol>{% for mensaje in mensajes %}
+                    <li>{{ mensaje }}</li>
                 </ol>
             {%- endif %}
         </body>
