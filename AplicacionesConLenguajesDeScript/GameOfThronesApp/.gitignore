@@ -1,5 +1,4 @@
 # Archivos grandes - Videos de fondo
-*.mp4
 got_background.*
 
 # Archivos de sistema
@@ -23,11 +22,13 @@ config_local.py
 # Logs
 *.log
 
-# Archivos comprimidos grandes
+# Archivos comprimidos grandes (estos sí los ignoramos porque no son necesarios para la app)
 *.zip
 *.rar
 *.7z
 
-# Imágenes muy grandes (opcional - ajustar según necesidad)
-# *.mov
-# *.avi
+# NOTA: Los archivos *.mp4 NO están en .gitignore porque Git LFS los maneja
+# Git LFS está configurado para manejar automáticamente:
+# - *.mp4 (videos)
+# - *.jpg, *.jpeg, *.png, *.gif (imágenes grandes)
+# - *.pdf (documentos grandes)
