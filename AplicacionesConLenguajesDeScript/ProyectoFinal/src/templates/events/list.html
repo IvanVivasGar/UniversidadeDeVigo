@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+
+{% block title %}Eventos - WesterosTracker{% endblock %}
+
+{% block content %}
+<div class="row mb-4 align-items-center">
+    <div class="col-md-6">
+        <h1 class="mb-0">Eventos de Westeros</h1>
+        <p class="text-muted">Descubre los momentos cruciales del mundo de Game of Thrones</p>
+    </div>
+    <div class="col-md-6 text-md-end">
+        {% if current_user.is_authenticated %}
+        <a href="{{ url_for('events.event_create') }}" class="btn btn-primary">
+            <i class="fas fa-plus me-1"></i> Añadir evento
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="input-group">
+                    <span class="input-group-text bg-primary text-white"><i class="fas fa-search"></i></span>
+                    <input type="text" id="filterInput" class="form-control" placeholder="Buscar eventos por nombre, temporada o ubicación...">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filtros por temporada -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="season-filter">
+            <span class="season-label me-2">Filtrar por temporada:</span>
+            <div class="btn-group">
+                <button type="button" class="btn btn-outline-primary season-btn active" data-season="all">Todas</button>
+                {% for i in range(1, 9) %}
+                <button type="button" class="btn btn-outline-primary season-btn" data-season="{{ i }}">{{ i }}</button>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    {% if events %}
+        {% for event in events %}
+        <div class="col-md-6 col-lg-4 mb-4 filter-item event-card" data-season="{{ event.season }}">
+            <div class="card h-100 {% if event.importance >= 4 %}border-danger{% endif %}">
+                {% if event.image_url %}
+                <div class="event-img-container card-img-container">
+                    <img src="{{ event.image_url }}" alt="{{ event.name }}">
+                </div>
+                {% else %}
+                <div class="event-img-placeholder">
+                    <i class="fas fa-landmark fa-4x text-muted"></i>
+                </div>
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ event.name }}</h5>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="badge bg-primary">Temporada {{ event.season }} | Episodio {{ event.episode }}</span>
+                        <span class="badge bg-secondary">{{ event.location }}</span>
+                    </div>
+                    <p class="card-text">{{ event.description|truncate(100) }}</p>
+                    
+                    <div class="event-importance mb-3">
+                        <small class="text-muted me-2">Importancia:</small>
+                        <div class="importance-badge">
+                            {% for i in range(1, 6) %}
+                            <span class="importance-dot {% if i <= event.importance %}active{% endif %}"></span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex flex-wrap">
+                        {% if event.related_characters %}
+                        <span class="badge bg-info me-1 mb-1">
+                            <i class="fas fa-user me-1"></i> {{ event.related_characters|length }} personajes
+                        </span>
+                        {% endif %}
+                        
+                        {% if event.related_houses %}
+                        <span class="badge bg-secondary me-1 mb-1">
+                            <i class="fas fa-flag me-1"></i> {{ event.related_houses|length }} casas
+                        </span>
+                        {% endif %}
+                        
+                        {% if event.comments %}
+                        <span class="badge bg-light text-dark me-1 mb-1">
+                            <i class="fas fa-comment me-1"></i> {{ event.comments|length }} comentarios
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent d-flex justify-content-between">
+                    <a href="{{ url_for('events.event_detail', event_id=event.get_id()) }}" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-info-circle me-1"></i> Detalles
+                    </a>
+                    
+                    {% if current_user.is_authenticated %}
+                    <div>
+                        <button class="btn btn-outline-secondary btn-sm favorite-btn {% if event._oid in current_user.favorites.events %}active{% endif %}" 
+                                data-id="{{ event._oid }}" 
+                                data-type="events">
+                            <i class="{% if event._oid in current_user.favorites.events %}fas{% else %}far{% endif %} fa-heart me-1"></i> 
+                            Favorito
+                        </button>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+    <div class="col-12">
+        <div class="alert alert-info" role="alert">
+            <i class="fas fa-info-circle me-2"></i>
+            No hay eventos añadidos todavía.
+            {% if current_user.is_authenticated %}
+            <a href="{{ url_for('events.event_create') }}" class="alert-link">¡Añade el primero!</a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% if events and events|length > 9 %}
+<div class="row">
+    <div class="col-12">
+        <nav aria-label="Paginación de eventos">
+            <ul class="pagination justify-content-center">
+                <li class="page-item disabled">
+                    <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Anterior</a>
+                </li>
+                <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                <li class="page-item"><a class="page-link" href="#">2</a></li>
+                <li class="page-item"><a class="page-link" href="#">3</a></li>
+                <li class="page-item">
+                    <a class="page-link" href="#">Siguiente</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const seasonButtons = document.querySelectorAll('.season-btn');
+    const eventCards = document.querySelectorAll('.event-card');
+    const searchInput = document.getElementById('filterInput');
+    
+    // Variables para mantener el estado de los filtros
+    let currentSeason = 'all';
+    let currentSearchText = '';
+    
+    // Función para aplicar ambos filtros simultáneamente
+    function applyFilters() {
+        eventCards.forEach(card => {
+            const cardSeason = card.getAttribute('data-season');
+            const cardText = card.textContent.toLowerCase();
+            
+            // Verificar filtro de temporada
+            const seasonMatch = (currentSeason === 'all' || cardSeason === currentSeason);
+            
+            // Verificar filtro de búsqueda
+            const searchMatch = (currentSearchText === '' || cardText.includes(currentSearchText.toLowerCase()));
+            
+            // Mostrar solo si coincide con ambos filtros
+            if (seasonMatch && searchMatch) {
+                card.style.display = '';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+    
+    // Filtrado por temporada
+    seasonButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Quitar la clase active de todos los botones
+            seasonButtons.forEach(btn => btn.classList.remove('active'));
+            
+            // Añadir la clase active al botón pulsado
+            this.classList.add('active');
+            
+            // Actualizar la temporada current

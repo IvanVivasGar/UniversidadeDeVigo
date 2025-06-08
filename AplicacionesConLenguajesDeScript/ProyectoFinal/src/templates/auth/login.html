@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Iniciar sesión - WesterosTracker{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-lg">
+            <div class="card-header bg-primary text-white text-center py-3">
+                <h2 class="mb-0">Iniciar sesión</h2>
+            </div>
+            <div class="card-body p-4">
+                <form method="post" action="{{ url_for('auth.login') }}">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Nombre de usuario</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-user"></i></span>
+                            <input type="text" class="form-control" id="username" name="username" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Contraseña</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                        </div>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">Iniciar sesión</button>
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer text-center py-3">
+                <p class="mb-0">¿No tienes una cuenta? <a href="{{ url_for('auth.register') }}" class="text-decoration-none">Regístrate</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border: none;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    
+    .card-header {
+        background-color: var(--primary) !important;
+    }
+    
+    .form-control:focus {
+        box-shadow: 0 0 0 0.25rem rgba(219, 158, 29, 0.25);
+        border-color: var(--secondary);
+    }
+    
+    .btn-primary {
+        background-color: var(--primary);
+        border-color: var(--primary);
+    }
+    
+    .btn-primary:hover {
+        background-color: var(--dark);
+        border-color: var(--dark);
+    }
+    
+    .card-footer {
+        background-color: rgba(0,0,0,0.03);
+    }
+    
+    .card-footer a {
+        color: var(--secondary);
+    }
+</style>
+{% endblock %}

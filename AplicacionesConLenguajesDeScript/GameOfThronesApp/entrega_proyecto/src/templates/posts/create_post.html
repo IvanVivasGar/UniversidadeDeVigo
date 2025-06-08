@@ -1,0 +1,807 @@
+{% extends "base.html" %}
+
+{% block title %}Nueva Discusión - WesterosTracker{% endblock %}
+
+{% block content %}
+<div class="create-post-container">
+    <!-- Hero Section -->
+    <div class="create-hero">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <div class="breadcrumb">
+                <a href="{{ url_for('posts.posts') }}">
+                    <i class="fas fa-comments"></i>
+                    Discusiones
+                </a>
+                <i class="fas fa-chevron-right"></i>
+                <span>Nueva Discusión</span>
+            </div>
+            
+            <h1 class="hero-title">
+                <i class="fas fa-feather-alt"></i>
+                Crear Nueva Discusión
+            </h1>
+            <p class="hero-subtitle">
+                Comparte tus pensamientos, teorías y análisis sobre el mundo de Westeros
+            </p>
+        </div>
+        
+        <div class="floating-elements">
+            <div class="floating-scroll"><i class="fas fa-scroll"></i></div>
+            <div class="floating-dragon"><i class="fas fa-dragon"></i></div>
+            <div class="floating-crown"><i class="fas fa-crown"></i></div>
+        </div>
+    </div>
+
+    <!-- Main Form Section -->
+    <div class="create-main">
+        <div class="container">
+            <div class="create-layout">
+                <!-- Main Form -->
+                <div class="form-section">
+                    <div class="form-card">
+                        <div class="form-header">
+                            <h2>
+                                <i class="fas fa-edit"></i>
+                                Detalles de la Discusión
+                            </h2>
+                            <p>Completa la información para crear tu nueva discusión</p>
+                        </div>
+                        
+                        <form id="create-post-form" class="post-form" method="POST" enctype="multipart/form-data">
+                            <!-- Title Section -->
+                            <div class="form-group title-group">
+                                <label for="title" class="form-label required">
+                                    <i class="fas fa-heading"></i>
+                                    Título de la Discusión
+                                </label>
+                                <div class="input-wrapper">
+                                    <input type="text" 
+                                           id="title" 
+                                           name="title" 
+                                           class="form-input title-input" 
+                                           placeholder="Escribe un título llamativo para tu discusión..."
+                                           maxlength="200"
+                                           required>
+                                    <div class="char-counter">
+                                        <span id="title-counter">0</span>/200
+                                    </div>
+                                </div>
+                                <div class="field-help">
+                                    Un buen título es claro, específico y atrae la atención de otros usuarios
+                                </div>
+                            </div>
+
+                            <!-- Category Section -->
+                            <div class="form-group category-group">
+                                <label for="category" class="form-label required">
+                                    <i class="fas fa-tag"></i>
+                                    Categoría
+                                </label>
+                                <div class="category-selector">
+                                    <select id="category" name="category" class="form-select" required>
+                                        <option value="">Selecciona una categoría</option>
+                                        <option value="teoria">
+                                            <i class="fas fa-lightbulb"></i>
+                                            Teorías y Especulaciones
+                                        </option>
+                                        <option value="analisis">
+                                            <i class="fas fa-search"></i>
+                                            Análisis de Personajes
+                                        </option>
+                                        <option value="eventos">
+                                            <i class="fas fa-calendar"></i>
+                                            Eventos Históricos
+                                        </option>
+                                        <option value="casas">
+                                            <i class="fas fa-home"></i>
+                                            Casas Nobles
+                                        </option>
+                                        <option value="debate">
+                                            <i class="fas fa-comments"></i>
+                                            Debates Generales
+                                        </option>
+                                        <option value="off-topic">
+                                            <i class="fas fa-chat"></i>
+                                            Fuera de Tema
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="category-preview" id="category-preview"></div>
+                            </div>
+
+                            <!-- Tags Section -->
+                            <div class="form-group tags-group">
+                                <label for="tags" class="form-label">
+                                    <i class="fas fa-tags"></i>
+                                    Etiquetas
+                                    <span class="optional">(Opcional)</span>
+                                </label>
+                                <div class="tags-input-wrapper">
+                                    <input type="text" 
+                                           id="tags-input" 
+                                           class="form-input tags-input" 
+                                           placeholder="Añade etiquetas separadas por comas (ej: Jon Snow, Teoría R+L=J, Winterfell)">
+                                    <button type="button" class="add-tag-btn" onclick="addTag()">
+                                        <i class="fas fa-plus"></i>
+                                        Añadir
+                                    </button>
+                                </div>
+                                <div class="tags-list" id="tags-list"></div>
+                                <input type="hidden" name="tags" id="tags-hidden">
+                                <div class="field-help">
+                                    Las etiquetas ayudan a otros usuarios a encontrar tu discusión
+                                </div>
+                            </div>
+
+                            <!-- Content Section -->
+                            <div class="form-group content-group">
+                                <label for="content" class="form-label required">
+                                    <i class="fas fa-align-left"></i>
+                                    Contenido de la Discusión
+                                </label>
+                                <div class="content-editor-wrapper">
+                                    <div class="editor-toolbar">
+                                        <div class="format-buttons">
+                                            <button type="button" class="format-btn" onclick="formatText('bold')" title="Negrita">
+                                                <i class="fas fa-bold"></i>
+                                            </button>
+                                            <button type="button" class="format-btn" onclick="formatText('italic')" title="Cursiva">
+                                                <i class="fas fa-italic"></i>
+                                            </button>
+                                            <button type="button" class="format-btn" onclick="formatText('quote')" title="Cita">
+                                                <i class="fas fa-quote-left"></i>
+                                            </button>
+                                            <button type="button" class="format-btn" onclick="formatText('link')" title="Enlace">
+                                                <i class="fas fa-link"></i>
+                                            </button>
+                                        </div>
+                                        <div class="editor-actions">
+                                            <button type="button" class="preview-btn" onclick="togglePreview()">
+                                                <i class="fas fa-eye"></i>
+                                                Vista Previa
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="editor-container">
+                                        <textarea id="content" 
+                                                  name="content" 
+                                                  class="form-textarea content-editor" 
+                                                  placeholder="Escribe aquí el contenido de tu discusión...
+
+Puedes incluir:
+• Tus teorías y análisis
+• Referencias a eventos o personajes
+• Preguntas para generar debate
+• Enlaces a recursos relevantes
+
+¡Sé creativo y detallado!"
+                                                  rows="15"
+                                                  minlength="50"
+                                                  maxlength="5000"
+                                                  required></textarea>
+                                        <div class="content-preview" id="content-preview" style="display: none;"></div>
+                                    </div>
+                                    
+                                    <div class="editor-footer">
+                                        <div class="char-counter">
+                                            <span id="content-counter">0</span>/5000 caracteres
+                                        </div>
+                                        <div class="format-help">
+                                            <span class="help-toggle" onclick="toggleFormatHelp()">
+                                                <i class="fas fa-question-circle"></i>
+                                                Ayuda de formato
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="format-help-panel" id="format-help" style="display: none;">
+                                    <h4>Guía de Formato</h4>
+                                    <div class="help-grid">
+                                        <div class="help-item">
+                                            <code>**texto**</code>
+                                            <span>Texto en <strong>negrita</strong></span>
+                                        </div>
+                                        <div class="help-item">
+                                            <code>*texto*</code>
+                                            <span>Texto en <em>cursiva</em></span>
+                                        </div>
+                                        <div class="help-item">
+                                            <code>&gt; texto</code>
+                                            <span>Cita en bloque</span>
+                                        </div>
+                                        <div class="help-item">
+                                            <code>[texto](url)</code>
+                                            <span>Enlace</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Image Upload Section -->
+                            <div class="form-group image-group">
+                                <label for="image" class="form-label">
+                                    <i class="fas fa-image"></i>
+                                    Imagen de Portada
+                                    <span class="optional">(Opcional)</span>
+                                </label>
+                                <div class="image-upload-wrapper">
+                                    <div class="upload-area" id="upload-area">
+                                        <div class="upload-content">
+                                            <i class="fas fa-cloud-upload-alt"></i>
+                                            <h4>Arrastra una imagen aquí</h4>
+                                            <p>o haz clic para seleccionar</p>
+                                            <span class="file-info">PNG, JPG hasta 5MB</span>
+                                        </div>
+                                        <input type="file" 
+                                               id="image" 
+                                               name="image" 
+                                               accept="image/*" 
+                                               class="file-input">
+                                    </div>
+                                    <div class="image-preview" id="image-preview" style="display: none;">
+                                        <img id="preview-img" src="" alt="Vista previa">
+                                        <button type="button" class="remove-image" onclick="removeImage()">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Form Actions -->
+                            <div class="form-actions">
+                                <div class="action-buttons">
+                                    <button type="button" class="btn btn-secondary" onclick="saveDraft()">
+                                        <div class="btn-content">
+                                            <i class="fas fa-save"></i>
+                                            <span>Guardar Borrador</span>
+                                        </div>
+                                    </button>
+                                    
+                                    <button type="button" class="btn btn-outline" onclick="cancelPost()">
+                                        <i class="fas fa-times"></i>
+                                        Cancelar
+                                    </button>
+                                    
+                                    <button type="submit" class="btn btn-primary submit-btn" id="submit-post">
+                                        <div class="btn-content">
+                                            <i class="fas fa-paper-plane"></i>
+                                            <span>Publicar Discusión</span>
+                                        </div>
+                                        <div class="btn-loading">
+                                            <i class="fas fa-spinner fa-spin"></i>
+                                            <span>Publicando...</span>
+                                        </div>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Sidebar -->
+                <div class="create-sidebar">
+                    <!-- Tips Card -->
+                    <div class="sidebar-card tips-card">
+                        <div class="card-header">
+                            <h4>
+                                <i class="fas fa-lightbulb"></i>
+                                Consejos para una Buena Discusión
+                            </h4>
+                        </div>
+                        <div class="card-content">
+                            <div class="tips-list">
+                                <div class="tip-item">
+                                    <i class="fas fa-check-circle"></i>
+                                    <div class="tip-content">
+                                        <h5>Título Descriptivo</h5>
+                                        <p>Usa un título claro que resuma el tema principal</p>
+                                    </div>
+                                </div>
+                                <div class="tip-item">
+                                    <i class="fas fa-check-circle"></i>
+                                    <div class="tip-content">
+                                        <h5>Contenido Detallado</h5>
+                                        <p>Proporciona contexto y desarrolla tus ideas</p>
+                                    </div>
+                                </div>
+                                <div class="tip-item">
+                                    <i class="fas fa-check-circle"></i>
+                                    <div class="tip-content">
+                                        <h5>Categoría Apropiada</h5>
+                                        <p>Selecciona la categoría que mejor describa tu tema</p>
+                                    </div>
+                                </div>
+                                <div class="tip-item">
+                                    <i class="fas fa-check-circle"></i>
+                                    <div class="tip-content">
+                                        <h5>Respeto y Cortesía</h5>
+                                        <p>Mantén un tono respetuoso y constructivo</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Guidelines Card -->
+                    <div class="sidebar-card guidelines-card">
+                        <div class="card-header">
+                            <h4>
+                                <i class="fas fa-scroll"></i>
+                                Reglas de la Comunidad
+                            </h4>
+                        </div>
+                        <div class="card-content">
+                            <div class="guidelines-list">
+                                <div class="guideline-item">
+                                    <i class="fas fa-shield-alt"></i>
+                                    <span>No spoilers sin advertencia</span>
+                                </div>
+                                <div class="guideline-item">
+                                    <i class="fas fa-heart"></i>
+                                    <span>Respeta otras opiniones</span>
+                                </div>
+                                <div class="guideline-item">
+                                    <i class="fas fa-search"></i>
+                                    <span>Busca antes de crear</span>
+                                </div>
+                                <div class="guideline-item">
+                                    <i class="fas fa-ban"></i>
+                                    <span>No contenido ofensivo</span>
+                                </div>
+                            </div>
+                            <a href="/guidelines" class="guidelines-link">
+                                Ver reglas completas
+                                <i class="fas fa-external-link-alt"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity -->
+                    <div class="sidebar-card activity-card">
+                        <div class="card-header">
+                            <h4>
+                                <i class="fas fa-clock"></i>
+                                Actividad Reciente
+                            </h4>
+                        </div>
+                        <div class="card-content">
+                            <div class="recent-posts" id="recent-posts">
+                                <div class="loading">
+                                    <i class="fas fa-spinner fa-spin"></i>
+                                    <span>Cargando actividad...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+class CreatePostManager {
+    constructor() {
+        this.tags = [];
+        this.previewMode = false;
+        this.draftSaved = false;
+        this.init();
+    }
+    
+    init() {
+        this.setupEventListeners();
+        this.setupCharacterCounters();
+        this.setupImageUpload();
+        this.loadRecentActivity();
+        this.loadDraft();
+        this.setupAutoSave();
+    }
+    
+    setupEventListeners() {
+        // Form submission
+        document.getElementById('create-post-form').addEventListener('submit', this.handleSubmit.bind(this));
+        
+        // Category change
+        document.getElementById('category').addEventListener('change', this.updateCategoryPreview.bind(this));
+        
+        // Tags input
+        document.getElementById('tags-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' || e.key === ',') {
+                e.preventDefault();
+                this.addTag();
+            }
+        });
+        
+        // Prevent accidental navigation
+        window.addEventListener('beforeunload', (e) => {
+            if (this.hasUnsavedChanges()) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
+    }
+    
+    setupCharacterCounters() {
+        // Title counter
+        const titleInput = document.getElementById('title');
+        const titleCounter = document.getElementById('title-counter');
+        
+        titleInput.addEventListener('input', () => {
+            const length = titleInput.value.length;
+            titleCounter.textContent = length;
+            
+            if (length > 200) {
+                titleCounter.parentElement.classList.add('over-limit');
+            } else {
+                titleCounter.parentElement.classList.remove('over-limit');
+            }
+        });
+        
+        // Content counter
+        const contentTextarea = document.getElementById('content');
+        const contentCounter = document.getElementById('content-counter');
+        
+        contentTextarea.addEventListener('input', () => {
+            const length = contentTextarea.value.length;
+            contentCounter.textContent = length;
+            
+            if (length > 5000) {
+                contentCounter.parentElement.classList.add('over-limit');
+            } else {
+                contentCounter.parentElement.classList.remove('over-limit');
+            }
+        });
+    }
+    
+    setupImageUpload() {
+        const uploadArea = document.getElementById('upload-area');
+        const fileInput = document.getElementById('image');
+        const imagePreview = document.getElementById('image-preview');
+        const previewImg = document.getElementById('preview-img');
+        
+        // Click to upload
+        uploadArea.addEventListener('click', () => fileInput.click());
+        
+        // Drag and drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('drag-over');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('drag-over');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('drag-over');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                this.handleImageFile(files[0]);
+            }
+        });
+        
+        // File input change
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                this.handleImageFile(e.target.files[0]);
+            }
+        });
+    }
+    
+    handleImageFile(file) {
+        if (!file.type.startsWith('image/')) {
+            showNotification('Por favor selecciona un archivo de imagen válido', 'error');
+            return;
+        }
+        
+        if (file.size > 5 * 1024 * 1024) { // 5MB
+            showNotification('La imagen no puede ser mayor a 5MB', 'error');
+            return;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            document.getElementById('preview-img').src = e.target.result;
+            document.getElementById('upload-area').style.display = 'none';
+            document.getElementById('image-preview').style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    }
+    
+    updateCategoryPreview() {
+        const category = document.getElementById('category').value;
+        const preview = document.getElementById('category-preview');
+        
+        if (category) {
+            const option = document.querySelector(`option[value="${category}"]`);
+            preview.innerHTML = `
+                <div class="category-badge category-${category}">
+                    ${option.textContent.trim()}
+                </div>
+            `;
+            preview.style.display = 'block';
+        } else {
+            preview.style.display = 'none';
+        }
+    }
+    
+    addTag() {
+        const input = document.getElementById('tags-input');
+        const tagText = input.value.trim();
+        
+        if (!tagText || this.tags.includes(tagText) || this.tags.length >= 10) {
+            input.value = '';
+            return;
+        }
+        
+        this.tags.push(tagText);
+        this.renderTags();
+        this.updateTagsInput();
+        input.value = '';
+    }
+    
+    removeTag(tagText) {
+        this.tags = this.tags.filter(tag => tag !== tagText);
+        this.renderTags();
+        this.updateTagsInput();
+    }
+    
+    renderTags() {
+        const tagsList = document.getElementById('tags-list');
+        
+        if (this.tags.length === 0) {
+            tagsList.innerHTML = '';
+            return;
+        }
+        
+        const html = this.tags.map(tag => `
+            <span class="tag">
+                ${tag}
+                <button type="button" class="remove-tag" onclick="createPostManager.removeTag('${tag}')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </span>
+        `).join('');
+        
+        tagsList.innerHTML = html;
+    }
+    
+    updateTagsInput() {
+        document.getElementById('tags-hidden').value = JSON.stringify(this.tags);
+    }
+    
+    async handleSubmit(event) {
+        event.preventDefault();
+        
+        const submitBtn = document.getElementById('submit-post');
+        submitBtn.classList.add('loading');
+        submitBtn.disabled = true;
+        
+        try {
+            const formData = new FormData(event.target);
+            
+            const response = await fetch('/posts/create', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                this.clearDraft();
+                showNotification('Discusión creada exitosamente', 'success');
+                setTimeout(() => {
+                    window.location.href = `/posts/${data.post_id}`;
+                }, 1500);
+            } else {
+                showNotification(data.message || 'Error al crear la discusión', 'error');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showNotification('Error de conexión', 'error');
+        } finally {
+            submitBtn.classList.remove('loading');
+            submitBtn.disabled = false;
+        }
+    }
+    
+    saveDraft() {
+        const formData = {
+            title: document.getElementById('title').value,
+            category: document.getElementById('category').value,
+            content: document.getElementById('content').value,
+            tags: this.tags
+        };
+        
+        localStorage.setItem('post_draft', JSON.stringify(formData));
+        this.draftSaved = true;
+        showNotification('Borrador guardado', 'success');
+    }
+    
+    loadDraft() {
+        const draft = localStorage.getItem('post_draft');
+        if (draft) {
+            const data = JSON.parse(draft);
+            document.getElementById('title').value = data.title || '';
+            document.getElementById('category').value = data.category || '';
+            document.getElementById('content').value = data.content || '';
+            this.tags = data.tags || [];
+            this.renderTags();
+            this.updateTagsInput();
+            this.updateCategoryPreview();
+            
+            if (data.title || data.content) {
+                showNotification('Borrador cargado', 'info');
+            }
+        }
+    }
+    
+    clearDraft() {
+        localStorage.removeItem('post_draft');
+        this.draftSaved = true;
+    }
+    
+    setupAutoSave() {
+        setInterval(() => {
+            if (this.hasUnsavedChanges()) {
+                this.saveDraft();
+            }
+        }, 60000); // Auto-save every minute
+    }
+    
+    hasUnsavedChanges() {
+        if (this.draftSaved) return false;
+        
+        const title = document.getElementById('title').value;
+        const content = document.getElementById('content').value;
+        
+        return title.length > 0 || content.length > 0 || this.tags.length > 0;
+    }
+    
+    async loadRecentActivity() {
+        try {
+            const response = await fetch('/api/posts/recent');
+            const posts = await response.json();
+            this.renderRecentActivity(posts);
+        } catch (error) {
+            console.error('Error loading recent activity:', error);
+            document.getElementById('recent-posts').innerHTML = 
+                '<p class="error-message">Error al cargar actividad</p>';
+        }
+    }
+    
+    renderRecentActivity(posts) {
+        const container = document.getElementById('recent-posts');
+        
+        if (posts.length === 0) {
+            container.innerHTML = '<p class="no-activity">No hay actividad reciente</p>';
+            return;
+        }
+        
+        const html = posts.slice(0, 5).map(post => `
+            <div class="recent-post">
+                <a href="/posts/${post.id}" class="recent-link">
+                    <h5>${post.title}</h5>
+                    <div class="recent-meta">
+                        <span class="recent-author">${post.author_name}</span>
+                        <span class="recent-time">${this.formatTimeAgo(post.created_at)}</span>
+                    </div>
+                </a>
+            </div>
+        `).join('');
+        
+        container.innerHTML = html;
+    }
+    
+    formatTimeAgo(dateString) {
+        const date = new Date(dateString);
+        const now = new Date();
+        const diffMs = now - date;
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffHours = Math.floor(diffMs / 3600000);
+        const diffDays = Math.floor(diffMs / 86400000);
+        
+        if (diffMins < 60) return `hace ${diffMins}m`;
+        if (diffHours < 24) return `hace ${diffHours}h`;
+        return `hace ${diffDays}d`;
+    }
+}
+
+// Global functions
+function togglePreview() {
+    const textarea = document.getElementById('content');
+    const preview = document.getElementById('content-preview');
+    const btn = document.querySelector('.preview-btn');
+    
+    createPostManager.previewMode = !createPostManager.previewMode;
+    
+    if (createPostManager.previewMode) {
+        textarea.style.display = 'none';
+        preview.style.display = 'block';
+        preview.innerHTML = formatContent(textarea.value);
+        btn.innerHTML = '<i class="fas fa-edit"></i> Editar';
+    } else {
+        textarea.style.display = 'block';
+        preview.style.display = 'none';
+        btn.innerHTML = '<i class="fas fa-eye"></i> Vista Previa';
+    }
+}
+
+function formatContent(content) {
+    return content
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        .replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>')
+        .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>')
+        .replace(/\n/g, '<br>');
+}
+
+function toggleFormatHelp() {
+    const helpPanel = document.getElementById('format-help');
+    const isVisible = helpPanel.style.display !== 'none';
+    helpPanel.style.display = isVisible ? 'none' : 'block';
+}
+
+function removeImage() {
+    document.getElementById('image').value = '';
+    document.getElementById('upload-area').style.display = 'block';
+    document.getElementById('image-preview').style.display = 'none';
+}
+
+function cancelPost() {
+    if (createPostManager.hasUnsavedChanges()) {
+        if (confirm('¿Estás seguro de que quieres cancelar? Se perderán los cambios no guardados.')) {
+            window.location.href = '/posts';
+        }
+    } else {
+        window.location.href = '/posts';
+    }
+}
+
+function formatText(type) {
+    const textarea = document.getElementById('content');
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = textarea.value.substring(start, end);
+    
+    let formattedText = '';
+    
+    switch (type) {
+        case 'bold':
+            formattedText = `**${selectedText}**`;
+            break;
+        case 'italic':
+            formattedText = `*${selectedText}*`;
+            break;
+        case 'quote':
+            formattedText = `> ${selectedText}`;
+            break;
+        case 'link':
+            const url = prompt('Introduce la URL:');
+            if (url) {
+                formattedText = `[${selectedText || 'texto del enlace'}](${url})`;
+            } else {
+                return;
+            }
+            break;
+    }
+    
+    textarea.value = textarea.value.substring(0, start) + formattedText + textarea.value.substring(end);
+    textarea.focus();
+    textarea.setSelectionRange(start + formattedText.length, start + formattedText.length);
+}
+
+// Initialize when DOM is loaded
+let createPostManager;
+document.addEventListener('DOMContentLoaded', () => {
+    createPostManager = new CreatePostManager();
+});
+</script>
+{% endblock %}

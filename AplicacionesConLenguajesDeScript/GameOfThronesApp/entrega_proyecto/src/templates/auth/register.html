@@ -1,0 +1,661 @@
+{% extends "base.html" %}
+
+{% block title %}Registrarse - WesterosTracker{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/login_epic.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="epic-register-container">
+    <!-- Fondo épico animado -->
+    <div class="epic-login-background">
+        <div class="floating-embers">
+            <div class="ember"></div>
+            <div class="ember"></div>
+            <div class="ember"></div>
+            <div class="ember"></div>
+            <div class="ember"></div>
+        </div>
+    </div>
+
+    <!-- Dragones decorativos -->
+    <div class="epic-dragons">
+        <div class="dragon-silhouette dragon-left">
+            <i class="fas fa-dragon"></i>
+        </div>
+        <div class="dragon-silhouette dragon-right">
+            <i class="fas fa-dragon"></i>
+        </div>
+    </div>
+
+    <!-- Tarjeta principal de registro -->
+    <div class="epic-register-card">
+        <!-- Barra de progreso del formulario -->
+        <div class="epic-form-progress" style="width: 0%"></div>
+        
+        <!-- Header épico -->
+        <div class="epic-register-header">
+            <i class="fas fa-scroll scroll-icon"></i>
+            <h1 class="epic-register-title">Jurar Lealtad</h1>
+            <p class="epic-register-subtitle">"Cuando juegas el juego de tronos, o ganas o mueres" - Cersei Lannister</p>
+            <div class="header-divider"></div>
+        </div>
+        
+        <!-- Formulario épico -->
+        <form id="epic-register-form" class="epic-register-form" method="POST">
+            {{ csrf_token() if csrf_token }}
+            
+            <div class="epic-form-group">
+                <label for="username" class="epic-form-label">
+                    <i class="fas fa-user-shield label-icon"></i>
+                    Nombre de Guerrero
+                </label>
+                <div class="epic-input-container">
+                    <input type="text" id="username" name="username" class="epic-input" required 
+                           placeholder="Elige tu nombre en Westeros..."
+                           minlength="3" maxlength="20"
+                           value="{{ request.form.get('username', '') }}">
+                </div>
+                <div class="epic-input-feedback" id="username-feedback"></div>
+            </div>
+            
+            <div class="epic-form-group">
+                <label for="email" class="epic-form-label">
+                    <i class="fas fa-raven label-icon"></i>
+                    Cuervo Mensajero
+                </label>
+                <div class="epic-input-container">
+                    <input type="email" id="email" name="email" class="epic-input" required 
+                           placeholder="raven@westeros.com"
+                           value="{{ request.form.get('email', '') }}">
+                </div>
+                <div class="epic-input-feedback" id="email-feedback"></div>
+            </div>
+            
+            <div class="epic-form-group">
+                <label for="password" class="epic-form-label">
+                    <i class="fas fa-sword label-icon"></i>
+                    Espada Secreta
+                </label>
+                <div class="epic-input-container">
+                    <input type="password" id="password" name="password" class="epic-input" required 
+                           placeholder="Forja tu espada con sabiduría..."
+                           minlength="6">
+                    <button type="button" class="password-toggle" onclick="toggleEpicPassword('password')">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+                <div class="epic-password-strength" id="password-strength">
+                    <div class="strength-label">Fortaleza de tu espada:</div>
+                    <div class="epic-strength-bar">
+                        <div class="epic-strength-fill"></div>
+                    </div>
+                    <span class="epic-strength-text">Forja una espada digna de un rey</span>
+                </div>
+            </div>
+            
+            <div class="epic-form-group">
+                <label for="confirm-password" class="epic-form-label">
+                    <i class="fas fa-shield-alt label-icon"></i>
+                    Confirmar Espada
+                </label>
+                <div class="epic-input-container">
+                    <input type="password" id="confirm-password" name="confirm-password" class="epic-input" required 
+                           placeholder="Reafirma tu juramento...">
+                    <button type="button" class="password-toggle" onclick="toggleEpicPassword('confirm-password')">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+                <div class="epic-input-feedback" id="confirm-password-feedback"></div>
+            </div>
+            
+            <div class="epic-terms-group">
+                <label class="epic-terms-checkbox">
+                    <div class="epic-custom-checkbox" id="terms-checkbox">
+                    </div>
+                    <span class="checkbox-text">
+                        Juro por los Antiguos Dioses y los Nuevos que acepto los 
+                        <a href="#" class="epic-terms-link">códigos de honor</a> y las 
+                        <a href="#" class="epic-terms-link">leyes del reino</a>
+                    </span>
+                    <input type="checkbox" id="terms" name="terms" style="display: none;" required>
+                </label>
+            </div>
+            
+            <button type="submit" class="epic-register-btn" disabled>
+                <div class="btn-content">
+                    <i class="fas fa-crown"></i>
+                    <span>Unirse al Reino</span>
+                </div>
+                <div class="btn-loading">
+                    <i class="fas fa-dragon fa-spin"></i>
+                </div>
+            </button>
+        </form>
+        
+        <div class="epic-divider">
+            <span>⚔️</span>
+        </div>
+
+        <div class="epic-login-footer">
+            <p>¿Ya formas parte de la hermandad?</p>
+            <a href="{{ url_for('auth.login') }}" class="epic-login-link">
+                <i class="fas fa-shield-alt"></i>
+                Acceder a tu reino
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const registerForm = document.getElementById('epic-register-form');
+    const submitButton = registerForm.querySelector('button[type="submit"]');
+    const progressBar = document.querySelector('.epic-form-progress');
+    
+    // Función para mostrar notificaciones épicas
+    window.showEpicNotification = function(message, type = 'info') {
+        const existingNotifications = document.querySelectorAll('.epic-notification');
+        existingNotifications.forEach(notification => notification.remove());
+        
+        const notification = document.createElement('div');
+        notification.className = `epic-notification ${type}`;
+        notification.innerHTML = `
+            <div class="notification-content">
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-triangle' : 'info-circle'}"></i>
+                <span>${message}</span>
+            </div>
+            <button class="notification-close" onclick="this.parentElement.remove()">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.classList.add('show');
+        }, 100);
+        
+        setTimeout(() => {
+            if (notification.parentElement) {
+                notification.remove();
+            }
+        }, 5000);
+    };
+
+    // Función para mostrar mensaje de bienvenida épico
+    function showEpicWelcome(username) {
+        const welcomeDiv = document.createElement('div');
+        welcomeDiv.className = 'epic-welcome-message';
+        welcomeDiv.innerHTML = `
+            <h3>🐉 ¡Bienvenido al Reino, ${username}! 🐉</h3>
+            <p>"El Norte Recuerda... y ahora tú formas parte de nuestra historia"</p>
+        `;
+        document.body.appendChild(welcomeDiv);
+        
+        setTimeout(() => {
+            welcomeDiv.classList.add('show');
+        }, 100);
+        
+        setTimeout(() => {
+            welcomeDiv.remove();
+        }, 4000);
+    }
+
+    // Función para alternar visibilidad de contraseña
+    window.toggleEpicPassword = function(inputId) {
+        const input = document.getElementById(inputId);
+        const toggle = input.nextElementSibling;
+        const icon = toggle.querySelector('i');
+        
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+            toggle.classList.add('active');
+        } else {
+            input.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+            toggle.classList.remove('active');
+        }
+    };
+
+    // Validación en tiempo real
+    function validateUsername() {
+        const username = document.getElementById('username').value;
+        const feedback = document.getElementById('username-feedback');
+        const container = feedback.previousElementSibling;
+        
+        if (username.length === 0) {
+            hideFieldFeedback(feedback, container);
+            return false;
+        } else if (username.length < 3) {
+            showFieldFeedback(feedback, container, 'Un verdadero guerrero necesita al menos 3 caracteres', 'error');
+            return false;
+        } else if (username.length > 20) {
+            showFieldFeedback(feedback, container, 'Incluso los nombres más nobles no exceden 20 caracteres', 'error');
+            return false;
+        } else if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+            showFieldFeedback(feedback, container, 'Solo letras, números y guiones bajos son dignos del reino', 'error');
+            return false;
+        } else {
+            showFieldFeedback(feedback, container, '¡Nombre digno de un noble! ⚔️', 'success');
+            return true;
+        }
+    }
+
+    function validateEmail() {
+        const email = document.getElementById('email').value;
+        const feedback = document.getElementById('email-feedback');
+        const container = feedback.previousElementSibling;
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        
+        if (email.length === 0) {
+            hideFieldFeedback(feedback, container);
+            return false;
+        } else if (!emailRegex.test(email)) {
+            showFieldFeedback(feedback, container, 'Los cuervos necesitan una dirección válida', 'error');
+            return false;
+        } else {
+            showFieldFeedback(feedback, container, '¡Los cuervos encontrarán su camino! 🐦‍⬛', 'success');
+            return true;
+        }
+    }
+
+    function validatePassword() {
+        const password = document.getElementById('password').value;
+        const strengthBar = document.querySelector('.epic-strength-fill');
+        const strengthText = document.querySelector('.epic-strength-text');
+        const container = document.getElementById('password').closest('.epic-input-container');
+        
+        let strength = 0;
+        let feedback = '';
+        let className = '';
+        
+        if (password.length >= 6) strength++;
+        if (password.length >= 8) strength++;
+        if (/[A-Z]/.test(password)) strength++;
+        if (/[0-9]/.test(password)) strength++;
+        if (/[^A-Za-z0-9]/.test(password)) strength++;
+        
+        const strengthPercent = (strength / 5) * 100;
+        strengthBar.style.width = strengthPercent + '%';
+        
+        if (password.length === 0) {
+            strengthBar.style.width = '0%';
+            feedback = 'Forja una espada digna de un rey';
+            className = '';
+            container.classList.remove('success', 'error');
+        } else if (strength <= 2) {
+            className = 'weak';
+            feedback = 'Espada de madera - Muy débil';
+            container.classList.remove('success');
+            container.classList.add('error');
+        } else if (strength <= 3) {
+            className = 'medium';
+            feedback = 'Espada de hierro - Aceptable';
+            container.classList.remove('success', 'error');
+        } else {
+            className = 'strong';
+            feedback = 'Espada de acero valyrio - ¡Poderosa!';
+            container.classList.remove('error');
+            container.classList.add('success');
+        }
+        
+        strengthBar.className = `epic-strength-fill ${className}`;
+        strengthText.textContent = feedback;
+        
+        return strength >= 2;
+    }
+
+    function validateConfirmPassword() {
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirm-password').value;
+        const feedback = document.getElementById('confirm-password-feedback');
+        const container = feedback.previousElementSibling;
+        
+        if (confirmPassword.length === 0) {
+            hideFieldFeedback(feedback, container);
+            return false;
+        } else if (password !== confirmPassword) {
+            showFieldFeedback(feedback, container, 'Las espadas no son idénticas - Reafirma tu juramento', 'error');
+            return false;
+        } else {
+            showFieldFeedback(feedback, container, '¡Tu juramento es firme como el acero! ⚔️', 'success');
+            return true;
+        }
+    }
+
+    function showFieldFeedback(feedback, container, message, type) {
+        feedback.textContent = message;
+        feedback.className = `epic-input-feedback ${type}`;
+        feedback.style.display = 'block';
+        container.classList.remove('success', 'error');
+        container.classList.add(type);
+    }
+
+    function hideFieldFeedback(feedback, container) {
+        feedback.style.display = 'none';
+        container.classList.remove('success', 'error');
+    }
+
+    function updateFormProgress() {
+        const fields = [
+            validateUsername(),
+            validateEmail(),
+            validatePassword(),
+            validateConfirmPassword(),
+            document.getElementById('terms').checked
+        ];
+        
+        const validFields = fields.filter(field => field).length;
+        const progress = (validFields / fields.length) * 100;
+        progressBar.style.width = progress + '%';
+        
+        return validFields === fields.length;
+    }
+
+    function checkFormValidity() {
+        const isFormValid = updateFormProgress();
+        
+        submitButton.disabled = !isFormValid;
+        
+        if (isFormValid) {
+            submitButton.classList.add('form-valid');
+        } else {
+            submitButton.classList.remove('form-valid');
+        }
+    }
+
+    // Event listeners para validación en tiempo real
+    document.getElementById('username').addEventListener('input', function() {
+        validateUsername();
+        checkFormValidity();
+    
+    document.getElementById('email').addEventListener('input', function() {
+        validateEmail();
+        checkFormValidity();
+    });
+    
+    document.getElementById('password').addEventListener('input', function() {
+        validatePassword();
+        validateConfirmPassword(); // Re-validar confirmación si ya tiene contenido
+        checkFormValidity();
+    });
+    
+    document.getElementById('confirm-password').addEventListener('input', function() {
+        validateConfirmPassword();
+        checkFormValidity();
+    });
+
+    // Checkbox personalizado
+    const termsCheckbox = document.getElementById('terms-checkbox');
+    const hiddenCheckbox = document.getElementById('terms');
+    
+    if (termsCheckbox && hiddenCheckbox) {
+        termsCheckbox.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            hiddenCheckbox.checked = !hiddenCheckbox.checked;
+            this.classList.toggle('checked', hiddenCheckbox.checked);
+            
+            console.log('Checkbox terms cambiado:', hiddenCheckbox.checked); // Debug
+            checkFormValidity();
+        });
+        
+        // También manejar clicks en el label
+        const termsLabel = document.querySelector('.epic-terms-checkbox');
+        if (termsLabel) {
+            termsLabel.addEventListener('click', function(e) {
+                if (e.target.classList.contains('epic-terms-link')) {
+                    e.preventDefault();
+                    showNotification('Términos y condiciones - Próximamente disponible', 'info');
+                    return;
+                }
+                
+                if (e.target !== termsCheckbox) {
+                    e.preventDefault();
+                    hiddenCheckbox.checked = !hiddenCheckbox.checked;
+                    termsCheckbox.classList.toggle('checked', hiddenCheckbox.checked);
+                    
+                    console.log('Checkbox terms cambiado via label:', hiddenCheckbox.checked); // Debug
+                    checkFormValidity();
+                }
+            });
+        }
+        
+        // Agregar estilos para el checkbox personalizado
+        if (!document.querySelector('#custom-checkbox-styles')) {
+            const checkboxStyles = document.createElement('style');
+            checkboxStyles.id = 'custom-checkbox-styles';
+            checkboxStyles.textContent = `
+                .epic-custom-checkbox {
+                    width: 20px;
+                    height: 20px;
+                    border: 2px solid #ffd700;
+                    border-radius: 4px;
+                    background: transparent;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    margin-right: 10px;
+                    flex-shrink: 0;
+                }
+                
+                .epic-custom-checkbox:hover {
+                    background: rgba(255, 215, 0, 0.1);
+                    box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+                }
+                
+                .epic-custom-checkbox.checked {
+                    background: #ffd700;
+                    border-color: #ffd700;
+                }
+                
+                .epic-custom-checkbox.checked::after {
+                    content: '✓';
+                    color: #000;
+                    font-weight: bold;
+                    font-size: 14px;
+                }
+                
+                .epic-terms-checkbox {
+                    display: flex;
+                    align-items: flex-start;
+                    cursor: pointer;
+                    gap: 10px;
+                    padding: 10px 0;
+                }
+                
+                .checkbox-text {
+                    font-size: 0.9rem;
+                    line-height: 1.4;
+                    color: #e0e0e0;
+                }
+                
+                .epic-terms-link {
+                    color: #ffd700;
+                    text-decoration: none;
+                    transition: color 0.3s ease;
+                }
+                
+                .epic-terms-link:hover {
+                    color: #fff;
+                    text-decoration: underline;
+                }
+            `;
+            document.head.appendChild(checkboxStyles);
+        }
+    }
+
+    // Envío del formulario
+    registerForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        console.log('Formulario enviado'); // Debug
+        
+        const button = this.querySelector('button[type="submit"]');
+        
+        // Estado de carga
+        button.classList.add('loading');
+        button.disabled = true;
+        
+        const formData = new FormData(this);
+        
+        // Debug: mostrar datos del formulario
+        console.log('Datos del formulario:');
+        for (let [key, value] of formData.entries()) {
+            console.log(key, value);
+        }
+        
+        try {
+            const response = await fetch('{{ url_for("auth.register") }}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            
+            console.log('Respuesta recibida:', response.status); // Debug
+            
+            if (response.ok) {
+                let data;
+                const contentType = response.headers.get('content-type');
+                
+                if (contentType && contentType.includes('application/json')) {
+                    data = await response.json();
+                } else {
+                    // Si no es JSON, asumir éxito y redireccionar
+                    data = { success: true };
+                }
+                
+                console.log('Datos de respuesta:', data); // Debug
+                
+                if (data.success !== false) {
+                    button.classList.remove('loading');
+                    button.classList.add('success');
+                    showEpicNotification('¡Tu juramento ha sido aceptado! Bienvenido al reino 🐉', 'success');
+                    
+                    const username = document.getElementById('username').value;
+                    showEpicWelcome(username);
+                    
+                    setTimeout(() => {
+                        window.location.href = data.redirect_url || '{{ url_for("main.index") }}';
+                    }, 2000);
+                } else {
+                    throw new Error(data.message || 'Error al crear la cuenta');
+                }
+            } else {
+                // Intentar leer la respuesta como JSON para obtener el mensaje de error
+                let errorData;
+                try {
+                    errorData = await response.json();
+                } catch (e) {
+                    errorData = { message: 'Error en el servidor' };
+                }
+                throw new Error(errorData.message || 'Error en el servidor');
+            }
+        } catch (error) {
+            console.error('Error en registro:', error);
+            button.classList.remove('loading');
+            button.classList.add('error');
+            showEpicNotification(
+                error.message || 'Los dioses antiguos rechazan tu juramento. Verifica tus datos. ⚔️', 
+                'error'
+            );
+            
+            setTimeout(() => {
+                button.classList.remove('error');
+                checkFormValidity();
+            }, 3000);
+        }
+    });
+
+    // Efectos en los inputs
+    document.querySelectorAll('.epic-input').forEach(input => {
+        input.addEventListener('focus', function() {
+            this.parentElement.classList.add('focused');
+        });
+        
+        input.addEventListener('blur', function() {
+            if (!this.value.trim()) {
+                this.parentElement.classList.remove('focused');
+            }
+        });
+        
+        // Verificar si el input tiene valor al cargar la página
+        if (input.value.trim()) {
+            input.parentElement.classList.add('focused');
+        }
+    });
+
+    // Efectos de teclado épicos
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && e.target.matches('.epic-login-link, .epic-terms-link')) {
+            e.target.click();
+        }
+        
+        if (e.ctrlKey && e.key === 'Enter') {
+            registerForm.dispatchEvent(new Event('submit'));
+        }
+    });
+
+    // Efecto de entrada épico
+    setTimeout(() => {
+        document.querySelector('.epic-register-card').style.transform = 'translateY(0)';
+        document.querySelector('.epic-register-card').style.opacity = '1';
+    }, 300);
+
+    // Mensajes flash existentes
+    {%- with messages = get_flashed_messages(with_categories=true) -%}
+        {%- if messages -%}
+            {%- for category, message in messages -%}
+                setTimeout(() => {
+                    showEpicNotification(
+                        {{ message|tojson|safe }}, 
+                        {{ ("error" if category == "error" else "success" if category == "success" else "info")|tojson|safe }}
+                    );
+                }, 500);
+            {%- endfor -%}
+        {%- endif -%}
+    {%- endwith -%}
+
+    // Validación inicial
+    checkFormValidity();
+
+    // Easter egg: Triple click en el título para efectos especiales
+    let titleClickCount = 0;
+    document.querySelector('.epic-register-title').addEventListener('click', function() {
+        titleClickCount++;
+        if (titleClickCount === 3) {
+            titleClickCount = 0;
+            showEpicNotification('🐉 ¡El poder de los Tres Dragones te protege! 🐉', 'success');
+            this.style.animation = 'crown-glow 0.5s ease-in-out 3';
+            
+            // Efecto especial en las brasas
+            document.querySelectorAll('.ember').forEach(ember => {
+                ember.style.animationDuration = '2s';
+            });
+            
+            setTimeout(() => {
+                document.querySelectorAll('.ember').forEach(ember => {
+                    ember.style.animationDuration = '8s';
+                });
+            }, 5000);
+        }
+        
+        setTimeout(() => {
+            titleClickCount = 0;
+        }, 2000);
+    });
+});
+</script>
+{% endblock %}

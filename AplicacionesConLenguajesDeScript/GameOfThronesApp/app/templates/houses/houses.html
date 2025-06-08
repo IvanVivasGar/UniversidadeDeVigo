@@ -1,0 +1,910 @@
+{% extends "base.html" %}
+
+{% block title %}Casas - WesterosTracker{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/houses.css') }}?v={{ range(1000, 9999) | random }}">
+{% endblock %}
+
+{% block content %}
+<div class="houses-container">
+    <!-- Hero Section -->
+    <div class="houses-hero">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <div class="hero-icon">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <h1 class="hero-title">Casas de Westeros</h1>
+            <p class="hero-subtitle">Descubre las grandes casas que dominan los Siete Reinos y sus señoríos</p>
+        </div>
+        <div class="floating-shields">
+            <div class="shield shield-1"><i class="fas fa-shield-alt"></i></div>
+            <div class="shield shield-2"><i class="fas fa-chess-king"></i></div>
+            <div class="shield shield-3"><i class="fas fa-crown"></i></div>
+        </div>
+    </div>
+
+    <!-- Search and Controls -->
+    <div class="houses-controls">
+        <div class="container">
+            <div class="controls-header">
+                <div class="search-section">
+                    <div class="search-container">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" id="house-search" placeholder="Buscar casas..." 
+                               class="search-input">
+                        <div class="search-border"></div>
+                    </div>
+                    <div class="search-suggestions" id="search-suggestions"></div>
+                </div>
+                
+                {% if current_user.is_authenticated %}
+                <div class="action-section">
+                    <a href="{{ url_for('houses.create_house') }}" class="btn btn-primary create-btn">
+                        <i class="fas fa-plus-circle"></i>
+                        <span>Crear Casa</span>
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Filters -->
+            <div class="filters-section">
+                <div class="filter-group">
+                    <label class="filter-label">
+                        <i class="fas fa-filter"></i>
+                        Filtrar por:
+                    </label>
+                    <div class="filter-options">
+                        <select id="region-filter" class="filter-select">
+                            <option value="">Todas las regiones</option>
+                            <option value="norte">El
+                            <option value="valle">El Valle</option>
+                            <option value="tierras-rios">Tierras de los Ríos</option>
+                            <option value="occidente">El Occidente</option>
+                            <option value="corona">Tierras de la Corona</option>
+                            <option value="tormenta">Tierras de la Tormenta</option>
+                            <option value="dominio">El Dominio</option>
+                            <option value="dorne">Dorne</option>
+                            <option value="islas-hierro">Islas del Hierro</option>
+                        </select>
+                        
+                        <select id="status-filter" class="filter-select">
+                            <option value="">Todos los estados</option>
+                            <option value="mayor">Casa Mayor</option>
+                            <option value="menor">Casa Menor</option>
+                            <option value="extinta">Extinta</option>
+                        </select>
+                        
+                        <select id="rating-filter" class="filter-select">
+                            <option value="">Todas las valoraciones</option>
+                            <option value="5">5 estrellas</option>
+                            <option value="4">4+ estrellas</option>
+                            <option value="3">3+ estrellas</option>
+                            <option value="2">2+ estrellas</option>
+                            <option value="1">1+ estrellas</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="sort-group">
+                    <label class="filter-label">
+                        <i class="fas fa-sort"></i>
+                        Ordenar por:
+                    </label>
+                    <select id="sort-order" class="filter-select">
+                        <option value="name">Nombre (A-Z)</option>
+                        <option value="name-desc">Nombre (Z-A)</option>
+                        <option value="rating">Mejor valoradas</option>
+                        <option value="rating-asc">Menor valoradas</option>
+                        <option value="members">Más miembros</option>
+                        <option value="newest">Más recientes</option>
+                        <option value="oldest">Más antiguas</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Houses Grid -->
+    <div class="houses-main">
+        <div class="container">
+            <div class="houses-stats">
+                <div class="stats-item">
+                    <span class="stats-number" id="total-houses">0</span>
+                    <span class="stats-label">Casas</span>
+                </div>
+                <div class="stats-item">
+                    <span class="stats-number" id="filtered-houses">0</span>
+                    <span class="stats-label">Mostradas</span>
+                </div>
+            </div>
+
+            <div class="houses-grid" id="houses-grid">
+                <!-- Houses will be loaded here -->
+            </div>
+
+            <!-- Loading State -->
+            <div class="loading-state" id="loading-state">
+                <div class="loading-spinner">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <p>Cargando casas...</p>
+            </div>
+
+            <!-- Empty State -->
+            <div class="empty-state" id="empty-state" style="display: none;">
+                <div class="empty-icon">
+                    <i class="fas fa-house-damage"></i>
+                </div>
+                <h3>No se encontraron casas</h3>
+                <p>Intenta ajustar los filtros de búsqueda o crear una nueva casa.</p>
+                {% if current_user.is_authenticated %}
+                <a href="{{ url_for('houses.create_house') }}" class="btn btn-secondary">
+                    <i class="fas fa-plus"></i>
+                    Crear primera casa
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- House Card Template -->
+<template id="house-card-template">
+    <div class="house-card" data-house-id="">
+        <div class="card-inner">
+            <div class="card-front">
+                <div class="house-banner">
+                    <img src="" alt="" class="house-sigil">
+                    <div class="banner-overlay">
+                        <div class="house-status">
+                            <span class="status-badge"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="house-info">
+                    <h3 class="house-name"></h3>
+                    <p class="house-motto">
+                        <i class="fas fa-quote-left"></i>
+                        <span class="motto-text"></span>
+                    </p>
+                    <p class="house-region">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span></span>
+                    </p>
+                    
+                    <div class="house-rating">
+                        {% if current_user.is_authenticated %}
+                        <div class="interactive-rating" data-house-id="">
+                            <div class="stars-interactive">
+                                <i class="fas fa-star" data-rating="1"></i>
+                                <i class="fas fa-star" data-rating="2"></i>
+                                <i class="fas fa-star" data-rating="3"></i>
+                                <i class="fas fa-star" data-rating="4"></i>
+                                <i class="fas fa-star" data-rating="5"></i>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="stars-container">
+                            <div class="stars-background">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <div class="stars-filled">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                        {% endif %}
+                        <span class="rating-value"></span>
+                        <span class="rating-count">(<span class="count"></span> votos)</span>
+                    </div>
+                    
+                    <div class="house-members">
+                        <i class="fas fa-users"></i>
+                        <span class="members-count"></span> miembros relevantes
+                    </div>
+                    
+                    <div class="house-actions">
+                        {% if current_user.is_authenticated %}
+                        <button class="btn-icon edit-btn" title="Editar">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn-icon favorite-btn" title="Agregar a favoritos">
+                            <i class="far fa-heart"></i>
+                        </button>
+                        {% else %}
+                        <button class="btn-icon view-btn" title="Ver detalles">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        {% endif %}
+                        
+                        <!-- Admin controls -->
+                        {% if current_user.is_authenticated and current_user.is_administrator() %}
+                        <button class="admin-delete-btn btn-icon" 
+                                data-entity-type="house" 
+                                data-entity-id="" 
+                                data-entity-name=""
+                                title="Eliminar casa">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card-back">
+                <div class="house-description">
+                    <h4>Historia de la Casa</h4>
+                    <p class="description-text"></p>
+                </div>
+                <button class="flip-back-btn">
+                    <i class="fas fa-arrow-left"></i>
+                    Volver
+                </button>
+            </div>
+        </div>
+    </div>
+</template>
+{% endblock %}
+
+{% block scripts %}
+<script>
+class HousesManager {
+    constructor() {
+        this.houses = [];
+        this.filteredHouses = [];
+        this.currentFilters = {
+            search: '',
+            region: '',
+            status: '',
+            rating: '',
+            sort: 'name'
+        };
+        
+        this.init();
+    }
+    
+    async init() {
+        console.log('🏰 Iniciando HousesManager...');
+        await this.loadHouses();
+        this.setupEventListeners();
+        this.renderHouses();
+    }
+    
+    async loadHouses() {
+        try {
+            console.log('📡 Cargando casas desde API...');
+            const response = await fetch('/api/houses');
+            console.log('🔍 Response status:', response.status);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            console.log('✅ Casas cargadas:', data);
+            console.log('📊 Número de casas:', data.length);
+            
+            this.houses = data;
+            this.filteredHouses = [...this.houses];
+            this.updateStats();
+            
+            // Verificar elementos del DOM
+            const grid = document.getElementById('houses-grid');
+            const emptyState = document.getElementById('empty-state');
+            const loadingState = document.getElementById('loading-state');
+            
+            console.log('🔧 Elementos DOM encontrados:', {
+                grid: !!grid,
+                emptyState: !!emptyState,
+                loadingState: !!loadingState
+            });
+            
+            if (this.houses.length === 0) {
+                console.log('❌ No se encontraron casas en la base de datos');
+                if (emptyState) emptyState.style.display = 'block';
+            } else {
+                console.log(`🎉 ${this.houses.length} casas cargadas exitosamente`);
+                if (emptyState) emptyState.style.display = 'none';
+            }
+            
+        } catch (error) {
+            console.error('💥 Error cargando casas:', error);
+            this.showError('Error al cargar las casas: ' + error.message);
+            this.houses = [];
+            this.filteredHouses = [];
+            const emptyState = document.getElementById('empty-state');
+            if (emptyState) emptyState.style.display = 'block';
+        } finally {
+            console.log('🔄 Ocultando estado de carga...');
+            const loadingState = document.getElementById('loading-state');
+            if (loadingState) loadingState.style.display = 'none';
+        }
+    }
+    
+    renderHouses() {
+        console.log('🎨 Renderizando casas...', this.filteredHouses.length);
+        
+        const grid = document.getElementById('houses-grid');
+        const emptyState = document.getElementById('empty-state');
+        
+        if (!grid) {
+            console.error('❌ No se encontró el elemento houses-grid');
+            return;
+        }
+        
+        if (this.filteredHouses.length === 0) {
+            console.log('📭 No hay casas para mostrar');
+            grid.innerHTML = '';
+            if (emptyState) emptyState.style.display = 'block';
+            return;
+        }
+        
+        console.log('✨ Creando tarjetas de casas...');
+        if (emptyState) emptyState.style.display = 'none';
+        
+        const template = document.getElementById('house-card-template');
+        if (!template) {
+            console.error('❌ No se encontró el template de casas');
+            return;
+        }
+        
+        grid.innerHTML = '';
+        
+        this.filteredHouses.forEach((house, index) => {
+            console.log(`📝 Creando tarjeta para casa: ${house.name}`);
+            try {
+                const card = this.createHouseCard(house, template);
+                grid.appendChild(card);
+                console.log(`✅ Tarjeta ${index + 1} agregada al grid`);
+            } catch (error) {
+                console.error(`💥 Error creando tarjeta para ${house.name}:`, error);
+            }
+        });
+        
+        console.log('🎭 Aplicando animaciones...');
+        this.animateCards();
+    }
+    
+    createHouseCard(house, template) {
+        const card = template.content.cloneNode(true);
+        const cardElement = card.querySelector('.house-card');
+        
+        // Set data
+        cardElement.dataset.houseId = house.id;
+        
+        // Set sigil image
+        const img = card.querySelector('.house-sigil');
+        img.src = house.sigil_url || house.image_url || '/static/images/default-house.jpg';
+        img.alt = house.name;
+        img.onerror = function() {
+            this.src = '/static/images/default-house.jpg';
+        };
+        
+        // Set basic info
+        card.querySelector('.house-name').textContent = house.name;
+        card.querySelector('.motto-text').textContent = house.motto || 'Sin lema conocido';
+        card.querySelector('.house-region span').textContent = house.region || 'Región desconocida';
+        
+        // Set status
+        const statusBadge = card.querySelector('.status-badge');
+        statusBadge.textContent = house.status || 'Casa Mayor';
+        statusBadge.className = `status-badge status-${house.status || 'mayor'}`;
+        
+        // Set rating
+        this.setRating(card, house);
+        
+        // Set member count
+        card.querySelector('.members-count').textContent = house.member_count || 0;
+        
+        // Set description
+        card.querySelector('.description-text').textContent = house.description || 'Sin descripción disponible';
+        
+        // Check and set favorite status for authenticated users
+        const favoriteBtn = card.querySelector('.favorite-btn');
+        if (favoriteBtn) {
+            this.checkFavoriteStatus(house.id, favoriteBtn);
+        }
+        
+        // Set up event listeners
+        this.setupCardEvents(cardElement, house);
+        
+        // Set up admin delete button data
+        const deleteBtn = card.querySelector('.admin-delete-btn');
+        if (deleteBtn) {
+            deleteBtn.dataset.entityId = house.id;
+            deleteBtn.dataset.entityName = house.name;
+        }
+        
+        return card;
+    }
+    
+    async checkFavoriteStatus(houseId, favoriteBtn) {
+        try {
+            const response = await fetch(`/houses/${houseId}/favorite-status`);
+            if (response.ok) {
+                const data = await response.json();
+                const icon = favoriteBtn.querySelector('i');
+                
+                if (data.is_favorite) {
+                    icon.className = 'fas fa-heart';
+                    favoriteBtn.classList.add('favorited');
+                } else {
+                    icon.className = 'far fa-heart';
+                    favoriteBtn.classList.remove('favorited');
+                }
+            }
+        } catch (error) {
+            console.error('Error checking favorite status:', error);
+        }
+    }
+    
+    setRating(card, house) {
+        const interactiveRating = card.querySelector('.interactive-rating');
+        const starsContainer = card.querySelector('.stars-filled');
+        const ratingValue = card.querySelector('.rating-value');
+        const ratingCount = card.querySelector('.count');
+        
+        // Set rating display values
+        ratingValue.textContent = house.average_rating ? house.average_rating.toFixed(1) : '0.0';
+        ratingCount.textContent = house.rating_count || 0;
+        
+        if (interactiveRating) {
+            // For authenticated users - interactive stars
+            interactiveRating.dataset.houseId = house.id;
+            this.setupInteractiveRating(interactiveRating, house);
+        } else if (starsContainer) {
+            // For non-authenticated users - static stars
+            const percentage = (house.average_rating / 5) * 100;
+            starsContainer.style.width = percentage + '%';
+        }
+    }
+    
+    async setupInteractiveRating(container, house) {
+        const stars = container.querySelectorAll('.stars-interactive i');
+        const houseId = house.id;
+        
+        // Load user's current rating
+        let userRating = 0;
+        try {
+            const response = await fetch(`/houses/${houseId}/user-rating`);
+            if (response.ok) {
+                const data = await response.json();
+                userRating = data.user_rating || 0;
+            }
+        } catch (error) {
+            console.error('Error loading user rating:', error);
+        }
+        
+        // Set initial star display
+        this.updateStarDisplay(stars, house.average_rating || 0, userRating);
+        
+        // Add event listeners to stars
+        stars.forEach((star, index) => {
+            const rating = index + 1;
+            
+            star.addEventListener('mouseenter', () => {
+                this.highlightStars(stars, rating);
+            });
+            
+            star.addEventListener('mouseleave', () => {
+                this.updateStarDisplay(stars, house.average_rating || 0, userRating);
+            });
+            
+            star.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                const result = await this.rateHouse(houseId, rating, stars, house);
+                if (result.success) {
+                    userRating = rating;
+                    // Actualizar inmediatamente la visualización con la nueva valoración del usuario
+                    this.updateStarDisplay(stars, house.average_rating, userRating);
+                }
+            });
+        });
+    }
+    
+    updateStarDisplay(stars, averageRating, userRating) {
+        stars.forEach((star, index) => {
+            const position = index + 1;
+            star.className = 'fas fa-star';
+            
+            if (userRating > 0) {
+                // Mostrar la valoración del usuario cuando existe
+                if (position <= userRating) {
+                    star.classList.add('user-rated');
+                } else {
+                    star.classList.add('unrated');
+                }
+            } else {
+                // Mostrar el promedio general cuando el usuario no ha valorado
+                if (position <= Math.floor(averageRating)) {
+                    star.classList.add('rated');
+                } else if (position === Math.ceil(averageRating) && averageRating % 1 >= 0.5) {
+                    star.classList.add('half-rated');
+                } else {
+                    star.classList.add('unrated');
+                }
+            }
+        });
+    }
+    
+    highlightStars(stars, rating) {
+        stars.forEach((star, index) => {
+            const position = index + 1;
+            star.className = 'fas fa-star';
+            
+            if (position <= rating) {
+                star.classList.add('highlighted');
+            } else {
+                star.classList.add('unrated');
+            }
+        });
+    }
+    
+    async rateHouse(houseId, rating, stars, house) {
+        try {
+            const response = await fetch(`/houses/${houseId}/rate`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ rating: rating })
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                
+                // Update house data
+                house.average_rating = data.new_average;
+                house.rating_count = data.total_ratings;
+                
+                // Update display
+                const card = stars[0].closest('.house-card');
+                const ratingValue = card.querySelector('.rating-value');
+                const ratingCount = card.querySelector('.count');
+                
+                ratingValue.textContent = data.new_average.toFixed(1);
+                ratingCount.textContent = data.total_ratings;
+                
+                // Show success message
+                this.showSuccessMessage(data.message);
+                
+                // Update the house in our data array
+                const houseIndex = this.houses.findIndex(h => h.id === houseId);
+                if (houseIndex !== -1) {
+                    this.houses[houseIndex] = house;
+                }
+                
+                return { success: true, userRating: data.user_rating };
+                
+            } else {
+                const errorData = await response.json();
+                this.showError(errorData.message || 'Error al enviar valoración');
+                return { success: false };
+            }
+        } catch (error) {
+            console.error('Error rating house:', error);
+            this.showError('Error de conexión');
+            return { success: false };
+        }
+    }
+    
+    showSuccessMessage(message) {
+        if (typeof showNotification === 'function') {
+            showNotification(message, 'success');
+        } else {
+            // Fallback notification
+            const notification = document.createElement('div');
+            notification.className = 'success-notification';
+            notification.textContent = message;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #28a745;
+                color: white;
+                padding: 15px 20px;
+                border-radius: 5px;
+                z-index: 1000;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            `;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+    }
+    
+    async toggleFavorite(houseId, button) {
+        try {
+            const response = await fetch(`/api/houses/${houseId}/favorite`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                const icon = button.querySelector('i');
+                if (data.is_favorite) {
+                    icon.className = 'fas fa-heart';
+                    button.classList.add('favorited');
+                } else {
+                    icon.className = 'far fa-heart';
+                    button.classList.remove('favorited');
+                }
+                
+                if (typeof showNotification === 'function') {
+                    showNotification(data.message, 'success');
+                }
+            }
+        } catch (error) {
+            console.error('Error toggling favorite:', error);
+            if (typeof showNotification === 'function') {
+                showNotification('Error al actualizar favoritos', 'error');
+            }
+        }
+    }
+    
+    updateStats() {
+        const totalElement = document.getElementById('total-houses');
+        const filteredElement = document.getElementById('filtered-houses');
+        
+        if (totalElement) totalElement.textContent = this.houses.length;
+        if (filteredElement) filteredElement.textContent = this.filteredHouses.length;
+    }
+    
+    animateCards() {
+        const cards = document.querySelectorAll('.house-card');
+        cards.forEach((card, index) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(30px)';
+            
+            setTimeout(() => {
+                card.style.transition = 'all 0.5s ease';
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, index * 100);
+        });
+    }
+    
+    setupCardEvents(cardElement, house) {
+        // Card flip on click
+        cardElement.addEventListener('click', (e) => {
+            if (!e.target.closest('.house-actions') && !e.target.closest('.flip-back-btn')) {
+                cardElement.classList.toggle('flipped');
+            }
+        });
+        
+        // Flip back button
+        const flipBackBtn = cardElement.querySelector('.flip-back-btn');
+        if (flipBackBtn) {
+            flipBackBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                cardElement.classList.remove('flipped');
+            });
+        }
+        
+        // View button
+        const viewBtn = cardElement.querySelector('.view-btn');
+        if (viewBtn) {
+            viewBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                window.location.href = `/houses/${house.id}`;
+            });
+        }
+        
+        // Edit button (if authenticated)
+        const editBtn = cardElement.querySelector('.edit-btn');
+        if (editBtn) {
+            editBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                window.location.href = `/houses/${house.id}/edit`;
+            });
+        }
+        
+        // Favorite button (if authenticated)
+        const favoriteBtn = cardElement.querySelector('.favorite-btn');
+        if (favoriteBtn) {
+            favoriteBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.toggleFavorite(house.id, favoriteBtn);
+            });
+        }
+        
+        // Delete button (if admin)
+        const deleteBtn = cardElement.querySelector('.admin-delete-btn');
+        if (deleteBtn) {
+            deleteBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.confirmDeleteHouse(house.id, house.name);
+            });
+        }
+    }
+    
+    setupEventListeners() {
+        console.log('🔧 Configurando event listeners...');
+        
+        // Search input
+        const searchInput = document.getElementById('house-search');
+        if (searchInput) {
+            searchInput.addEventListener('input', this.debounce((e) => {
+                this.currentFilters.search = e.target.value.toLowerCase();
+                this.applyFilters();
+            }, 300));
+        }
+        
+        // Filter selects
+        const regionFilter = document.getElementById('region-filter');
+        if (regionFilter) {
+            regionFilter.addEventListener('change', (e) => {
+                this.currentFilters.region = e.target.value;
+                this.applyFilters();
+            });
+        }
+        
+        const statusFilter = document.getElementById('status-filter');
+        if (statusFilter) {
+            statusFilter.addEventListener('change', (e) => {
+                this.currentFilters.status = e.target.value;
+                this.applyFilters();
+            });
+        }
+        
+        const ratingFilter = document.getElementById('rating-filter');
+        if (ratingFilter) {
+            ratingFilter.addEventListener('change', (e) => {
+                this.currentFilters.rating = e.target.value;
+                this.applyFilters();
+            });
+        }
+        
+        const sortOrder = document.getElementById('sort-order');
+        if (sortOrder) {
+            sortOrder.addEventListener('change', (e) => {
+                this.currentFilters.sort = e.target.value;
+                this.applySorting();
+                this.renderHouses();
+            });
+        }
+    }
+    
+    applyFilters() {
+        this.filteredHouses = this.houses.filter(house => {
+            // Search filter
+            if (this.currentFilters.search) {
+                const searchTerm = this.currentFilters.search;
+                const matchesSearch = 
+                    house.name.toLowerCase().includes(searchTerm) ||
+                    (house.motto || '').toLowerCase().includes(searchTerm) ||
+                    (house.description || '').toLowerCase().includes(searchTerm) ||
+                    (house.region || '').toLowerCase().includes(searchTerm);
+                
+                if (!matchesSearch) return false;
+            }
+            
+            // Region filter
+            if (this.currentFilters.region && house.region !== this.currentFilters.region) {
+                return false;
+            }
+            
+            // Status filter
+            if (this.currentFilters.status && house.status !== this.currentFilters.status) {
+                return false;
+            }
+            
+            // Rating filter
+            if (this.currentFilters.rating) {
+                const minRating = parseInt(this.currentFilters.rating);
+                if ((house.average_rating || 0) < minRating) {
+                    return false;
+                }
+            }
+            
+            return true;
+        });
+        
+        this.applySorting();
+        this.updateStats();
+        this.renderHouses();
+    }
+    
+    applySorting() {
+        this.filteredHouses.sort((a, b) => {
+            switch (this.currentFilters.sort) {
+                case 'name':
+                    return a.name.localeCompare(b.name);
+                case 'name-desc':
+                    return b.name.localeCompare(a.name);
+                case 'rating':
+                    return (b.average_rating || 0) - (a.average_rating || 0);
+                case 'rating-asc':
+                    return (a.average_rating || 0) - (b.average_rating || 0);
+                case 'members':
+                    return (b.member_count || 0) - (a.member_count || 0);
+                case 'newest':
+                    return new Date(b.created_at || 0) - new Date(a.created_at || 0);
+                case 'oldest':
+                    return new Date(a.created_at || 0) - new Date(b.created_at || 0);
+                default:
+                    return 0;
+            }
+        });
+    }
+    
+    showError(message) {
+        console.error('🚨 Error:', message);
+        if (typeof showNotification === 'function') {
+            showNotification(message, 'error');
+        } else {
+            alert(message);
+        }
+    }
+    
+    debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+    
+    confirmDeleteHouse(houseId, houseName) {
+        if (confirm(`¿Estás seguro de que deseas eliminar la casa "${houseName}"? Esta acción no se puede deshacer.`)) {
+            this.deleteHouse(houseId);
+        }
+    }
+    
+    async deleteHouse(houseId) {
+        try {
+            const response = await fetch(`/api/houses/${houseId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                this.showSuccessMessage(data.message);
+                
+                // Remove the deleted house from local data
+                this.houses = this.houses.filter(house => house.id !== houseId);
+                this.filteredHouses = this.filteredHouses.filter(house => house.id !== houseId);
+                this.updateStats();
+                this.renderHouses();
+            } else {
+                const errorData = await response.json();
+                this.showError(errorData.message || 'Error al eliminar la casa');
+            }
+        } catch (error) {
+            console.error('Error eliminando casa:', error);
+            this.showError('Error de conexión');
+        }
+    }
+}
+
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('🚀 DOM cargado, iniciando HousesManager...');
+    window.housesManager = new HousesManager();
+});
+</script>
+{% endblock %}

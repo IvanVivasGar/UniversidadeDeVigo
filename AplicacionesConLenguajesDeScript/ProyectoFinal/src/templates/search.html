@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+
+{% block title %}Resultados de búsqueda: {{ query }}{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <h1>Resultados de búsqueda: "{{ query }}"</h1>
+    
+    {% if not query %}
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            Introduce un término de búsqueda para encontrar personajes, casas y eventos.
+        </div>
+    {% elif not results.characters and not results.houses and not results.events %}
+        <div class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            No se encontraron resultados para "{{ query }}".
+        </div>
+    {% else %}
+        <!-- Personajes -->
+        <h2 class="mt-4">Personajes</h2>
+        {% if results.characters %}
+            <div class="row row-cols-1 row-cols-md-3 g-4">
+                {% for character in results.characters %}
+                    <div class="col">
+                        <div class="card h-100">
+                            {% if character.image_url %}
+                                <img src="{{ character.image_url }}" class="card-img-top" alt="{{ character.name }}" style="height: 200px; object-fit: cover;">
+                            {% else %}
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                                    <i class="fas fa-user fa-4x text-muted"></i>
+                                </div>
+                            {% endif %}
+                            <div class="card-body">
+                                <h5 class="card-title">{{ character.name }}</h5>
+                                <h6 class="card-subtitle mb-2 text-muted">{{ character.title }}</h6>
+                                <p class="card-text">{{ character.description|truncate(100) }}</p>
+                                <a href="{{ url_for('characters.character_detail', character_id=character.get_id()) }}" class="btn btn-primary">Ver detalles</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="alert alert-light">
+                <i class="fas fa-search-minus me-2"></i>
+                No se encontraron personajes que coincidan con "{{ query }}".
+            </div>
+        {% endif %}
+        
+        <!-- Casas -->
+        <h2 class="mt-4">Casas</h2>
+        {% if results.houses %}
+            <div class="row row-cols-1 row-cols-md-3 g-4">
+                {% for house in results.houses %}
+                    <div class="col">
+                        <div class="card h-100">
+                            {% if house.image_url %}
+                                <img src="{{ house.image_url }}" class="card-img-top" alt="Casa {{ house.name }}" style="height: 200px; object-fit: cover;">
+                            {% else %}
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                                    <i class="fas fa-flag fa-4x text-muted"></i>
+                                </div>
+                            {% endif %}
+                            <div class="card-body">
+                                <h5 class="card-title">Casa {{ house.name }}</h5>
+                                <h6 class="card-subtitle mb-2 text-muted">{{ house.region }}</h6>
+                                <p class="card-text">{{ house.description|truncate(100) }}</p>
+                                <a href="{{ url_for('houses.house_detail', house_id=house.get_id()) }}" class="btn btn-primary">Ver detalles</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="alert alert-light">
+                <i class="fas fa-search-minus me-2"></i>
+                No se encontraron casas que coincidan con "{{ query }}".
+            </div>
+        {% endif %}
+        
+        <!-- Eventos -->
+        <h2 class="mt-4">Eventos</h2>
+        {% if results.events %}
+            <div class="row row-cols-1 row-cols-md-3 g-4">
+                {% for event in results.events %}
+                    <div class="col">
+                        <div class="card h-100">
+                            {% if event.image_url %}
+                                <img src="{{ event.image_url }}" class="card-img-top" alt="{{ event.name }}" style="height: 200px; object-fit: cover;">
+                            {% else %}
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                                    <i class="fas fa-landmark fa-4x text-muted"></i>
+                                </div>
+                            {% endif %}
+                            <div class="card-body">
+                                <h5 class="card-title">{{ event.name }}</h5>
+                                <h6 class="card-subtitle mb-2 text-muted">Temporada {{ event.season }}, Episodio {{ event.episode }}</h6>
+                                <p class="card-text">{{ event.description|truncate(100) }}</p>
+                                <a href="{{ url_for('events.event_detail', event_id=event.get_id()) }}" class="btn btn-primary">Ver detalles</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="alert alert-light">
+                <i class="fas fa-search-minus me-2"></i>
+                No se encontraron eventos que coincidan con "{{ query }}".
+            </div>
+        {% endif %}
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,541 @@
+{% extends "base.html" %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/event_detail.css') }}">
+{% endblock %}
+
+{% block title %}{{ event.name }} - WesterosTracker{% endblock %}
+
+{% block content %}
+<div class="event-detail-page">
+    <!-- Epic Event Header -->
+    <div class="event-detail-hero">
+        <div class="hero-background">
+            <!-- Animated background instead of event image -->
+            <div class="animated-background"></div>
+            <div class="hero-overlay"></div>
+        </div>
+        
+        <div class="hero-content">
+            <div class="event-breadcrumb">
+                <a href="{{ url_for('events.events') }}">
+                    <i class="fas fa-scroll"></i>
+                    Crónicas de Westeros
+                </a>
+                <i class="fas fa-chevron-right"></i>
+                <span>{{ event.name }}</span>
+            </div>
+            
+            <div class="event-title-section">
+                <h1 class="event-main-title">{{ event.name }}</h1>
+                <div class="event-meta-info">
+                    <div class="meta-item">
+                        <i class="fas fa-tv"></i>
+                        <span>Temporada {{ event.season }}</span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-play"></i>
+                        <span>Episodio {{ event.episode }}</span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-star"></i>
+                        <span>{{ "%.1f"|format(event.get_average_rating()) }} valoración</span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>Importancia {{ event.importance_rating }}/5</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="event-actions-hero">
+                {% if current_user.is_authenticated %}
+                    <div class="rating-section">
+                        <span class="rating-label">Tu valoración:</span>
+                        <div class="user-rating-epic" id="user-rating">
+                            {% set user_rating = event.get_user_rating(current_user.__oid__) %}
+                            {% for i in range(1, 6) %}
+                                <i class="{% if i <= user_rating %}fas{% else %}far{% endif %} fa-star epic-star" 
+                                   data-rating="{{ i }}" 
+                                   title="{% if i <= user_rating %}Calificaste con {{ i }} estrella{{ 's' if i > 1 else '' }}{% else %}Calificar con {{ i }} estrella{{ 's' if i > 1 else '' }}{% endif %}"></i>
+                            {% endfor %}
+                        </div>
+                        {% if user_rating > 0 %}
+                            <button class="btn-remove-rating" id="remove-rating-btn" title="Remover mi calificación">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        {% endif %}
+                    </div>
+                    
+                    <a href="{{ url_for('events.edit_event', event_id=event.__oid__) }}" class="btn-epic btn-edit">
+                        <i class="fas fa-feather-alt"></i>
+                        <span>Editar Crónica</span>
+                    </a>
+                {% else %}
+                    <div class="login-prompt-epic">
+                        <a href="{{ url_for('auth.login') }}" class="btn-epic">
+                            <i class="fas fa-sign-in-alt"></i>
+                            <span>Inicia sesión para valorar</span>
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Event Content Main -->
+    <div class="event-content-main">
+        <div class="content-wrapper">
+            <!-- Left Column: Images & Description -->
+            <div class="content-left">
+                <!-- Image Gallery Epic -->
+                <div class="event-gallery-epic">
+                    {% if event.image_urls and event.image_urls|length > 0 %}
+                        <div class="main-image-container">
+                            <img src="{{ event.image_urls[0] }}" alt="{{ event.name }}" id="main-image" class="main-image-epic">
+                            <div class="image-overlay-effects">
+                                <div class="overlay-pattern"></div>
+                            </div>
+                            <div class="image-counter">
+                                <span id="current-image">1</span> / {{ event.image_urls|length }}
+                            </div>
+                        </div>
+                        
+                        {% if event.image_urls|length > 1 %}
+                            <div class="image-thumbnails-epic">
+                                {% for image_url in event.image_urls %}
+                                    <div class="thumbnail-epic {% if loop.index0 == 0 %}active{% endif %}" 
+                                         onclick="changeMainImage('{{ image_url }}', this, {{ loop.index0 }})">
+                                        <img src="{{ image_url }}" alt="{{ event.name }} - Imagen {{ loop.index }}">
+                                        <div class="thumbnail-overlay"></div>
+                                        <div class="thumbnail-number">{{ loop.index }}</div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="placeholder-image-epic">
+                            <i class="fas fa-scroll"></i>
+                            <p>Pergamino sin ilustraciones</p>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Event Description -->
+                <div class="event-description-epic">
+                    <div class="description-header">
+                        <h2>
+                            <i class="fas fa-book-open"></i>
+                            Relato del Evento
+                        </h2>
+                    </div>
+                    
+                    <div class="description-content">
+                        <div class="description-text">
+                            {{ event.description|safe }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right Column: Stats & Related -->
+            <div class="content-right">
+                <!-- Event Statistics -->
+                <div class="event-stats-card">
+                    <div class="stats-header">
+                        <h3>
+                            <i class="fas fa-chart-line"></i>
+                            Estadísticas del Evento
+                        </h3>
+                    </div>
+                    
+                    <div class="stats-content-grid">
+                        <div class="stat-item-improved">
+                            <div class="stat-icon-improved">
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <div class="stat-content-improved">
+                                <span class="stat-value-improved">{{ "%.1f"|format(event.get_average_rating()) }}</span>
+                                <span class="stat-label-improved">Valoración Media</span>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-item-improved">
+                            <div class="stat-icon-improved">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div class="stat-content-improved">
+                                <span class="stat-value-improved">{{ event.rating_count }}</span>
+                                <span class="stat-label-improved">Valoraciones</span>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-item-improved">
+                            <div class="stat-icon-improved">
+                                <i class="fas fa-exclamation"></i>
+                            </div>
+                            <div class="stat-content-improved">
+                                <span class="stat-value-improved">{{ event.importance_rating }}/5</span>
+                                <span class="stat-label-improved">Importancia</span>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-item-improved">
+                            <div class="stat-icon-improved">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div class="stat-content-improved">
+                                <span class="stat-value-improved">{{ event.characters_involved|length if event.characters_involved else 0 }}</span>
+                                <span class="stat-label-improved">Personajes</span>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-item-improved">
+                            <div class="stat-icon-improved">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <div class="stat-content-improved">
+                                <span class="stat-value-improved">{{ event.houses_involved|length if event.houses_involved else 0 }}</span>
+                                <span class="stat-label-improved">Casas</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Related Characters -->
+                <div class="related-section-epic">
+                    <div class="section-header">
+                        <h3>
+                            <i class="fas fa-users"></i>
+                            Personajes Involucrados
+                        </h3>
+                    </div>
+                    
+                    <div class="section-content">
+                        {% if characters and characters|length > 0 %}
+                            <div class="related-entities-epic">
+                                {% for character in characters %}
+                                    <div class="related-entity-epic">
+                                        <a href="{{ url_for('characters.character_detail', character_id=character.__oid__) }}">
+                                            <div class="entity-image-epic">
+                                                {% if character.image_url %}
+                                                    <img src="{{ character.image_url }}" alt="{{ character.name }}">
+                                                {% else %}
+                                                    <div class="placeholder-entity">
+                                                        <i class="fas fa-user"></i>
+                                                    </div>
+                                                {% endif %}
+                                                <div class="entity-overlay"></div>
+                                            </div>
+                                            <div class="entity-name-epic">{{ character.name }}</div>
+                                        </a>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="empty-related-epic">
+                                <i class="fas fa-user-slash"></i>
+                                <p>No hay personajes asociados</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Related Houses -->
+                <div class="related-section-epic">
+                    <div class="section-header">
+                        <h3>
+                            <i class="fas fa-shield-alt"></i>
+                            Casas Involucradas
+                        </h3>
+                    </div>
+                    
+                    <div class="section-content">
+                        {% if houses and houses|length > 0 %}
+                            <div class="related-entities-epic">
+                                {% for house in houses %}
+                                    <div class="related-entity-epic">
+                                        <a href="{{ url_for('houses.house_detail', house_id=house.__oid__) }}">
+                                            <div class="entity-image-epic">
+                                                {% if house.image_urls and house.image_urls|length > 0 %}
+                                                    <img src="{{ house.image_urls[0] }}" alt="{{ house.name }}">
+                                                {% else %}
+                                                    <div class="placeholder-entity">
+                                                        <i class="fas fa-shield-alt"></i>
+                                                    </div>
+                                                {% endif %}
+                                                <div class="entity-overlay"></div>
+                                            </div>
+                                            <div class="entity-name-epic">{{ house.name }}</div>
+                                        </a>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="empty-related-epic">
+                                <i class="fas fa-shield-alt"></i>
+                                <p>No hay casas asociadas</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Event data passed from template
+const EVENT_DATA = {
+    id: "{{ event.__oid__ }}",
+    currentUserRating: {% if current_user.is_authenticated %}{{ event.get_user_rating(current_user.__oid__)|default(0) }}{% else %}0{% endif %}
+};
+
+// Image Gallery Functionality
+function changeMainImage(url, thumbnail, index) {
+    document.getElementById('main-image').src = url;
+    document.getElementById('current-image').innerText = index + 1;
+    
+    // Update active thumbnail
+    document.querySelectorAll('.thumbnail-epic').forEach(thumb => {
+        thumb.classList.remove('active');
+    });
+    thumbnail.classList.add('active');
+}
+
+// Rating System
+document.addEventListener('DOMContentLoaded', function() {
+    const userRating = document.getElementById('user-rating');
+    const removeRatingBtn = document.getElementById('remove-rating-btn');
+    
+    if (userRating) {
+        const stars = userRating.querySelectorAll('.epic-star');
+        
+        stars.forEach(star => {
+            // Highlight stars on hover
+            star.addEventListener('mouseover', function() {
+                const rating = parseInt(this.dataset.rating);
+                updateStarsDisplay(stars, rating, true);
+            });
+            
+            // Reset to current rating when not hovering
+            star.addEventListener('mouseleave', function() {
+                updateStarsDisplay(stars, EVENT_DATA.currentUserRating, false);
+            });
+            
+            // Submit rating on click
+            star.addEventListener('click', async function() {
+                const rating = parseInt(this.dataset.rating);
+                await submitRating(rating);
+            });
+        });
+        
+        // Reset stars display when leaving rating section
+        userRating.addEventListener('mouseleave', function() {
+            updateStarsDisplay(stars, EVENT_DATA.currentUserRating, false);
+        });
+    }
+    
+    // Remove rating button
+    if (removeRatingBtn) {
+        removeRatingBtn.addEventListener('click', async function() {
+            if (confirm('¿Estás seguro de que quieres remover tu calificación?')) {
+                await removeRating();
+            }
+        });
+    }
+});
+
+function updateStarsDisplay(stars, rating, isHover) {
+    stars.forEach((star, index) => {
+        const starRating = index + 1;
+        
+        if (starRating <= rating) {
+            star.classList.remove('far');
+            star.classList.add('fas');
+            if (isHover) {
+                star.style.color = '#f7d794';
+                star.style.transform = 'scale(1.1)';
+            } else {
+                star.style.color = '#d4a574';
+                star.style.transform = 'scale(1)';
+            }
+        } else {
+            star.classList.remove('fas');
+            star.classList.add('far');
+            star.style.color = '#666';
+            star.style.transform = 'scale(1)';
+        }
+    });
+}
+
+async function submitRating(rating) {
+    try {
+        const response = await fetch(`/events/${EVENT_DATA.id}/rate`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({
+                rating: rating
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // Update current user rating
+            EVENT_DATA.currentUserRating = rating;
+            
+            // Update statistics display
+            updateStatistics(data.average_rating, data.rating_count);
+            
+            // Update meta info
+            const metaRating = document.querySelector('.meta-item .fa-star').parentElement.querySelector('span');
+            if (metaRating) {
+                metaRating.textContent = `${data.average_rating} valoración`;
+            }
+            
+            // Show/hide remove button
+            toggleRemoveButton(rating > 0);
+            
+            // Show success message
+            showNotification(data.message, 'success');
+            
+        } else {
+            showNotification(data.message || 'Error al guardar la calificación', 'error');
+            // Reset stars to previous rating
+            const stars = document.querySelectorAll('#user-rating .epic-star');
+            updateStarsDisplay(stars, EVENT_DATA.currentUserRating, false);
+        }
+        
+    } catch (error) {
+        console.error('Error:', error);
+        showNotification('Error al conectar con el servidor', 'error');
+        // Reset stars to previous rating
+        const stars = document.querySelectorAll('#user-rating .epic-star');
+        updateStarsDisplay(stars, EVENT_DATA.currentUserRating, false);
+    }
+}
+
+async function removeRating() {
+    try {
+        const response = await fetch(`/events/${EVENT_DATA.id}/remove-rating`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // Update current user rating
+            EVENT_DATA.currentUserRating = 0;
+            
+            // Reset stars display
+            const stars = document.querySelectorAll('#user-rating .epic-star');
+            updateStarsDisplay(stars, 0, false);
+            
+            // Update statistics display
+            updateStatistics(data.average_rating, data.rating_count);
+            
+            // Update meta info
+            const metaRating = document.querySelector('.meta-item .fa-star').parentElement.querySelector('span');
+            if (metaRating) {
+                metaRating.textContent = `${data.average_rating} valoración`;
+            }
+            
+            // Hide remove button
+            toggleRemoveButton(false);
+            
+            // Show success message
+            showNotification(data.message, 'success');
+            
+        } else {
+            showNotification(data.message || 'Error al remover la calificación', 'error');
+        }
+        
+    } catch (error) {
+        console.error('Error:', error);
+        showNotification('Error al conectar con el servidor', 'error');
+    }
+}
+
+function updateStatistics(averageRating, ratingCount) {
+    // Update average rating in stats
+    const avgRatingElement = document.querySelector('.stat-value-improved');
+    if (avgRatingElement) {
+        avgRatingElement.textContent = averageRating.toString();
+    }
+    
+    // Update rating count in stats
+    const ratingCountElements = document.querySelectorAll('.stat-value-improved');
+    if (ratingCountElements.length > 1) {
+        ratingCountElements[1].textContent = ratingCount.toString();
+    }
+}
+
+function toggleRemoveButton(show) {
+    const removeBtn = document.getElementById('remove-rating-btn');
+    if (removeBtn) {
+        if (show) {
+            removeBtn.style.display = 'block';
+        } else {
+            removeBtn.style.display = 'none';
+        }
+    } else if (show) {
+        // Create remove button if it doesn't exist
+        const ratingSection = document.querySelector('.rating-section');
+        if (ratingSection) {
+            const removeBtn = document.createElement('button');
+            removeBtn.id = 'remove-rating-btn';
+            removeBtn.className = 'btn-remove-rating';
+            removeBtn.title = 'Remover mi calificación';
+            removeBtn.innerHTML = '<i class="fas fa-trash"></i>';
+            removeBtn.addEventListener('click', async function() {
+                if (confirm('¿Estás seguro de que quieres remover tu calificación?')) {
+                    await removeRating();
+                }
+            });
+            ratingSection.appendChild(removeBtn);
+        }
+    }
+}
+
+// Notification system
+function showNotification(message, type) {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.innerHTML = `
+        <div class="notification-content">
+            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i>
+            <span>${message}</span>
+        </div>
+    `;
+    
+    // Add to page
+    document.body.appendChild(notification);
+    
+    // Show notification
+    setTimeout(() => {
+        notification.classList.add('show');
+    }, 100);
+    
+    // Remove notification after 3 seconds
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 300);
+    }, 3000);
+}
+</script>
+{% endblock %}

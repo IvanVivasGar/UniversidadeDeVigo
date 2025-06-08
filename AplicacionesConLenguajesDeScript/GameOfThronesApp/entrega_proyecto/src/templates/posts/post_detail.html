@@ -1,0 +1,1155 @@
+{% extends "base.html" %}
+
+{% block title %}{{ post.title }} - WesterosTracker{% endblock %}
+
+{% block content %}
+<div class="post-detail-container">
+    <!-- Hero Section -->
+    <div class="post-hero" data-bg-image="{{ post.image_url if post.image_url else '/static/images/default-post-bg.jpg' }}">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <div class="breadcrumb">
+                <a href="{{ url_for('posts.posts') }}">
+                    <i class="fas fa-comments"></i>
+                    Discusiones
+                </a>
+                <i class="fas fa-chevron-right"></i>
+                <span>{{ post.title[:50] }}{% if post.title|length > 50 %}...{% endif %}</span>
+            </div>
+            
+            <div class="post-category">
+                <span class="category-badge category-{{ post.category or 'general' }}">
+                    {% set category_icons = {
+                        'teoria': 'fas fa-lightbulb',
+                        'analisis': 'fas fa-search',
+                        'eventos': 'fas fa-calendar',
+                        'casas': 'fas fa-home',
+                        'debate': 'fas fa-comments',
+                        'off-topic': 'fas fa-chat'
+                    } %}
+                    <i class="{{ category_icons.get(post.category, 'fas fa-tag') }}"></i>
+                    {% set category_names = {
+                        'teoria': 'Teorías y Especulaciones',
+                        'analisis': 'Análisis de Personajes',
+                        'eventos': 'Eventos Históricos',
+                        'casas': 'Casas Nobles',
+                        'debate': 'Debates Generales',
+                        'off-topic': 'Fuera de Tema'
+                    } %}
+                    {{ category_names.get(post.category, 'General') }}
+                </span>
+            </div>
+            
+            <h1 class="post-title">{{ post.title }}</h1>
+            
+            <div class="post-meta">
+                <div class="author-section">
+                    <div class="author-avatar">
+                        <img src="{{ author.avatar_url if author and author.avatar_url else '/static/images/default-avatar.jpg' }}" 
+                             alt="{{ author.username if author else 'Usuario' }}">
+                        <div class="author-status online"></div>
+                    </div>
+                    <div class="author-info">
+                        <span class="author-name">
+                            {{ author.username if author else 'Usuario desconocido' }}
+                        </span>
+                        <span class="post-date">
+                            <i class="fas fa-calendar"></i>
+                            {{ post.created_at.strftime('%d de %B, %Y a las %H:%M') }}
+                            {% if post.updated_at and post.updated_at != post.created_at %}
+                            <span class="edited-indicator" title="Editado el {{ post.updated_at.strftime('%d/%m/%Y %H:%M') }}">
+                                <i class="fas fa-edit"></i>
+                                editado
+                            </span>
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="post-stats">
+                    <div class="stat-item" title="Visualizaciones">
+                        <i class="fas fa-eye"></i>
+                        <span>{{ post.view_count or 0 }}</span>
+                    </div>
+                    <div class="stat-item" title="Me gusta">
+                        <i class="fas fa-heart"></i>
+                        <span id="likes-count">{{ post.like_count or 0 }}</span>
+                    </div>
+                    <div class="stat-item" title="Comentarios">
+                        <i class="fas fa-comment"></i>
+                        <span id="comments-count">{{ comments|length if comments else 0 }}</span>
+                    </div>
+                    <div class="stat-item" title="Guardado en favoritos">
+                        <i class="fas fa-bookmark"></i>
+                        <span>{{ post.bookmark_count or 0 }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="floating-elements">
+            <div class="floating-scroll"><i class="fas fa-scroll"></i></div>
+            <div class="floating-quill"><i class="fas fa-feather-alt"></i></div>
+            <div class="floating-raven"><i class="fas fa-crow"></i></div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="post-main">
+        <div class="container">
+            <div class="post-layout">
+                <!-- Main Post Content -->
+                <div class="post-content-section">
+                    <div class="post-content-card">
+                        {% if post.image_url %}
+                        <div class="post-image">
+                            <img src="{{ post.image_url }}" alt="{{ post.title }}" class="featured-image">
+                        </div>
+                        {% endif %}
+                        
+                        <div class="content-body">
+                            <div class="post-content formatted-content">
+                                {{ post.content | nl2br | safe }}
+                            </div>
+                            
+                            <!-- Tags Section -->
+                            {% if post.tags %}
+                            <div class="post-tags">
+                                <div class="tags-label">
+                                    <i class="fas fa-tags"></i>
+                                    Etiquetas:
+                                </div>
+                                <div class="tags-list">
+                                    {% for tag in post.tags %}
+                                    <span class="tag clickable-tag" onclick="searchByTag('{{ tag }}')">{{ tag }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Post Actions -->
+                        <div class="post-actions">
+                            <div class="interaction-buttons">
+                                {% if current_user.is_authenticated %}
+                                <button class="action-btn like-btn {% if user_liked %}liked{% endif %}" 
+                                        onclick="toggleLike('{{ post.__oid__ }}')">
+                                    <i class="fas fa-heart"></i>
+                                    <span class="btn-text">Me gusta</span>
+                                    <span class="btn-count" id="like-count">{{ post.like_count or 0 }}</span>
+                                </button>
+                                
+                                <button class="action-btn bookmark-btn {% if user_bookmarked %}bookmarked{% endif %}" 
+                                        onclick="toggleBookmark('{{ post.__oid__ }}')">
+                                    <i class="fas fa-bookmark"></i>
+                                    <span class="btn-text">Guardar</span>
+                                </button>
+                                
+                                <button class="action-btn report-btn" onclick="reportPost('{{ post.__oid__ }}')">
+                                    <i class="fas fa-flag"></i>
+                                    <span class="btn-text">Reportar</span>
+                                </button>
+                                {% else %}
+                                <div class="like-display">
+                                    <i class="fas fa-heart"></i>
+                                    <span>{{ post.like_count or 0 }} likes</span>
+                                </div>
+                                <a href="{{ url_for('auth.login') }}" class="action-btn login-prompt">
+                                    <i class="fas fa-sign-in-alt"></i>
+                                    <span class="btn-text">Inicia sesión para interactuar</span>
+                                </a>
+                                {% endif %}
+                                
+                                <button class="action-btn share-btn" onclick="sharePost()">
+                                    <i class="fas fa-share"></i>
+                                    <span class="btn-text">Compartir</span>
+                                </button>
+                            </div>
+                            
+                            {% if current_user.is_authenticated and (current_user.__oid__ == post.user_id or current_user.is_admin) %}
+                            <div class="author-actions">
+                                <a href="{{ url_for('posts.edit_post', post_id=post.__oid__) }}" class="btn btn-outline">
+                                    <i class="fas fa-edit"></i>
+                                    Editar
+                                </a>
+                                <button class="btn btn-danger" onclick="deletePost('{{ post.__oid__ }}')">
+                                    <i class="fas fa-trash"></i>
+                                    Eliminar
+                                </button>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Comments Section -->
+                    <div class="comments-section">
+                        <div class="comments-header">
+                            <h3>
+                                <i class="fas fa-comments"></i>
+                                Comentarios (<span id="total-comments">{{ comments|length if comments else 0 }}</span>)
+                            </h3>
+                            
+                            {% if comments|length > 1 %}
+                            <div class="comments-controls">
+                                <div class="comments-sort">
+                                    <select id="comments-sort" class="sort-select">
+                                        <option value="newest">Más recientes</option>
+                                        <option value="oldest">Más antiguos</option>
+                                        <option value="popular">Más populares</option>
+                                    </select>
+                                </div>
+                                <button class="comments-toggle" onclick="toggleAllComments()">
+                                    <i class="fas fa-eye"></i>
+                                    <span>Contraer todo</span>
+                                </button>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        {% if current_user.is_authenticated %}
+                        <div class="comment-form-section">
+                            <div class="comment-form-card">
+                                <div class="form-header">
+                                    <div class="user-avatar">
+                                        <img src="{{ current_user.avatar_url if current_user.avatar_url else '/static/images/default-avatar.jpg' }}" 
+                                             alt="{{ current_user.username }}">
+                                    </div>
+                                    <div class="form-title">
+                                        <h4>Añadir comentario</h4>
+                                        <p>Comparte tu opinión sobre esta discusión</p>
+                                    </div>
+                                </div>
+                                
+                                <form class="comment-form" id="comment-form" onsubmit="addComment(event, '{{ post.__oid__ }}')">
+                                    <div class="textarea-container">
+                                        <textarea name="content" id="comment-content" 
+                                                  placeholder="Escribe tu comentario..." 
+                                                  required maxlength="1000" rows="4"></textarea>
+                                        <div class="char-counter">
+                                            <span id="comment-counter">0</span>/1000
+                                        </div>
+                                        
+                                        <!-- Formatting toolbar for comments -->
+                                        <div class="comment-toolbar">
+                                            <button type="button" class="format-btn" onclick="formatComment('bold')" title="Negrita">
+                                                <i class="fas fa-bold"></i>
+                                            </button>
+                                            <button type="button" class="format-btn" onclick="formatComment('italic')" title="Cursiva">
+                                                <i class="fas fa-italic"></i>
+                                            </button>
+                                            <button type="button" class="format-btn" onclick="formatComment('quote')" title="Cita">
+                                                <i class="fas fa-quote-left"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-actions">
+                                        <button type="button" class="btn btn-secondary" onclick="clearCommentForm()">
+                                            <i class="fas fa-times"></i>
+                                            Cancelar
+                                        </button>
+                                        <button type="submit" class="btn btn-primary submit-btn" id="submit-comment">
+                                            <div class="btn-content">
+                                                <i class="fas fa-paper-plane"></i>
+                                                <span>Publicar comentario</span>
+                                            </div>
+                                            <div class="btn-loading">
+                                                <i class="fas fa-spinner fa-spin"></i>
+                                                <span>Publicando...</span>
+                                            </div>
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <div class="comments-list" id="comments-list">
+                            {% if comments %}
+                                {% for comment in comments %}
+                                <div class="comment-card" id="comment-{{ comment.__oid__ }}" data-comment-id="{{ comment.__oid__ }}" data-created="{{ comment.created_at.isoformat() }}">
+                                    <div class="comment-header">
+                                        <div class="comment-author">
+                                            <div class="author-avatar">
+                                                <img src="{{ comment.author_avatar if comment.author_avatar else '/static/images/default-avatar.jpg' }}" 
+                                                     alt="{{ comment.author_name if comment.author_name else 'Usuario' }}">
+                                            </div>
+                                            <div class="author-details">
+                                                <span class="author-name">
+                                                    {{ comment.author_name if comment.author_name else 'Usuario desconocido' }}
+                                                </span>
+                                                <span class="comment-date">
+                                                    <i class="fas fa-clock"></i>
+                                                    <time datetime="{{ comment.created_at.isoformat() }}">
+                                                        {{ comment.created_at.strftime('%d/%m/%Y %H:%M') }}
+                                                    </time>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        
+                                        {% if current_user.is_authenticated and (current_user.__oid__ == comment.user_id or current_user.is_admin) %}
+                                        <div class="comment-actions">
+                                            <div class="actions-dropdown">
+                                                <button class="dropdown-toggle" onclick="toggleCommentActions('{{ comment.__oid__ }}')">
+                                                    <i class="fas fa-ellipsis-v"></i>
+                                                </button>
+                                                <div class="dropdown-menu" id="actions-{{ comment.__oid__ }}">
+                                                    <button class="dropdown-item edit-comment-btn" 
+                                                            onclick="editComment('{{ comment.__oid__ }}')" >
+                                                        <i class="fas fa-edit"></i>
+                                                        Editar
+                                                    </button>
+                                                    <button class="dropdown-item delete-comment-btn" 
+                                                            onclick="deleteComment('{{ comment.__oid__ }}')" >
+                                                        <i class="fas fa-trash"></i>
+                                                        Eliminar
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="comment-content">
+                                        <div class="content-text" id="content-{{ comment.__oid__ }}">
+                                            {{ comment.content | nl2br | safe }}
+                                        </div>
+                                        <div class="edit-form" id="edit-form-{{ comment.__oid__ }}" style="display: none;">
+                                            <textarea class="edit-textarea" maxlength="1000">{{ comment.content }}</textarea>
+                                            <div class="edit-actions">
+                                                <button class="btn btn-sm btn-secondary" onclick="cancelEdit('{{ comment.__oid__ }}')">
+                                                    Cancelar
+                                                </button>
+                                                <button class="btn btn-sm btn-primary" onclick="saveEdit('{{ comment.__oid__ }}')">
+                                                    Guardar
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="comment-footer">
+                                        {% if current_user.is_authenticated %}
+                                        <button class="comment-like-btn" onclick="toggleCommentLike('{{ comment.__oid__ }}')">
+                                            <i class="far fa-heart"></i>
+                                            <span class="like-count">{{ comment.like_count or 0 }}</span>
+                                        </button>
+                                        {% endif %}
+                                        <button class="reply-btn" onclick="replyToComment('{{ comment.__oid__ }}')">
+                                            <i class="fas fa-reply"></i>
+                                            Responder
+                                        </button>
+                                        <span class="comment-time-ago" data-time="{{ comment.created_at.isoformat() }}">
+                                            {{ formatTimeAgo(comment.created_at) }}
+                                        </span>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="no-comments" id="no-comments">
+                                    <div class="empty-icon">
+                                        <i class="fas fa-comment-dots"></i>
+                                    </div>
+                                    <h4>No hay comentarios aún</h4>
+                                    <p>¡Sé el primero en iniciar la conversación!</p>
+                                    {% if current_user.is_authenticated %}
+                                    <button class="btn btn-primary" onclick="focusCommentForm()">
+                                        <i class="fas fa-plus"></i>
+                                        Escribir primer comentario
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Load More Comments -->
+                        {% if comments|length >= 10 %}
+                        <div class="load-more-section">
+                            <button class="btn btn-outline load-more-btn" onclick="loadMoreComments()">
+                                <i class="fas fa-chevron-down"></i>
+                                Cargar más comentarios
+                            </button>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Sidebar -->
+                <div class="post-sidebar">
+                    <!-- Author Info Card -->
+                    {% if author %}
+                    <div class="sidebar-card author-card">
+                        <div class="card-header">
+                            <h4>
+                                <i class="fas fa-user"></i>
+                                Sobre el autor
+                            </h4>
+                        </div>
+                        <div class="card-content">
+                            <div class="author-profile">
+                                <div class="author-avatar large">
+                                    <img src="{{ author.avatar_url if author.avatar_url else '/static/images/default-avatar.jpg' }}" 
+                                         alt="{{ author.username }}">
+                                    <div class="author-badge">
+                                        {% if author.is_verified %}
+                                        <i class="fas fa-check-circle verified" title="Usuario verificado"></i>
+                                        {% endif %}
+                                        {% if author.is_moderator %}
+                                        <i class="fas fa-shield-alt moderator" title="Moderador"></i>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="author-info">
+                                    <h5>{{ author.username }}</h5>
+                                    <p class="author-title">{{ author.title if author.title else 'Miembro de la comunidad' }}</p>
+                                    <p class="author-bio">{{ author.bio if author.bio else 'Un aficionado a Juego de Tronos' }}</p>
+                                    <div class="author-stats">
+                                        <div class="stat">
+                                            <span class="stat-number">{{ author.posts_count or 0 }}</span>
+                                            <span class="stat-label">Posts</span>
+                                        </div>
+                                        <div class="stat">
+                                            <span class="stat-number">{{ author.comments_count or 0 }}</span>
+                                            <span class="stat-label">Comentarios</span>
+                                        </div>
+                                        <div class="stat">
+                                            <span class="stat-number">{{ author.reputation or 0 }}</span>
+                                            <span class="stat-label">Reputación</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Related Posts -->
+                    <div class="sidebar-card related-posts-card">
+                        <div class="card-header">
+                            <h4>
+                                <i class="fas fa-newspaper"></i>
+                                Posts relacionados
+                            </h4>
+                        </div>
+                        <div class="card-content">
+                            <div class="related-posts" id="related-posts">
+                                <!-- Will be loaded dynamically -->
+                                <div class="loading-related">
+                                    <i class="fas fa-spinner fa-spin"></i>
+                                    <span>Cargando posts relacionados...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Popular Tags -->
+                    <div class="sidebar-card tags-card">
+                        <div class="card-header">
+                            <h4>
+                                <i class="fas fa-tags"></i>
+                                Tags populares
+                            </h4>
+                        </div>
+                        <div class="card-content">
+                            <div class="popular-tags" id="popular-tags">
+                                <!-- Will be loaded dynamically -->
+                                <div class="loading-tags">
+                                    <i class="fas fa-spinner fa-spin"></i>
+                                    <span>Cargando tags...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="sidebar-card actions-card">
+                        <div class="card-header">
+                            <h4>
+                                <i class="fas fa-bolt"></i>
+                                Acciones rápidas
+                            </h4>
+                        </div>
+                        <div class="card-content">
+                            <div class="quick-actions">
+                                <a href="{{ url_for('posts.posts') }}" class="quick-action">
+                                    <i class="fas fa-arrow-left"></i>
+                                    <span>Volver a discusiones</span>
+                                </a>
+                                {% if current_user.is_authenticated %}
+                                <a href="{{ url_for('discussions.create_discussion') }}" class="btn btn-primary">
+                                    <i class="fas fa-plus"></i>
+                                    Crear Nueva Discusión
+                                </a>
+                                <button class="quick-action" onclick="followPost('{{ post.__oid__ }}')">
+                                    <i class="fas fa-bell"></i>
+                                    <span>Seguir discusión</span>
+                                </button>
+                                {% endif %}
+                                <button class="quick-action" onclick="printPost()">
+                                    <i class="fas fa-print"></i>
+                                    <span>Imprimir post</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Report Modal -->
+<div class="modal fade" id="reportModal" tabindex="-1" aria-labelledby="reportModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="reportModalLabel">
+                    <i class="fas fa-flag"></i>
+                    Reportar contenido
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="report-form">
+                    <div class="form-group">
+                        <label for="report-reason" class="form-label">Motivo del reporte:</label>
+                        <select id="report-reason" class="form-select" required>
+                            <option value="">Selecciona un motivo</option>
+                            <option value="spam">Spam</option>
+                            <option value="inappropriate">Contenido inapropiado</option>
+                            <option value="harassment">Acoso</option>
+                            <option value="copyright">Violación de derechos de autor</option>
+                            <option value="other">Otro</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="report-details" class="form-label">Detalles adicionales:</label>
+                        <textarea id="report-details" class="form-textarea" rows="3" 
+                                  placeholder="Proporciona más información sobre el problema..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" onclick="submitReport()">Enviar reporte</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Pass template data via data attributes -->
+<div id="post-data" 
+     data-post-id="{{ post.__oid__ }}"
+     data-is-authenticated="{{ current_user.is_authenticated | lower }}"
+     data-current-user-id="{{ current_user.__oid__ if current_user.is_authenticated else '' }}"
+     style="display: none;"></div>
+
+<script>
+class PostDetailManager {
+    constructor() {
+        const postData = document.getElementById('post-data');
+        this.postId = postData.dataset.postId;
+        this.currentUser = postData.dataset.isAuthenticated === 'true';
+        this.currentUserId = postData.dataset.currentUserId;
+        this.init();
+    }
+    
+    init() {
+        this.setupEventListeners();
+        this.loadRelatedPosts();
+        this.loadPopularTags();
+        this.setupCharacterCounter();
+        this.trackView();
+        this.updateTimeAgo();
+    }
+    
+    setupEventListeners() {
+        // Comments sorting
+        const sortSelect = document.getElementById('comments-sort');
+        if (sortSelect) {
+            sortSelect.addEventListener('change', (e) => {
+                this.sortComments(e.target.value);
+            });
+        }
+        
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.actions-dropdown')) {
+                document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                    menu.style.display = 'none';
+                });
+            }
+        });
+    }
+    
+    setupCharacterCounter() {
+        const textarea = document.getElementById('comment-content');
+        const counter = document.getElementById('comment-counter');
+        
+        if (textarea && counter) {
+            textarea.addEventListener('input', () => {
+                const length = textarea.value.length;
+                counter.textContent = length;
+                
+                if (length > 1000) {
+                    counter.parentElement.classList.add('over-limit');
+                    textarea.value = textarea.value.substring(0, 1000);
+                    counter.textContent = 1000;
+                } else {
+                    counter.parentElement.classList.remove('over-limit');
+                }
+            });
+        }
+    }
+    
+    async trackView() {
+        try {
+            await fetch(`/api/posts/${this.postId}/view`, { 
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+        } catch (error) {
+            console.error('Error tracking view:', error);
+        }
+    }
+    
+    async loadRelatedPosts() {
+        try {
+            const response = await fetch(`/api/posts/${this.postId}/related`);
+            const data = await response.json();
+            this.renderRelatedPosts(data.posts || []);
+        } catch (error) {
+            console.error('Error loading related posts:', error);
+            const loadingElement = document.querySelector('.loading-related');
+            if (loadingElement) {
+                loadingElement.innerHTML = '<p class="error-message">Error al cargar posts relacionados</p>';
+            }
+        }
+    }
+    
+    async loadPopularTags() {
+        try {
+            const response = await fetch('/api/tags/popular');
+            const data = await response.json();
+            this.renderPopularTags(data.tags || []);
+        } catch (error) {
+            console.error('Error loading popular tags:', error);
+            const loadingElement = document.querySelector('.loading-tags');
+            if (loadingElement) {
+                loadingElement.innerHTML = '<p class="error-message">Error al cargar tags</p>';
+            }
+        }
+    }
+    
+    renderRelatedPosts(posts) {
+        const container = document.getElementById('related-posts');
+        
+        if (!container) return;
+        
+        if (posts.length === 0) {
+            container.innerHTML = '<p class="no-related">No hay posts relacionados</p>';
+            return;
+        }
+        
+        const html = posts.map(post => `
+            <div class="related-post">
+                <a href="/posts/${post.id}" class="related-link">
+                    <h5>${this.escapeHtml(post.title)}</h5>
+                    <div class="related-meta">
+                        <span class="related-author">${this.escapeHtml(post.author_name)}</span>
+                        <span class="related-stats">
+                            <i class="fas fa-heart"></i> ${post.like_count || 0}
+                            <i class="fas fa-comment"></i> ${post.comment_count || 0}
+                        </span>
+                    </div>
+                </a>
+            </div>
+        `).join('');
+        
+        container.innerHTML = html;
+    }
+    
+    renderPopularTags(tags) {
+        const container = document.getElementById('popular-tags');
+        
+        if (!container) return;
+        
+        if (tags.length === 0) {
+            container.innerHTML = '<p class="no-tags">No hay tags disponibles</p>';
+            return;
+        }
+        
+        const html = tags.map(tag => `
+            <span class="tag popular-tag" onclick="searchByTag('${this.escapeHtml(tag.name)}')">
+                ${this.escapeHtml(tag.name)}
+                <span class="tag-count">${tag.count}</span>
+            </span>
+        `).join('');
+        
+        container.innerHTML = html;
+    }
+    
+    sortComments(order) {
+        const commentsList = document.getElementById('comments-list');
+        if (!commentsList) return;
+        
+        const comments = Array.from(commentsList.querySelectorAll('.comment-card'));
+        
+        comments.sort((a, b) => {
+            const dateA = new Date(a.dataset.created);
+            const dateB = new Date(b.dataset.created);
+            
+            switch(order) {
+                case 'newest':
+                    return dateB - dateA;
+                case 'oldest':
+                    return dateA - dateB;
+                case 'popular':
+                    const likesA = parseInt(a.querySelector('.like-count')?.textContent || '0');
+                    const likesB = parseInt(b.querySelector('.like-count')?.textContent || '0');
+                    return likesB - likesA;
+                default:
+                    return dateB - dateA;
+            }
+        });
+        
+        // Re-append sorted comments
+        comments.forEach(comment => commentsList.appendChild(comment));
+    }
+    
+    updateTimeAgo() {
+        document.querySelectorAll('.comment-time-ago[data-time]').forEach(element => {
+            const timeString = element.dataset.time;
+            element.textContent = this.formatTimeAgo(timeString);
+        });
+        
+        // Update every minute
+        setTimeout(() => this.updateTimeAgo(), 60000);
+    }
+    
+    formatTimeAgo(dateString) {
+        const date = new Date(dateString);
+        const now = new Date();
+        const diff = now - date;
+        
+        const minutes = Math.floor(diff / (1000 * 60));
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        
+        if (minutes < 1) return 'hace un momento';
+        if (minutes < 60) return `hace ${minutes} minutos`;
+        if (hours < 24) return `hace ${hours} horas`;
+        if (days < 7) return `hace ${days} días`;
+        
+        return date.toLocaleDateString();
+    }
+    
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+}
+
+// Utility functions
+function showNotification(message, type = 'info') {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'exclamation-triangle' : 'info-circle'}"></i>
+        <span>${message}</span>
+        <button class="notification-close" onclick="this.parentElement.remove()">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+    
+    // Add to page
+    document.body.appendChild(notification);
+    
+    // Show notification
+    setTimeout(() => notification.classList.add('show'), 100);
+    
+    // Remove notification after 5 seconds
+    setTimeout(() => {
+        if (notification.parentElement) {
+            notification.classList.remove('show');
+            setTimeout(() => notification.remove(), 300);
+        }
+    }, 5000);
+}
+
+// Global functions for template compatibility
+async function toggleLike(postId) {
+    if (!postId || !POST_DATA.isAuthenticated) {
+        showNotification('Debes iniciar sesión para dar me gusta', 'error');
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/posts/${postId}/like`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            const likeBtn = document.querySelector('.like-btn');
+            const likeCount = document.getElementById('like-count');
+            
+            if (likeBtn && likeCount) {
+                likeBtn.classList.toggle('liked', data.liked);
+                likeCount.textContent = data.like_count;
+            }
+            
+            showNotification(data.liked ? 'Te gusta esta publicación' : 'Ya no te gusta esta publicación', 'success');
+        } else {
+            showNotification(data.message || 'Error al procesar la acción', 'error');
+        }
+    } catch (error) {
+        console.error('Error toggling like:', error);
+        showNotification('Error al procesar la acción', 'error');
+    }
+}
+
+async function toggleBookmark(postId) {
+    if (!postId || !POST_DATA.isAuthenticated) {
+        showNotification('Debes iniciar sesión para guardar publicaciones', 'error');
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/posts/${postId}/bookmark`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            const bookmarkBtn = document.querySelector('.bookmark-btn');
+            if (bookmarkBtn) {
+                bookmarkBtn.classList.toggle('bookmarked', data.bookmarked);
+            }
+            
+            showNotification(data.bookmarked ? 'Publicación guardada en favoritos' : 'Publicación eliminada de favoritos', 'success');
+        } else {
+            showNotification(data.message || 'Error al procesar la acción', 'error');
+        }
+    } catch (error) {
+        console.error('Error toggling bookmark:', error);
+        showNotification('Error al procesar la acción', 'error');
+    }
+}
+
+async function addComment(event, postId) {
+    event.preventDefault();
+    
+    if (!POST_DATA.isAuthenticated) {
+        showNotification('Debes iniciar sesión para comentar', 'error');
+        return;
+    }
+    
+    const form = event.target;
+    const content = form.content.value.trim();
+    
+    if (!content) {
+        showNotification('El comentario no puede estar vacío', 'error');
+        return;
+    }
+    
+    const submitBtn = form.querySelector('#submit-comment');
+    submitBtn.classList.add('loading');
+    
+    try {
+        const response = await fetch(`/posts/${postId}/comments`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ content: content })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // Clear form
+            form.reset();
+            document.getElementById('comment-counter').textContent = '0';
+            
+            // Add new comment to list
+            addCommentToList(data.comment);
+            
+            // Update comment count
+            const commentCount = document.getElementById('total-comments');
+            if (commentCount) {
+                const newCount = parseInt(commentCount.textContent) + 1;
+                commentCount.textContent = newCount;
+            }
+            
+            showNotification('Comentario publicado exitosamente', 'success');
+        } else {
+            showNotification(data.message || 'Error al publicar comentario', 'error');
+        }
+    } catch (error) {
+        console.error('Error adding comment:', error);
+        showNotification('Error al publicar comentario', 'error');
+    } finally {
+        submitBtn.classList.remove('loading');
+    }
+}
+
+function addCommentToList(comment) {
+    const commentsList = document.getElementById('comments-list');
+    const noComments = document.getElementById('no-comments');
+    
+    if (noComments) {
+        noComments.remove();
+    }
+    
+    const commentHtml = `
+        <div class="comment-card" id="comment-${comment.id}" data-comment-id="${comment.id}" data-created="${comment.created_at}">
+            <div class="comment-header">
+                <div class="comment-author">
+                    <div class="author-avatar">
+                        <img src="${comment.author_avatar || '/static/images/default-avatar.jpg'}" 
+                             alt="${comment.author_name}">
+                    </div>
+                    <div class="author-details">
+                        <span class="author-name">${comment.author_name}</span>
+                        <span class="comment-date">
+                            <i class="fas fa-clock"></i>
+                            <time datetime="${comment.created_at}">hace un momento</time>
+                        </span>
+                    </div>
+                </div>
+                ${POST_DATA.currentUserId === comment.user_id ? `
+                <div class="comment-actions">
+                    <div class="actions-dropdown">
+                        <button class="dropdown-toggle" onclick="toggleCommentActions('${comment.id}')">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                        <div class="dropdown-menu" id="actions-${comment.id}">
+                            <button class="dropdown-item edit-comment-btn" onclick="editComment('${comment.id}')">
+                                <i class="fas fa-edit"></i> Editar
+                            </button>
+                            <button class="dropdown-item delete-comment-btn" onclick="deleteComment('${comment.id}')">
+                                <i class="fas fa-trash"></i> Eliminar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                ` : ''}
+            </div>
+            <div class="comment-content">
+                <div class="content-text" id="content-${comment.id}">
+                    ${comment.content.replace(/\n/g, '<br>')}
+                </div>
+            </div>
+            <div class="comment-footer">
+                <button class="comment-like-btn" onclick="toggleCommentLike('${comment.id}')">
+                    <i class="far fa-heart"></i>
+                    <span class="like-count">0</span>
+                </button>
+                <button class="reply-btn" onclick="replyToComment('${comment.id}')">
+                    <i class="fas fa-reply"></i> Responder
+                </button>
+                <span class="comment-time-ago" data-time="${comment.created_at}">
+                    hace un momento
+                </span>
+            </div>
+        </div>
+    `;
+    
+    commentsList.insertAdjacentHTML('afterbegin', commentHtml);
+}
+
+function toggleCommentActions(commentId) {
+    const menu = document.getElementById(`actions-${commentId}`);
+    if (menu) {
+        const isVisible = menu.style.display === 'block';
+        
+        // Hide all other dropdowns
+        document.querySelectorAll('.dropdown-menu').forEach(m => m.style.display = 'none');
+        
+        // Toggle current dropdown
+        menu.style.display = isVisible ? 'none' : 'block';
+    }
+}
+
+async function deleteComment(commentId) {
+    if (!confirm('¿Estás seguro de que quieres eliminar este comentario?')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/comments/${commentId}`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            const commentElement = document.getElementById(`comment-${commentId}`);
+            if (commentElement) {
+                commentElement.remove();
+            }
+            
+            // Update comment count
+            const commentCount = document.getElementById('total-comments');
+            if (commentCount) {
+                const newCount = Math.max(0, parseInt(commentCount.textContent) - 1);
+                commentCount.textContent = newCount;
+            }
+            
+            showNotification('Comentario eliminado', 'success');
+        } else {
+            showNotification(data.message || 'Error al eliminar comentario', 'error');
+        }
+    } catch (error) {
+        console.error('Error deleting comment:', error);
+        showNotification('Error al eliminar comentario', 'error');
+    }
+}
+
+function editComment(commentId) {
+    const contentDiv = document.getElementById(`content-${commentId}`);
+    const editForm = document.getElementById(`edit-form-${commentId}`);
+    
+    if (contentDiv && editForm) {
+        contentDiv.style.display = 'none';
+        editForm.style.display = 'block';
+        editForm.querySelector('textarea').focus();
+    }
+}
+
+function cancelEdit(commentId) {
+    const contentDiv = document.getElementById(`content-${commentId}`);
+    const editForm = document.getElementById(`edit-form-${commentId}`);
+    
+    if (contentDiv && editForm) {
+        contentDiv.style.display = 'block';
+        editForm.style.display = 'none';
+    }
+}
+
+async function saveEdit(commentId) {
+    const editForm = document.getElementById(`edit-form-${commentId}`);
+    const textarea = editForm.querySelector('textarea');
+    const newContent = textarea.value.trim();
+    
+    if (!newContent) {
+        showNotification('El comentario no puede estar vacío', 'error');
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/comments/${commentId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ content: newContent })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            const contentDiv = document.getElementById(`content-${commentId}`);
+            contentDiv.innerHTML = newContent.replace(/\n/g, '<br>');
+            
+            cancelEdit(commentId);
+            showNotification('Comentario actualizado', 'success');
+        } else {
+            showNotification(data.message || 'Error al actualizar comentario', 'error');
+        }
+    } catch (error) {
+        console.error('Error updating comment:', error);
+        showNotification('Error al actualizar comentario', 'error');
+    }
+}
+
+function reportPost(postId) {
+    if (!POST_DATA.isAuthenticated) {
+        showNotification('Debes iniciar sesión para reportar contenido', 'error');
+        return;
+    }
+    
+    // Show report modal (assuming Bootstrap is available)
+    const modal = document.getElementById('reportModal');
+    if (modal) {
+        modal.style.display = 'block';
+        modal.classList.add('show');
+    }
+}
+
+function sharePost() {
+    if (navigator.share) {
+        navigator.share({
+            title: document.title,
+            url: window.location.href
+        });
+    } else {
+        // Fallback: copy to clipboard
+        navigator.clipboard.writeText(window.location.href).then(() => {
+            showNotification('Enlace copiado al portapapeles', 'success');
+        });
+    }
+}
+
+function searchByTag(tag) {
+    window.location.href = `/posts?tag=${encodeURIComponent(tag)}`;
+}
+
+function focusCommentForm() {
+    const textarea = document.getElementById('comment-content');
+    if (textarea) {
+        textarea.focus();
+        textarea.scrollIntoView({ behavior: 'smooth' });
+    }
+}
+
+function clearCommentForm() {
+    const form = document.getElementById('comment-form');
+    if (form) {
+        form.reset();
+        document.getElementById('comment-counter').textContent = '0';
+    }
+}
+
+function formatComment(type) {
+    const textarea = document.getElementById('comment-content');
+    if (!textarea) return;
+    
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = textarea.value.substring(start, end);
+    
+    let formattedText = '';
+    
+    switch(type) {
+        case 'bold':
+            formattedText = `**${selectedText}**`;
+            break;
+        case 'italic':
+            formattedText = `*${selectedText}*`;
+            break;
+        case 'quote':
+            formattedText = `> ${selectedText}`;
+            break;
+    }
+    
+    textarea.value = textarea.value.substring(0, start) + formattedText + textarea.value.substring(end);
+    textarea.focus();
+    textarea.setSelectionRange(start + formattedText.length, start + formattedText.length);
+}
+
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    window.postManager = new PostDetailManager();
+});
+</script>
+{% endblock %}

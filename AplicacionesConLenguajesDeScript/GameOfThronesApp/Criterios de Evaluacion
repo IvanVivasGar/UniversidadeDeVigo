@@ -1,0 +1,59 @@
+# Proyecto WesterosTracker - Contexto
+
+## Requisitos del Proyecto
+
+1. La aplicación debe estar desarrollada con Flask en Python, utilizando Jinja2 para las plantillas, y empleando Sirope/REDIS como sistema de almacenamiento.
+2. La aplicación debe utilizar:
+
+   * Formularios con Jinja2.
+   * Manejador de usuarios con Flask-Login.
+   * Almacenamiento de información usando Sirope/REDIS.
+3. La aplicación debe almacenar como mínimo:
+
+   * Una entidad para obtener una nota de 4.
+   * Dos entidades para una nota de 6 o 7.
+   * Tres o más entidades para aspirar a una nota de 8 a 10.
+4. Se pueden hacer excepciones al criterio de número de entidades si la complejidad justifica la nota.
+
+## Criterios de Corrección
+
+### 1. Diseño
+
+* El código debe estar modularizado, preferentemente con un módulo por entidad.
+
+### 2. Front-end
+
+* Debe utilizar algún tipo de interfaz gráfica (CSS, Bootstrap u otro). Si no se usa una librería externa, se debe garantizar un diseño visual funcional y comprensible.
+
+### 3. Interfaz de Usuario
+
+* Intuitiva y navegable sin necesidad de usar el botón "volver atrás" del navegador.
+* La navegación y los cambios (creación, edición, eliminación) deben reflejarse automáticamente sin necesidad de recargar la página manualmente.
+
+### 4. Robustez
+
+* El sistema debe manejar errores correctamente y nunca detener su ejecución por errores no controlados.
+* No debe haber interferencia entre módulos.
+* Deben mostrarse mensajes claros ante errores esperados, y guiar al usuario en cómo proceder.
+* Para errores inesperados, informar al usuario e indicar si puede continuar o no.
+
+### 5. Almacenamiento
+
+* El sistema de almacenamiento debe ser fiable y asegurar la persistencia de los datos.
+* Debe existir navegación entre objetos relacionados (por ejemplo, ver todos los eventos asociados a un personaje).
+* Se debe definir el comportamiento al eliminar objetos relacionados (por ejemplo, eliminar un personaje elimina también sus eventos o no).
+
+## Reglas de Entrega
+
+* El archivo .zip debe tener el mismo nombre que el asunto del envío y contener tres carpetas: `src/`, `bin/` y `doc/`.
+* `src/`: Contendrá el código fuente completo.
+* `bin/`: Solo si no es una aplicación web. Debe ser ejecutable sin librerías externas, compilado estáticamente.
+* `doc/`:
+
+  * `info.txt`: con título del proyecto, URL del proyecto, nombre completo y DNI.
+  * Documentación de la práctica en PDF.
+  * Diagramas necesarios en PNG o JPG.
+
+## Nota Importante
+
+Se desea alcanzar una nota entre 8 y 10, por lo que se planifica trabajar con más de dos entidades, seguir una arquitectura modular clara y cuidar la interfaz e interacción del usuario.

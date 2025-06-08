@@ -1,0 +1,60 @@
+## Descripción del Proyecto WesterosTracker
+
+**WesterosTracker** es una aplicación web para fans de *Game of Thrones* que permite a los usuarios:
+
+* Registrar, explorar y valorar personajes, casas y eventos clave de la serie.
+* Crear listas personalizadas de favoritos.
+* Participar en discusiones temáticas sobre el universo de Poniente.
+
+El objetivo del proyecto es construir una plataforma funcional, interactiva y bien estructurada, capaz de almacenar múltiples entidades (al menos tres) y proporcionar una experiencia de usuario fluida.
+
+## Requerimientos o necesidades del usuario
+
+La aplicación constará de 4 secciones principales: personajes, casas, eventos y posts. Además del perfil del usuario.
+
+## Sección de Personajes
+
+* Todos los personajes tendrán una tarjeta con la misma estructura física y diseño entre ellos, es decir, la imagen será del mismo tamaño, mismo tamaño de letra. Esta tarjeta será una plantilla para todos los personajes.
+* El personaje contendrá nombre, estado, afiliación de casa, descripción, una valoración (que otorgará cada usuario únicamente una vez y se sacará una media para asignar esta valoración; se manejará un sistema de 5 estrellas como máximo) y una imagen.
+* Cada personaje deberá ser único, esto se definirá por su nombre, es decir, si 'Jon Snow' ya está creado, no podrá haber otro.
+* Todos los personajes podrán ser creados y editados únicamente por usuarios con cuentas registradas; aquellos que accedan o que usen la app como invitados únicamente podrán leer.
+
+## Sección de Casas
+
+* Todas las casas tendrán, al igual que en los personajes, una tarjeta de presentación. Quiero que esta sea distinta a la de los personajes.
+* Cada casa contendrá nombre, la oportunidad de tener múltiples fotos (mínimo una al principio, pero se podrán poner múltiples), el motto de la casa, asignar de los personajes ya creados los miembros relevantes de esa casa, así como de los eventos ya creados aquellos en los que estuvieron involucrados, tendrá su valoración que funcionará igual que en los personajes y una breve descripción de la casa también.
+* La creación y edición de casas funcionará igual que en los personajes. En la edición de casas se podrán agregar más fotos.
+* Las tarjetas de las casas podrán ser clickeables; este deberá llevar a una plantilla de página que será igual para todas las casas, redireccionará a dicha página, en donde se mostrarán las imágenes más en grande, y no sé qué otros elementos agregar ahí; puedes agregar elementos que creas pertinentes.
+* No se aceptan casas repetidas al igual que en los personajes.
+
+## Sección de Eventos
+
+* Esta sección será muy similar a la de casas.
+* Cada evento contendrá nombre, la capacidad de tener múltiples fotos, temporada y episodio en la que ocurrió, personajes y casas involucradas y un rating de importancia.
+* Esta sección tendrá además del buscador que tienen todas las secciones, un filtro por temporadas, que funcionará como filtro sobre filtro; en caso de que el usuario esté usando este filtro y el buscador al mismo tiempo, tendrá que encontrar aquel evento que cumpla con ambas condiciones.
+
+## Para todas las secciones
+
+* Todas las secciones tendrán un buscador; este buscador filtrará en tiempo real lo que el usuario quiera encontrar, claro dependiendo de en qué sección se encuentre.
+
+## Sección de Posts
+
+* En esta sección se encontrarán los posts de discusión de todos los usuarios; se podrán comentar los posts, tendrán likes también.
+* La interacción en posts, tanto para publicar uno como para comentar otro, deberá únicamente ser permitida para usuarios con cuenta registrada, no para invitados.
+* El post contendrá el contenido, la hora en la que se publicó y el usuario que lo publicó, al igual que los comentarios.
+* Los posts se ordenarán en base a la fecha.
+
+## Perfil de usuario
+
+* Este deberá ser un perfil básico que se puede encontrar en cualquier otra página que maneje perfiles; requerirá contraseña claro.
+* En la sección del perfil del usuario se encontrarán aquellos posts que haya realizado, como un historial.
+
+## Página Principal y generalidades
+
+* La página principal tendrá un video de fondo que será 'got_background.mp4', un favicon para la pestaña que se llamará 'favicon.png' y un 'logo.png' para el logo.
+* El diseño de la página quiero que sea inspirado en los Targaryen; quiero muchos oscuros y alto contraste con el blanco, maneja diferentes tipos de negros y grises, que se vea variado y moderno a la vez.
+* Agrega animaciones para hacer más dinámico e interesante la experiencia de usuario.
+* La página principal contendrá un shortcut a las 4 secciones además de un nav bar arriba.
+* La página principal también tendrá el último post publicado y los últimos 2 elementos publicados en cada sección de personajes, eventos y casas.
+* El nav bar tendrá botones de inicio de sesión y registrarse; en caso de que el usuario ya haya iniciado sesión o registrado, en ese mismo espacio tendrá un bienvenido, más el nombre de usuario y un botón de cierre de sesión.
+* Al iniciar sesión o registrarse, se deberá mostrar un pop up que diga si el usuario tuvo éxito o no.

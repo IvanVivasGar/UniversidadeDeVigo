@@ -1,0 +1,1289 @@
+/* 
+===============================================
+GAME OF THRONES - SECCIÓN DE CASAS NOBLES
+===============================================
+Diseño épico y majestuoso para las casas de Westeros
+Temática de heráldica, escudos y nobleza medieval
+*/
+
+/* Variables CSS específicas para casas */
+:root {
+    --house-gold: #FFD700;
+    --house-silver: #C0C0C0;
+    --house-bronze: #CD7F32;
+    --house-crimson: #DC143C;
+    --house-royal-blue: #4169E1;
+    --house-forest-green: #228B22;
+    --house-deep-purple: #4B0082;
+    --house-black: #0F0F0F;
+    --house-white: #FFFFFF;
+    --house-ash: #2F2F2F;
+    
+    /* Gradientes heráldicos */
+    --gradient-royal: linear-gradient(135deg, #FFD700 0%, #4169E1 50%, #FFD700 100%);
+    --gradient-noble: linear-gradient(135deg, #C0C0C0 0%, #4B0082 50%, #C0C0C0 100%);
+    --gradient-banner: linear-gradient(135deg, #DC143C 0%, #FFD700 50%, #DC143C 100%);
+    --gradient-shield: linear-gradient(135deg, #2F2F2F 0%, #4169E1 50%, #2F2F2F 100%);
+    
+    /* Efectos y sombras */
+    --shadow-heraldic: 0 10px 30px rgba(255, 215, 0, 0.3);
+    --shadow-noble: 0 15px 40px rgba(75, 0, 130, 0.4);
+    --shadow-banner: 0 8px 25px rgba(220, 20, 60, 0.35);
+    
+    /* Fuentes heráldicas */
+    --font-heraldic: 'Cinzel', 'Times New Roman', serif;
+    --font-noble: 'Crimson Text', Georgia, serif;
+    --font-banner: 'Uncial Antiqua', cursive;
+}
+
+/* ===== CONTENEDOR PRINCIPAL DE CASAS ===== */
+.houses-page {
+    min-height: 100vh;
+    background: linear-gradient(135deg, 
+        rgba(15, 15, 15, 0.95) 0%, 
+        rgba(47, 47, 47, 0.9) 30%, 
+        rgba(75, 0, 130, 0.1) 50%, 
+        rgba(47, 47, 47, 0.9) 70%, 
+        rgba(15, 15, 15, 0.95) 100%),
+        url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="heraldry" x="0" y="0" width="50" height="50" patternUnits="userSpaceOnUse"><text x="25" y="25" font-family="serif" font-size="20" fill="rgba(255,215,0,0.05)" text-anchor="middle">⚜</text></pattern></defs><rect width="100%" height="100%" fill="url(%23heraldry)"/></svg>') center/100px;
+    position: relative;
+    font-family: var(--font-noble);
+    overflow-x: hidden;
+}
+
+/* Efecto de pergamino de fondo */
+.houses-page::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+        radial-gradient(circle at 20% 30%, rgba(255, 215, 0, 0.03) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(220, 20, 60, 0.03) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(65, 105, 225, 0.02) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* ===== HERO SECTION HERÁLDICO ===== */
+.houses-hero {
+    position: relative;
+    height: 75vh;
+    min-height: 650px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: 
+        linear-gradient(135deg, 
+            rgba(15, 15, 15, 0.8) 0%, 
+            rgba(47, 47, 47, 0.6) 30%, 
+            rgba(75, 0, 130, 0.2) 50%, 
+            rgba(47, 47, 47, 0.6) 70%, 
+            rgba(15, 15, 15, 0.8) 100%);
+    z-index: 2;
+}
+
+/* Overlay heráldico */
+.hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+        radial-gradient(ellipse at center, 
+            transparent 0%, 
+            rgba(75, 0, 130, 0.3) 40%, 
+            rgba(0, 0, 0, 0.7) 100%),
+        linear-gradient(45deg, 
+            rgba(220, 20, 60, 0.2) 0%, 
+            transparent 30%, 
+            rgba(255, 215, 0, 0.1) 70%, 
+            transparent 100%);
+    z-index: 1;
+}
+
+/* Contenido del hero */
+.hero-content {
+    position: relative;
+    z-index: 3;
+    text-align: center;
+    max-width: 900px;
+    padding: 3rem;
+}
+
+/* Escudo flotante */
+.hero-icon {
+    margin-bottom: 2.5rem;
+    animation: heroShieldFloat 5s ease-in-out infinite;
+}
+
+.hero-icon .fas,
+.hero-icon .fab {
+    font-size: 6rem;
+    background: var(--gradient-royal);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 25px rgba(255, 215, 0, 0.7));
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+@keyframes heroShieldFloat {
+    0%, 100% { 
+        transform: translateY(0) rotate(0deg) scale(1);
+        filter: drop-shadow(0 0 25px rgba(255, 215, 0, 0.7));
+    }
+    25% { 
+        transform: translateY(-10px) rotate(2deg) scale(1.05);
+        filter: drop-shadow(0 0 35px rgba(220, 20, 60, 0.8));
+    }
+    50% { 
+        transform: translateY(-20px) rotate(0deg) scale(1.1);
+        filter: drop-shadow(0 0 40px rgba(65, 105, 225, 0.9));
+    }
+    75% { 
+        transform: translateY(-10px) rotate(-2deg) scale(1.05);
+        filter: drop-shadow(0 0 35px rgba(75, 0, 130, 0.8));
+    }
+}
+
+/* Título heráldico */
+.hero-title {
+    font-family: var(--font-heraldic);
+    font-size: 4.5rem;
+    font-weight: bold;
+    background: var(--gradient-banner);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    background-size: 300% 100%;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+    margin-bottom: 2rem;
+    animation: titleBannerWave 4s ease-in-out infinite;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    line-height: 1.2;
+}
+
+@keyframes titleBannerWave {
+    0%, 100% { 
+        background-position: 0% 50%; 
+        filter: brightness(1);
+    }
+    25% { 
+        background-position: 50% 50%; 
+        filter: brightness(1.1);
+    }
+    50% { 
+        background-position: 100% 50%; 
+        filter: brightness(1.2);
+    }
+    75% { 
+        background-position: 50% 50%; 
+        filter: brightness(1.1);
+    }
+}
+
+/* Subtítulo noble */
+.hero-subtitle {
+    font-size: 1.6rem;
+    color: var(--house-silver);
+    line-height: 1.7;
+    opacity: 0.95;
+    margin-bottom: 3rem;
+    font-style: italic;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+    font-family: var(--font-noble);
+}
+
+/* Estandartes flotantes decorativos */
+.floating-banners {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.banner {
+    position: absolute;
+    color: var(--house-gold);
+    opacity: 0.4;
+    animation: bannerWave 8s ease-in-out infinite;
+    font-size: 2.5rem;
+}
+
+.banner-1 {
+    top: 15%;
+    left: 8%;
+    animation-delay: 0s;
+    color: var(--house-crimson);
+}
+
+.banner-2 {
+    top: 70%;
+    right: 12%;
+    animation-delay: 2s;
+    color: var(--house-royal-blue);
+}
+
+.banner-3 {
+    bottom: 25%;
+    left: 15%;
+    animation-delay: 4s;
+    color: var(--house-forest-green);
+}
+
+.banner-4 {
+    top: 40%;
+    right: 20%;
+    animation-delay: 6s;
+    color: var(--house-deep-purple);
+}
+
+@keyframes bannerWave {
+    0%, 100% { 
+        transform: translateY(0) rotate(0deg) scale(1); 
+        opacity: 0.4;
+    }
+    25% { 
+        transform: translateY(-15px) rotate(5deg) scale(1.1); 
+        opacity: 0.6;
+    }
+    50% { 
+        transform: translateY(-25px) rotate(0deg) scale(1.2); 
+        opacity: 0.7;
+    }
+    75% { 
+        transform: translateY(-15px) rotate(-5deg) scale(1.1); 
+        opacity: 0.5;
+    }
+}
+
+/* ===== CONTROLES Y FILTROS NOBLES ===== */
+.houses-controls {
+    background: rgba(15, 15, 15, 0.95);
+    border-bottom: 3px solid var(--house-gold);
+    border-top: 1px solid rgba(255, 215, 0, 0.3);
+    backdrop-filter: blur(20px);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: var(--shadow-heraldic);
+}
+
+.controls-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+/* Header de controles */
+.controls-header {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 2rem;
+    align-items: center;
+    padding: 1.5rem 0;
+}
+
+/* Sección de búsqueda heráldica */
+.search-section {
+    position: relative;
+}
+
+.search-container {
+    position: relative;
+    max-width: 450px;
+}
+
+.search-input {
+    width: 100%;
+    padding: 1.2rem 1.2rem 1.2rem 3.5rem;
+    background: rgba(47, 47, 47, 0.8);
+    border: 2px solid rgba(255, 215, 0, 0.4);
+    border-radius: 30px;
+    color: var(--house-white);
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(15px);
+    font-family: var(--font-noble);
+    box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--house-gold);
+    box-shadow: 
+        0 0 25px rgba(255, 215, 0, 0.5),
+        inset 0 2px 10px rgba(0, 0, 0, 0.3);
+    background: rgba(47, 47, 47, 0.9);
+}
+
+.search-input::placeholder {
+    color: var(--house-silver);
+    opacity: 0.8;
+}
+
+.search-icon {
+    position: absolute;
+    left: 1.2rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--house-gold);
+    font-size: 1.2rem;
+    z-index: 2;
+}
+
+/* Botón de crear casa */
+.create-house-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 1rem;
+    background: var(--gradient-noble);
+    color: var(--house-white);
+    padding: 1.2rem 2.5rem;
+    border-radius: 30px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    transition: all 0.3s ease;
+    border: 2px solid var(--house-silver);
+    text-decoration: none;
+    position: relative;
+    overflow: hidden;
+    font-family: var(--font-heraldic);
+    box-shadow: var(--shadow-noble);
+}
+
+.create-house-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    transition: left 0.6s;
+}
+
+.create-house-btn:hover::before {
+    left: 100%;
+}
+
+.create-house-btn:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: var(--shadow-heraldic);
+    border-color: var(--house-gold);
+    text-decoration: none;
+    color: var(--house-white);
+}
+
+/* Sección de filtros */
+.filters-section {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 2rem;
+    align-items: center;
+    padding: 1rem 0;
+    border-top: 1px solid rgba(255, 215, 0, 0.2);
+}
+
+.filter-group,
+.sort-group {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.filter-label {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    color: var(--house-gold);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-size: 1rem;
+    white-space: nowrap;
+    font-family: var(--font-heraldic);
+}
+
+.filter-options {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.filter-select {
+    padding: 1rem 1.5rem;
+    background: rgba(47, 47, 47, 0.8);
+    border: 2px solid rgba(255, 215, 0, 0.4);
+    border-radius: 15px;
+    color: var(--house-white);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    min-width: 170px;
+    font-family: var(--font-noble);
+    backdrop-filter: blur(10px);
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: var(--house-gold);
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+}
+
+.filter-select option {
+    background: var(--house-ash);
+    color: var(--house-white);
+    padding: 0.8rem;
+}
+
+/* ===== ÁREA PRINCIPAL DE CASAS ===== */
+.houses-main {
+    padding: 1rem 0; /* Reducido de 4rem a 1rem */
+    position: relative;
+    z-index: 2;
+}
+
+.main-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem 0.5rem 1rem; /* Reducido padding */
+}
+
+/* Estadísticas de casas */
+.houses-stats {
+    display: flex;
+    justify-content: center;
+    gap: 3rem; /* Reducido de 5rem a 3rem */
+    margin-bottom: 2rem; /* Reducido de 4rem a 2rem */
+    padding: 1.5rem; /* Reducido de 3rem a 1.5rem */
+    background: 
+        linear-gradient(135deg, 
+            rgba(47, 47, 47, 0.9) 0%, 
+            rgba(75, 0, 130, 0.1) 50%, 
+            rgba(47, 47, 47, 0.9) 100%);
+    border-radius: 25px;
+    backdrop-filter: blur(15px);
+    border: 2px solid rgba(255, 215, 0, 0.3);
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-heraldic);
+}
+
+.houses-stats::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+        linear-gradient(135deg, 
+            rgba(255, 215, 0, 0.05) 0%, 
+            rgba(220, 20, 60, 0.05) 30%, 
+            rgba(65, 105, 225, 0.05) 70%, 
+            rgba(255, 215, 0, 0.05) 100%);
+}
+
+.stats-item {
+    text-align: center;
+    position: relative;
+    z-index: 2;
+}
+
+.stats-number {
+    display: block;
+    font-family: var(--font-heraldic);
+    font-size: 3.5rem;
+    font-weight: bold;
+    background: var(--gradient-royal);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+    animation: numberGlow 3s ease-in-out infinite;
+    margin-bottom: 0.8rem;
+    background-size: 200% 100%;
+}
+
+@keyframes numberGlow {
+    0%, 100% { 
+        background-position: 0% 50%;
+        filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.6));
+    }
+    50% { 
+        background-position: 100% 50%;
+        filter: drop-shadow(0 0 25px rgba(65, 105, 225, 0.8));
+    }
+}
+
+.stats-label {
+    color: var(--house-silver);
+    font-size: 1.2rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-family: var(--font-heraldic);
+}
+
+/* ===== GRID DE CASAS HERÁLDICO ===== */
+.houses-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 1.5rem; /* Reducido de 2rem a 1.5rem */
+    margin-bottom: 2rem; /* Reducido de 4rem a 2rem */
+    position: relative;
+    z-index: 2;
+    padding: 0.5rem; /* Reducido de 1rem a 0.5rem */
+}
+
+/* ===== TARJETAS DE CASAS - DISEÑO HERÁLDICO MEJORADO ===== */
+.house-card {
+    position: relative;
+    height: 480px;
+    perspective: 1200px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin: 0;
+    padding: 0;
+    animation: cardRiseFromBattle 0.8s ease forwards;
+    transform-origin: center center;
+}
+
+.house-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    z-index: 10;
+}
+
+/* Sistema de flip 3D heráldico mejorado */
+.card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    text-align: left;
+    transition: transform 0.6s ease;
+    transform-style: preserve-3d;
+    border-radius: 15px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.house-card.flipped .card-inner {
+    transform: rotateY(180deg);
+}
+
+.card-front,
+.card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    border-radius: 15px;
+    overflow: hidden;
+    border: 2px solid rgba(255, 215, 0, 0.2);
+    background: linear-gradient(145deg, 
+        rgba(20, 20, 25, 0.95) 0%, 
+        rgba(35, 35, 40, 0.9) 100%);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+}
+
+.card-front {
+    display: flex;
+    flex-direction: column;
+}
+
+.card-back {
+    transform: rotateY(180deg);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 2rem;
+    background: linear-gradient(145deg, 
+        rgba(35, 35, 40, 0.95) 0%, 
+        rgba(50, 50, 55, 0.9) 100%);
+}
+
+.house-card:hover .card-front,
+.house-card:hover .card-back {
+    border-color: var(--house-gold);
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.4);
+}
+
+/* Banner/Header de la tarjeta */
+.house-banner {
+    position: relative;
+    height: 200px;
+    overflow: hidden;
+    border-radius: 15px 15px 0 0;
+    background: linear-gradient(135deg, 
+        rgba(47, 47, 47, 0.9) 0%, 
+        rgba(75, 0, 130, 0.3) 100%);
+}
+
+.house-sigil {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: all 0.3s ease;
+    filter: brightness(0.8) contrast(1.1);
+}
+
+.house-card:hover .house-sigil {
+    transform: scale(1.05);
+    filter: brightness(1) contrast(1.2);
+}
+
+.banner-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom,
+        transparent 0%,
+        transparent 60%,
+        rgba(0, 0, 0, 0.7) 100%);
+}
+
+.house-status {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+}
+
+.status-badge {
+    background: rgba(255, 215, 0, 0.9);
+    color: var(--house-black);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border: 1px solid var(--house-gold);
+    backdrop-filter: blur(10px);
+}
+
+.status-badge.status-mayor {
+    background: rgba(255, 215, 0, 0.9);
+    color: var(--house-black);
+}
+
+.status-badge.status-menor {
+    background: rgba(192, 192, 192, 0.9);
+    color: var(--house-black);
+}
+
+.status-badge.status-extinta {
+    background: rgba(139, 0, 0, 0.9);
+    color: var(--house-white);
+}
+
+/* Información de la casa mejorada */
+.house-info {
+    padding: 1.5rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    background: linear-gradient(to bottom,
+        transparent 0%,
+        rgba(0, 0, 0, 0.1) 100%);
+}
+
+.house-name {
+    font-family: var(--font-heraldic);
+    font-size: 1.6rem;
+    color: var(--house-white);
+    margin: 0 0 0.5rem 0;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    line-height: 1.2;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+    transition: all 0.3s ease;
+}
+
+.house-card:hover .house-name {
+    background: var(--gradient-royal);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: none;
+}
+
+.house-motto {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.8rem;
+    color: var(--house-silver);
+    font-size: 0.95rem;
+    font-weight: 400;
+    margin: 0;
+    font-style: italic;
+    line-height: 1.4;
+    font-family: var(--font-noble);
+}
+
+.house-motto .fas {
+    color: var(--house-gold);
+    font-size: 0.8rem;
+    margin-top: 0.2rem;
+    flex-shrink: 0;
+}
+
+.house-region {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin: 0;
+}
+
+.house-region .fas {
+    color: var(--house-crimson);
+    font-size: 0.9rem;
+}
+
+/* Sistema de rating mejorado */
+.house-rating {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 0.5rem 0;
+}
+
+.stars-container {
+    position: relative;
+    display: inline-block;
+}
+
+.stars-background,
+.stars-filled {
+    display: flex;
+    gap: 0.1rem;
+}
+
+.stars-background {
+    color: rgba(255, 215, 0, 0.2);
+}
+
+.stars-filled {
+    position: absolute;
+    top: 0;
+    left: 0;
+    color: var(--house-gold);
+    overflow: hidden;
+    width: 60%; /* Ejemplo: 3/5 estrellas */
+    transition: width 0.6s ease;
+    filter: drop-shadow(0 0 3px rgba(255, 215, 0, 0.6));
+}
+
+.stars-container .fas {
+    font-size: 0.9rem;
+}
+
+.rating-value {
+    color: var(--house-gold);
+    font-weight: 600;
+    font-size: 0.9rem;
+    font-family: var(--font-heraldic);
+}
+
+.rating-count {
+    color: var(--house-silver);
+    font-size: 0.8rem;
+}
+
+/* Miembros de la casa */
+.house-members {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.85rem;
+    margin: 0;
+}
+
+.house-members .fas {
+    color: var(--house-royal-blue);
+    font-size: 0.9rem;
+}
+
+/* Acciones de la tarjeta mejoradas */
+.house-actions {
+    display: flex;
+    justify-content: center;
+    gap: 0.8rem;
+    margin-top: auto;
+    padding: 0 1.5rem 1.5rem 1.5rem;
+}
+
+.btn-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 215, 0, 0.4);
+    background: rgba(47, 47, 47, 0.8);
+    color: var(--house-gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.btn-icon:hover {
+    transform: translateY(-2px) scale(1.1);
+    border-color: var(--house-gold);
+    background: rgba(255, 215, 0, 0.2);
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+    color: var(--house-white);
+    text-decoration: none;
+}
+
+.btn-icon.favorite-btn.favorited {
+    background: rgba(220, 20, 60, 0.3);
+    border-color: var(--house-crimson);
+    color: var(--house-crimson);
+}
+
+.btn-icon.favorite-btn.favorited:hover {
+    background: rgba(220, 20, 60, 0.5);
+}
+
+/* Parte trasera de la tarjeta mejorada */
+.house-description h4 {
+    color: var(--house-gold);
+    font-family: var(--font-heraldic);
+    font-size: 1.4rem;
+    margin-bottom: 1.5rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    text-align: center;
+}
+
+.description-text {
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.6;
+    font-size: 0.95rem;
+    margin-bottom: 2rem;
+    text-align: justify;
+    font-family: var(--font-noble);
+    flex: 1;
+    overflow-y: auto;
+}
+
+.flip-back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.8rem;
+    background: linear-gradient(135deg, var(--house-crimson) 0%, #8B0000 100%);
+    color: var(--house-white);
+    padding: 0.8rem 1.5rem;
+    border-radius: 25px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    align-self: center;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-family: var(--font-heraldic);
+    font-size: 0.9rem;
+}
+
+.flip-back-btn:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 6px 20px rgba(220, 20, 60, 0.4);
+}
+
+/* ===== CONTENEDOR PRINCIPAL MEJORADO ===== */
+.houses-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, 
+        rgba(15, 15, 15, 0.95) 0%, 
+        rgba(25, 25, 30, 0.9) 50%, 
+        rgba(15, 15, 15, 0.95) 100%);
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+/* ===== ANIMACIONES MEJORADAS ===== */
+@keyframes cardRiseFromBattle {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Animación de entrada escalonada */
+.house-card:nth-child(1) { animation-delay: 0.1s; }
+.house-card:nth-child(2) { animation-delay: 0.2s; }
+.house-card:nth-child(3) { animation-delay: 0.3s; }
+.house-card:nth-child(4) { animation-delay: 0.4s; }
+.house-card:nth-child(5) { animation-delay: 0.5s; }
+.house-card:nth-child(6) { animation-delay: 0.6s; }
+
+/* ===== RESPONSIVE MEJORADO ===== */
+@media (max-width: 1024px) {
+    .houses-grid {
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    .house-card {
+        height: 450px;
+    }
+}
+
+@media (max-width: 768px) {
+    .houses-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        padding: 0.5rem;
+    }
+    
+    .house-card {
+        height: 420px;
+        margin: 0;
+    }
+    
+    .house-banner {
+        height: 180px;
+    }
+    
+    .house-name {
+        font-size: 1.4rem;
+    }
+    
+    .house-info {
+        padding: 1.2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .house-card {
+        height: 400px;
+    }
+    
+    .house-banner {
+        height: 160px;
+    }
+    
+    .house-name {
+        font-size: 1.2rem;
+    }
+    
+    .house-info {
+        padding: 1rem;
+        gap: 0.8rem;
+    }
+    
+    .house-actions {
+        gap: 0.6rem;
+    }
+    
+    .btn-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 0.8rem;
+    }
+}
+
+/* ===== MODO OSCURO MEJORADO ===== */
+@media (prefers-color-scheme: dark) {
+    .houses-page {
+        background: 
+            linear-gradient(135deg, 
+                rgba(5, 5, 5, 0.98) 0%, 
+                rgba(25, 25, 25, 0.95) 50%, 
+                rgba(5, 5, 5, 0.98) 100%);
+    }
+    
+    .search-input {
+        background: rgba(20, 20, 20, 0.95);
+    }
+    
+    .filter-select {
+        background: rgba(20, 20, 20, 0.95);
+    }
+}
+
+/* ===== SCROLL PERSONALIZADO ===== */
+.houses-main::-webkit-scrollbar {
+    width: 10px;
+}
+
+.houses-main::-webkit-scrollbar-track {
+    background: rgba(47, 47, 47, 0.4);
+    border-radius: 15px;
+}
+
+.houses-main::-webkit-scrollbar-thumb {
+    background: var(--gradient-royal);
+    border-radius: 15px;
+}
+
+.houses-main::-webkit-scrollbar-thumb:hover {
+    background: var(--gradient-banner);
+}
+
+/* ===== EFECTOS DE PERFORMANCE ===== */
+.house-card,
+.btn-heraldic,
+.search-input,
+.filter-select {
+    will-change: transform;
+}
+
+/* Optimización para animaciones */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* ===== PRINT STYLES ===== */
+@media print {
+    .houses-hero,
+    .houses-controls,
+    .floating-banners,
+    .house-actions {
+        display: none;
+    }
+    
+    .houses-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+    
+    .house-card {
+        height: auto;
+        border: 1px solid #ccc;
+        background: white !important;
+    }
+    
+    .house-name,
+    .house-motto {
+        color: black !important;
+    }
+}
+
+/* ===== INTERACTIVE RATING STARS FOR HOUSES ===== */
+.interactive-rating {
+    cursor: pointer;
+}
+
+.stars-interactive {
+    display: flex;
+    gap: 0.1rem;
+}
+
+.stars-interactive i {
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    color: rgba(255, 215, 0, 0.3);
+}
+
+.stars-interactive i:hover {
+    transform: scale(1.1);
+}
+
+/* Estados de las estrellas de rating */
+.stars-interactive i.highlighted {
+    color: #f7d794;
+    transform: scale(1.15);
+    filter: drop-shadow(0 0 8px rgba(247, 215, 148, 0.8));
+}
+
+.stars-interactive i.user-rated {
+    color: var(--house-gold);
+    filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.7));
+}
+
+.stars-interactive i.rated {
+    color: var(--house-gold);
+    filter: drop-shadow(0 0 3px rgba(255, 215, 0, 0.5));
+}
+
+.stars-interactive i.half-rated {
+    background: linear-gradient(90deg, var(--house-gold) 50%, rgba(255, 215, 0, 0.3) 50%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.stars-interactive i.unrated {
+    color: rgba(255, 215, 0, 0.3);
+}
+
+/* Animación especial para rating de usuario */
+.stars-interactive i.user-rated {
+    animation: userRatingPulse 0.5s ease;
+}
+
+@keyframes userRatingPulse {
+    0% { 
+        transform: scale(1); 
+        filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.7));
+    }
+    50% { 
+        transform: scale(1.2); 
+        filter: drop-shadow(0 0 15px rgba(255, 215, 0, 1));
+    }
+    100% { 
+        transform: scale(1); 
+        filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.7));
+    }
+}
+
+/* Efecto hover para la sección de rating completa */
+.house-rating:hover .stars-interactive i {
+    color: rgba(255, 215, 0, 0.6);
+}
+
+.house-rating:hover .stars-interactive i.highlighted,
+.house-rating:hover .stars-interactive i.user-rated,
+.house-rating:hover .stars-interactive i.rated {
+    color: var(--house-gold);
+}
+
+/* ===== LOADING AND EMPTY STATES ===== */
+.loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+    text-align: center;
+    min-height: 300px;
+}
+
+.loading-spinner {
+    font-size: 3rem;
+    color: var(--house-gold);
+    margin-bottom: 1.5rem;
+    animation: loadingPulse 2s ease-in-out infinite;
+}
+
+@keyframes loadingPulse {
+    0%, 100% { 
+        transform: scale(1) rotate(0deg);
+        opacity: 0.7;
+    }
+    50% { 
+        transform: scale(1.2) rotate(180deg);
+        opacity: 1;
+    }
+}
+
+.loading-state p {
+    color: var(--house-silver);
+    font-size: 1.2rem;
+    font-family: var(--font-noble);
+    margin: 0;
+}
+
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+    text-align: center;
+    min-height: 400px;
+    background: linear-gradient(135deg, 
+        rgba(47, 47, 47, 0.3) 0%, 
+        rgba(75, 0, 130, 0.1) 50%, 
+        rgba(47, 47, 47, 0.3) 100%);
+    border-radius: 20px;
+    border: 2px dashed rgba(255, 215, 0, 0.3);
+    margin: 2rem 0;
+}
+
+.empty-icon {
+    font-size: 4rem;
+    color: rgba(255, 215, 0, 0.4);
+    margin-bottom: 2rem;
+    animation: emptyIconFloat 3s ease-in-out infinite;
+}
+
+@keyframes emptyIconFloat {
+    0%, 100% { 
+        transform: translateY(0);
+        opacity: 0.4;
+    }
+    50% { 
+        transform: translateY(-10px);
+        opacity: 0.6;
+    }
+}
+
+.empty-state h3 {
+    color: var(--house-white);
+    font-family: var(--font-heraldic);
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+}
+
+.empty-state p {
+    color: var(--house-silver);
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+    max-width: 400px;
+}
+
+.btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.8rem;
+    background: linear-gradient(135deg, var(--house-royal-blue) 0%, #1e3a8a 100%);
+    color: var(--house-white);
+    padding: 1rem 2rem;
+    border-radius: 25px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    border: 2px solid rgba(65, 105, 225, 0.5);
+    text-decoration: none;
+    font-family: var(--font-heraldic);
+}
+
+.btn-secondary:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 8px 25px rgba(65, 105, 225, 0.4);
+    border-color: var(--house-royal-blue);
+    text-decoration: none;
+    color: var(--house-white);
+}

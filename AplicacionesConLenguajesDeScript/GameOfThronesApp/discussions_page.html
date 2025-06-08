@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discusiones de la Comunidad - WesterosTracker</title>
+    <link rel="icon" type="image/png" href="/static/images/favicon.png">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+<link rel="stylesheet" href="/static/css/discussions.css">
+<link rel="stylesheet" href="/static/css/discussions_list.css">
+
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <a href="/">
+                    <img src="/static/images/logo.png" alt="WesterosTracker" class="logo-img">
+                    <span class="logo-text">WesterosTracker</span>
+                </a>
+            </div>
+            
+            <div class="nav-menu">
+                <a href="/" class="nav-link">
+                    <i class="fas fa-home"></i> Inicio
+                </a>
+                <a href="/characters/" class="nav-link">
+                    <i class="fas fa-user-friends"></i> Personajes
+                </a>
+                <a href="/houses/" class="nav-link">
+                    <i class="fas fa-shield-alt"></i> Casas
+                </a>
+                <a href="/events/" class="nav-link">
+                    <i class="fas fa-calendar-alt"></i> Eventos
+                </a>
+                <a href="/discussions/" class="nav-link">
+                    <i class="fas fa-comments"></i> Discusiones
+                </a>
+            </div>
+            
+            <div class="nav-auth">
+                
+                    <span class="welcome-text">Bienvenido, testuser</span>
+                    <a href="/auth/profile" class="nav-link profile-link">
+                        <i class="fas fa-user"></i> Perfil
+                    </a>
+                    <a href="/auth/logout" class="nav-link logout-btn">
+                        <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                    </a>
+                
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    
+        
+    
+
+    <!-- Main Content -->
+    <main class="main-content">
+        
+<div class="discussions-page">
+    <!-- Epic Hero Section -->
+    <div class="discussions-hero">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <div class="hero-icon">
+                <i class="fas fa-comments"></i>
+            </div>
+            <h1 class="hero-title">Foro de Discusiones</h1>
+            <p class="hero-subtitle">Únete a los debates más épicos sobre el mundo de Westeros</p>
+            
+            
+            <div class="hero-actions">
+                <a href="/discussions/create" class="btn btn-primary btn-lg">
+                    <i class="fas fa-plus"></i>
+                    Crear Nueva Discusión
+                </a>
+            </div>
+            
+        </div>
+        
+        <!-- Floating elements -->
+        <div class="floating-elements">
+            <div class="floating-element element-1"><i class="fas fa-crown"></i></div>
+            <div class="floating-element element-2"><i class="fas fa-dragon"></i></div>
+            <div class="floating-element element-3"><i class="fas fa-shield-alt"></i></div>
+            <div class="floating-element element-4"><i class="fas fa-fire"></i></div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="discussions-main">
+        <div class="container">
+            <!-- Header Controls -->
+            <div class="discussions-header">
+                <div class="discussions-stats">
+                    <div class="stat-item">
+                        <i class="fas fa-comments"></i>
+                        <span class="stat-number">5</span>
+                        <span class="stat-label">Discusiones</span>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-users"></i>
+                        <span class="stat-number">1</span>
+                        <span class="stat-label">Participantes</span>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-clock"></i>
+                        <span class="stat-number">5</span>
+                        <span class="stat-label">Activas Hoy</span>
+                    </div>
+                </div>
+
+                <!-- Search and Filter Controls -->
+                <div class="discussions-controls">
+                    <div class="search-wrapper">
+                        <form method="GET" class="search-form">
+                            <div class="search-input-wrapper">
+                                <input type="text" 
+                                       name="search" 
+                                       value="" 
+                                       placeholder="Buscar discusiones..."
+                                       class="search-input">
+                                <button type="submit" class="search-btn">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <div class="filter-controls">
+                        <form method="GET" class="filter-form">
+                            <input type="hidden" name="search" value="">
+                            
+                            <select name="category" class="filter-select" onchange="this.form.submit()">
+                                <option value="">Todas las categorías</option>
+                                <option value="general" >General</option>
+                                <option value="teoria" >Teorías</option>
+                                <option value="analisis" >Análisis</option>
+                                <option value="eventos" >Eventos</option>
+                                <option value="casas" >Casas</option>
+                                <option value="libros" >Libros vs Serie</option>
+                                <option value="ayuda" >Ayuda</option>
+                                <option value="off-topic" >Off-topic</option>
+                            </select>
+                            
+                            <select name="sort" class="filter-select" onchange="this.form.submit()">
+                                <option value="recent" >Más Recientes</option>
+                                <option value="popular" >Más Populares</option>
+                                <option value="active" >Más Activas</option>
+                                <option value="oldest" >Más Antiguas</option>
+                            </select>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Discussions List -->
+            <div class="discussions-content">
+                
+                    <div class="discussions-list">
+                        
+                        
+                        
+                        <div class="discussion-card  ">
+                            <!-- Discussion Header -->
+                            <div class="discussion-header">
+                                <div class="discussion-meta">
+                                    
+                                    
+                                    
+                                    
+                                    <span class="discussion-category category-analisis">
+                                        <i class="fas fa-search"></i>
+                                        Analisis
+                                    </span>
+                                </div>
+                                
+                                <div class="discussion-actions">
+                                    <div class="discussion-stats">
+                                        <span class="stat views" title="Visualizaciones">
+                                            <i class="fas fa-eye"></i>
+                                            16
+                                        </span>
+                                        <span class="stat likes" title="Me gusta">
+                                            <i class="fas fa-heart"></i>
+                                            1
+                                        </span>
+                                        <span class="stat replies" title="Respuestas">
+                                            <i class="fas fa-reply"></i>
+                                            0
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Discussion Content -->
+                            <div class="discussion-content-wrapper">
+                                
+                                
+                                <div class="discussion-body">
+                                    <h3 class="discussion-title">
+                                        <a href="/discussions/app.models.discussion.Discussion@4">
+                                            asdasmpodaspodmasd
+                                        </a>
+                                    </h3>
+                                    
+                                    <p class="discussion-excerpt">
+                                        
+                                        
+                                            aspomdpsamdpoasdmpaomdoasmdapdampdas
+                                        
+                                    </p>
+                                    
+                                    
+                                </div>
+                            </div>
+
+                            <!-- Discussion Footer -->
+                            <div class="discussion-footer">
+                                <div class="discussion-author">
+                                    <div class="author-avatar">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <div class="author-info">
+                                        <span class="author-name">Prueba</span>
+                                        <span class="discussion-time">08/06/2025 18:24</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="discussion-engagement">
+                                    
+                                    <button class="engagement-btn like-btn " 
+                                            onclick="toggleLike('app.models.discussion.Discussion@4', 'discussion')">
+                                        <i class="fas fa-heart"></i>
+                                        <span>1</span>
+                                    </button>
+                                    
+                                    
+                                    <a href="/discussions/app.models.discussion.Discussion@4" 
+                                       class="engagement-btn reply-btn">
+                                        <i class="fas fa-reply"></i>
+                                        <span>Responder</span>
+                                    </a>
+                                    
+                                    <a href="/discussions/app.models.discussion.Discussion@4" 
+                                       class="engagement-btn view-btn">
+                                        <i class="fas fa-eye"></i>
+                                        <span>Ver Discusión</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        
+                        
+                        <div class="discussion-card  ">
+                            <!-- Discussion Header -->
+                            <div class="discussion-header">
+                                <div class="discussion-meta">
+                                    
+                                    
+                                    
+                                    
+                                    <span class="discussion-category category-analisis">
+                                        <i class="fas fa-search"></i>
+                                        Analisis
+                                    </span>
+                                </div>
+                                
+                                <div class="discussion-actions">
+                                    <div class="discussion-stats">
+                                        <span class="stat views" title="Visualizaciones">
+                                            <i class="fas fa-eye"></i>
+                                            5
+                                        </span>
+                                        <span class="stat likes" title="Me gusta">
+                                            <i class="fas fa-heart"></i>
+                                            0
+                                        </span>
+                                        <span class="stat replies" title="Respuestas">
+                                            <i class="fas fa-reply"></i>
+                                            0
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Discussion Content -->
+                            <div class="discussion-content-wrapper">
+                                
+                                
+                                <div class="discussion-body">
+                                    <h3 class="discussion-title">
+                                        <a href="/discussions/app.models.discussion.Discussion@3">
+                                            dasdpomasd
+                                        </a>
+                                    </h3>
+                                    
+                                    <p class="discussion-excerpt">
+                                        
+                                        
+                                            mpsaodmapsmdsapdsamdpad
+                                        
+                                    </p>
+                                    
+                                    
+                                    <div class="discussion-tags">
+                                        
+                                        <span class="tag">sadadsa</span>
+                                        
+                                        
+                                    </div>
+                                    
+                                </div>
+                            </div>
+
+                            <!-- Discussion Footer -->
+                            <div class="discussion-footer">
+                                <div class="discussion-author">
+                                    <div class="author-avatar">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <div class="author-info">
+                                        <span class="author-name">Prueba</span>
+                                        <span class="discussion-time">08/06/2025 17:37</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="discussion-engagement">
+                                    
+                                    <button class="engagement-btn like-btn " 
+                                            onclick="toggleLike('app.models.discussion.Discussion@3', 'discussion')">
+                                        <i class="fas fa-heart"></i>
+                                        <span>0</span>
+                                    </button>
+                                    
+                                    
+                                    <a href="/discussions/app.models.discussion.Discussion@3" 
+                                       class="engagement-btn reply-btn">
+                                        <i class="fas fa-reply"></i>
+                                        <span>Responder</span>
+                                    </a>
+                                    
+                                    <a href="/discussions/app.models.discussion.Discussion@3" 
+                                       class="engagement-btn view-btn">
+                                        <i class="fas fa-eye"></i>
+                                        <span>Ver Discusión</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        
+                        
+                        <div class="discussion-card  ">
+                            <!-- Discussion Header -->
+                            <div class="discussion-header">
+                                <div class="discussion-meta">
+                                    
+                                    
+                                    
+                                    
+                                    <span class="discussion-category category-general">
+                                        <i class="fas fa-comments"></i>
+                                        General
+                                    </span>
+                                </div>
+                                
+                                <div class="discussion-actions">
+                                    <div class="discussion-stats">
+                                        <span class="stat views" title="Visualizaciones">
+                                            <i class="fas fa-eye"></i>
+                                            1
+                                        </span>
+                                        <span class="stat likes" title="Me gusta">
+                                            <i class="fas fa-heart"></i>
+                                            0
+                                        </span>
+                                        <span class="stat replies" title="Respuestas">
+                                            <i class="fas fa-reply"></i>
+                                            0
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Discussion Content -->
+                            <div class="discussion-content-wrapper">
+                                
+                                
+                                <div class="discussion-body">
+                                    <h3 class="discussion-title">
+                                        <a href="/discussions/app.models.discussion.Discussion@2">
+                                            Tercer discusion
+                                        </a>
+                                    </h3>
+                                    
+                                    <p class="discussion-excerpt">
+                                        
+                                        
+                                            sadsdasdasdasadsadsada
+                                        
+                                    </p>
+                                    
+                                    
+                                    <div class="discussion-tags">
+                                        
+                                        <span class="tag">sadasd</span>
+                                        
+                                        
+                                    </div>
+                                    
+                                </div>
+                            </div>
+
+                            <!-- Discussion Footer -->
+                            <div class="discussion-footer">
+                                <div class="discussion-author">
+                                    <div class="author-avatar">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <div class="author-info">
+                                        <span class="author-name">Prueba</span>
+                                        <span class="discussion-time">08/06/2025 17:34</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="discussion-engagement">
+                                    
+                                    <button class="engagement-btn like-btn " 
+                                            onclick="toggleLike('app.models.discussion.Discussion@2', 'discussion')">
+                                        <i class="fas fa-heart"></i>
+                                        <span>0</span>
+                                    </button>
+                                    
+                                    
+                                    <a href="/discussions/app.models.discussion.Discussion@2" 
+                                       class="engagement-btn reply-btn">
+                                        <i class="fas fa-reply"></i>
+                                        <span>Responder</span>
+                                    </a>
+                                    
+                                    <a href="/discussions/app.models.discussion.Discussion@2" 
+                                       class="engagement-btn view-btn">
+                                        <i class="fas fa-eye"></i>
+                                        <span>Ver Discusión</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        
+                        
+                        <div class="discussion-card  ">
+                            <!-- Discussion Header -->
+                            <div class="discussion-header">
+                                <div class="discussion-meta">
+                                    
+                                    
+                                    
+                                    
+                                    <span class="discussion-category category-teoria">
+                                        <i class="fas fa-lightbulb"></i>
+                                        Teoria
+                                    </span>
+                                </div>
+                                
+                                <div class="discussion-actions">
+                                    <div class="discussion-stats">
+                                        <span class="stat views" title="Visualizaciones">
+                                            <i class="fas fa-eye"></i>
+                                            1
+                                        </span>
+                                        <span class="stat likes" title="Me gusta">
+                                            <i class="fas fa-heart"></i>
+                                            1
+                                        </span>
+                                        <span class="stat replies" title="Respuestas">
+                                            <i class="fas fa-reply"></i>
+                                            0
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Discussion Content -->
+                            <div class="discussion-content-wrapper">
+                                
+                                
+                                <div class="discussion-body">
+                                    <h3 class="discussion-title">
+                                        <a href="/discussions/app.models.discussion.Discussion@1">
+                                            Segunda Discusion de prueba
+                                        </a>
+                                    </h3>
+                                    
+                                    <p class="discussion-excerpt">
+                                        
+                                        
+                                            apsamdasopdamsdpoasmdpa
+                                        
+                                    </p>
+                                    
+                                    
+                                    <div class="discussion-tags">
+                                        
+                                        <span class="tag">dsakdopa</span>
+                                        
+                                        <span class="tag">asod</span>
+                                        
+                                        <span class="tag">psaod</span>
+                                        
+                                        
+                                    </div>
+                                    
+                                </div>
+                            </div>
+
+                            <!-- Discussion Footer -->
+                            <div class="discussion-footer">
+                                <div class="discussion-author">
+                                    <div class="author-avatar">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <div class="author-info">
+                                        <span class="author-name">Prueba</span>
+                                        <span class="discussion-time">08/06/2025 17:27</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="discussion-engagement">
+                                    
+                                    <button class="engagement-btn like-btn " 
+                                            onclick="toggleLike('app.models.discussion.Discussion@1', 'discussion')">
+                                        <i class="fas fa-heart"></i>
+                                        <span>1</span>
+                                    </button>
+                                    
+                                    
+                                    <a href="/discussions/app.models.discussion.Discussion@1" 
+                                       class="engagement-btn reply-btn">
+                                        <i class="fas fa-reply"></i>
+                                        <span>Responder</span>
+                                    </a>
+                                    
+                                    <a href="/discussions/app.models.discussion.Discussion@1" 
+                                       class="engagement-btn view-btn">
+                                        <i class="fas fa-eye"></i>
+                                        <span>Ver Discusión</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        
+                        
+                        <div class="discussion-card  ">
+                            <!-- Discussion Header -->
+                            <div class="discussion-header">
+                                <div class="discussion-meta">
+                                    
+                                    
+                                    
+                                    
+                                    <span class="discussion-category category-general">
+                                        <i class="fas fa-comments"></i>
+                                        General
+                                    </span>
+                                </div>
+                                
+                                <div class="discussion-actions">
+                                    <div class="discussion-stats">
+                                        <span class="stat views" title="Visualizaciones">
+                                            <i class="fas fa-eye"></i>
+                                            2
+                                        </span>
+                                        <span class="stat likes" title="Me gusta">
+                                            <i class="fas fa-heart"></i>
+                                            0
+                                        </span>
+                                        <span class="stat replies" title="Respuestas">
+                                            <i class="fas fa-reply"></i>
+                                            0
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Discussion Content -->
+                            <div class="discussion-content-wrapper">
+                                
+                                
+                                <div class="discussion-body">
+                                    <h3 class="discussion-title">
+                                        <a href="/discussions/app.models.discussion.Discussion@0">
+                                            La primera discusión de esta app
+                                        </a>
+                                    </h3>
+                                    
+                                    <p class="discussion-excerpt">
+                                        
+                                        
+                                            Bienvenidos a WesterosApp
+                                        
+                                    </p>
+                                    
+                                    
+                                </div>
+                            </div>
+
+                            <!-- Discussion Footer -->
+                            <div class="discussion-footer">
+                                <div class="discussion-author">
+                                    <div class="author-avatar">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <div class="author-info">
+                                        <span class="author-name">Prueba</span>
+                                        <span class="discussion-time">08/06/2025 17:21</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="discussion-engagement">
+                                    
+                                    <button class="engagement-btn like-btn " 
+                                            onclick="toggleLike('app.models.discussion.Discussion@0', 'discussion')">
+                                        <i class="fas fa-heart"></i>
+                                        <span>0</span>
+                                    </button>
+                                    
+                                    
+                                    <a href="/discussions/app.models.discussion.Discussion@0" 
+                                       class="engagement-btn reply-btn">
+                                        <i class="fas fa-reply"></i>
+                                        <span>Responder</span>
+                                    </a>
+                                    
+                                    <a href="/discussions/app.models.discussion.Discussion@0" 
+                                       class="engagement-btn view-btn">
+                                        <i class="fas fa-eye"></i>
+                                        <span>Ver Discusión</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                    </div>
+                    
+                    <!-- Pagination -->
+                    
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+    </main>
+
+    <!-- Footer Épico Mejorado -->
+    <footer class="footer-epic">
+        <!-- Fondo con efectos -->
+        <div class="footer-background">
+            <div class="footer-overlay"></div>
+            <div class="footer-pattern"></div>
+        </div>
+        
+        <!-- Efectos de dragones decorativos -->
+        <div class="footer-dragons">
+            <div class="dragon-silhouette dragon-footer-left">🐉</div>
+            <div class="dragon-silhouette dragon-footer-right">🐲</div>
+        </div>
+        
+        <!-- Contenido principal del footer -->
+        <div class="footer-container">
+            <!-- Sección superior del footer -->
+            <div class="footer-main">
+                <div class="footer-brand">
+                    <div class="footer-logo">
+                        <img src="/static/images/logo.png" alt="WesterosTracker" class="footer-logo-img">
+                        <h3 class="footer-brand-name">WesterosTracker</h3>
+                    </div>
+                    <p class="footer-tagline">
+                        "Winter is coming... y nosotros te mantenemos informado"
+                    </p>
+                    <p class="footer-description">
+                        La plataforma más completa para explorar el universo épico de Game of Thrones. 
+                        Descubre personajes, casas nobles, eventos históricos y únete a la comunidad más apasionada de Poniente.
+                    </p>
+                    
+                    <!-- Estadísticas del footer -->
+                    <div class="footer-stats">
+                        <div class="footer-stat">
+                            <i class="fas fa-users"></i>
+                            <span class="stat-number">0</span>
+                            <span class="stat-label">Personajes</span>
+                        </div>
+                        <div class="footer-stat">
+                            <i class="fas fa-shield-alt"></i>
+                            <span class="stat-number">0</span>
+                            <span class="stat-label">Casas</span>
+                        </div>
+                        <div class="footer-stat">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span class="stat-number">0</span>
+                            <span class="stat-label">Eventos</span>
+                        </div>
+                        <div class="footer-stat">
+                            <i class="fas fa-comments"></i>
+                            <span class="stat-number">0</span>
+                            <span class="stat-label">Discusiones</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Enlaces de navegación -->
+                <div class="footer-sections">
+                    <div class="footer-section explore">
+                        <h4 class="footer-section-title">
+                            <i class="fas fa-compass"></i>
+                            Explorar Poniente
+                        </h4>
+                        <ul class="footer-links">
+                            <li><a href="/characters/">
+                                <i class="fas fa-user-crown"></i> Personajes Legendarios
+                            </a></li>
+                            <li><a href="/houses/">
+                                <i class="fas fa-shield-alt"></i> Casas Nobles
+                            </a></li>
+                            <li><a href="/events/">
+                                <i class="fas fa-scroll"></i> Eventos Épicos
+                            </a></li>
+                            <li><a href="/discussions/">
+                                <i class="fas fa-comments"></i> Debates Candentes
+                            </a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="footer-section community">
+                        <h4 class="footer-section-title">
+                            <i class="fas fa-users"></i>
+                            Comunidad
+                        </h4>
+                        <ul class="footer-links">
+                            
+                                <li><a href="/auth/profile">
+                                    <i class="fas fa-user"></i> Mi Perfil
+                                </a></li>
+                                <li><a href="/discussions/create">
+                                    <i class="fas fa-feather"></i> Crear Discusión
+                                </a></li>
+                            
+                            <li><a href="#" class="coming-soon">
+                                <i class="fas fa-trophy"></i> Clasificaciones
+                                <span class="badge-soon">Próximamente</span>
+                            </a></li>
+                            <li><a href="#" class="coming-soon">
+                                <i class="fas fa-star"></i> Favoritos
+                                <span class="badge-soon">Próximamente</span>
+                            </a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="footer-section info">
+                        <h4 class="footer-section-title">
+                            <i class="fas fa-info-circle"></i>
+                            Información
+                        </h4>
+                        <ul class="footer-links">
+                            <li><a href="#" onclick="showAboutModal()">
+                                <i class="fas fa-book"></i> Acerca del Proyecto
+                            </a></li>
+                            <li><a href="#" onclick="showCreditsModal()">
+                                <i class="fas fa-heart"></i> Créditos
+                            </a></li>
+                            <li><a href="#" onclick="showPrivacyModal()">
+                                <i class="fas fa-shield-check"></i> Privacidad
+                            </a></li>
+                            <li><a href="#" onclick="showTermsModal()">
+                                <i class="fas fa-scroll"></i> Términos de Uso
+                            </a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="footer-section universe">
+                        <h4 class="footer-section-title">
+                            <i class="fas fa-globe"></i>
+                            Universo GoT
+                        </h4>
+                        <div class="footer-quotes">
+                            <div class="quote-card active">
+                                <p class="quote-text">"Winter is coming"</p>
+                                <span class="quote-author">- Casa Stark</span>
+                            </div>
+                            <div class="quote-card">
+                                <p class="quote-text">"Fire and Blood"</p>
+                                <span class="quote-author">- Casa Targaryen</span>
+                            </div>
+                            <div class="quote-card">
+                                <p class="quote-text">"Hear Me Roar"</p>
+                                <span class="quote-author">- Casa Lannister</span>
+                            </div>
+                        </div>
+                        <div class="house-symbols">
+                            <div class="symbol-item" title="Casa Stark">❄️</div>
+                            <div class="symbol-item" title="Casa Targaryen">🐉</div>
+                            <div class="symbol-item" title="Casa Lannister">🦁</div>
+                            <div class="symbol-item" title="Casa Baratheon">🦌</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Separador decorativo -->
+            <div class="footer-divider">
+                <div class="divider-line"></div>
+                <div class="divider-icon">
+                    <i class="fas fa-crown"></i>
+                </div>
+                <div class="divider-line"></div>
+            </div>
+            
+            <!-- Footer inferior -->
+            <div class="footer-bottom">
+                <div class="footer-bottom-content">
+                    <div class="footer-copyright">
+                        <p>
+                            &copy; 2024 WesterosTracker | Proyecto académico inspirado en Game of Thrones
+                        </p>
+                        <p class="footer-disclaimer">
+                            Creado con ❤️ por Ivan Vivas | Universidad de Vigo
+                        </p>
+                    </div>
+                    
+                    <div class="footer-tech">
+                        <span class="tech-label">Powered by:</span>
+                        <div class="tech-stack">
+                            <span class="tech-item">
+                                <i class="fab fa-python"></i> Python
+                            </span>
+                            <span class="tech-item">
+                                <i class="fas fa-fire"></i> Flask
+                            </span>
+                            <span class="tech-item">
+                                <i class="fas fa-database"></i> Sirope
+                            </span>
+                            <span class="tech-item">
+                                <i class="fab fa-html5"></i> HTML5
+                            </span>
+                            <span class="tech-item">
+                                <i class="fab fa-css3-alt"></i> CSS3
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="footer-social">
+                        <span class="social-label">Síguenos:</span>
+                        <div class="social-links">
+                            <a href="#" class="social-link" title="GitHub">
+                                <i class="fab fa-github"></i>
+                            </a>
+                            <a href="#" class="social-link" title="Twitter">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                            <a href="#" class="social-link" title="Discord">
+                                <i class="fab fa-discord"></i>
+                            </a>
+                            <a href="#" class="social-link" title="Reddit">
+                                <i class="fab fa-reddit"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Efectos de partículas en el footer -->
+        <div class="footer-particles">
+            <div class="footer-ember"></div>
+            <div class="footer-ember"></div>
+            <div class="footer-ember"></div>
+            <div class="footer-ember"></div>
+            <div class="footer-ember"></div>
+        </div>
+    </footer>
+
+    <!-- Notification Modal -->
+    <div id="notification-modal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <div class="modal-body">
+                <i class="modal-icon"></i>
+                <p class="modal-message"></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/main.js"></script>
+    
+<script>
+async function toggleLike(discussionId, type) {
+    try {
+        const response = await fetch(`/discussions/${discussionId}/like`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            const button = document.querySelector(`button[onclick="toggleLike('${discussionId}', '${type}')"]`);
+            const icon = button.querySelector('i');
+            const span = button.querySelector('span');
+            
+            if (data.liked) {
+                button.classList.add('liked');
+                icon.className = 'fas fa-heart';
+            } else {
+                button.classList.remove('liked');
+                icon.className = 'far fa-heart';
+            }
+            
+            span.textContent = data.likes_count;
+        } else {
+            showNotification(data.message || 'Error al procesar like', 'error');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showNotification('Error de conexión', 'error');
+    }
+}
+
+function showNotification(message, type = 'info') {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+        <span>${message}</span>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Show notification
+    setTimeout(() => notification.classList.add('show'), 100);
+    
+    // Hide and remove notification
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => document.body.removeChild(notification), 300);
+    }, 3000);
+}
+
+// Auto-submit search form on Enter
+document.querySelector('.search-input').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        this.closest('form').submit();
+    }
+});
+</script>
+
+</body>
+</html>

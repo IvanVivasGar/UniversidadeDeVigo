@@ -1,0 +1,488 @@
+{% extends "base.html" %}
+
+{% block title %}{{ character.name }} - WesterosTracker{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/characters.css') }}?v={{ range(1000, 9999) | random }}">
+{% endblock %}
+
+{% block content %}
+<div class="character-detail-container">
+    <!-- Hero Section with Character Image -->
+    <div class="character-hero" data-bg-image="{{ character.image_url if character.image_url else '/static/images/default-character.jpg' }}">
+        <div class="hero-overlay"></div>
+        <div class="character-hero-content">
+            <div class="character-avatar">
+                <img src="{{ character.image_url if character.image_url else '/static/images/default-character.jpg' }}" alt="{{ character.name }}" class="avatar-image">
+                <div class="status-ring status-{{ character.status }}">
+                    <span class="status-indicator"></span>
+                </div>
+            </div>
+            
+            <div class="character-header-info">
+                <h1 class="character-title">{{ character.name }}</h1>
+                
+                <div class="character-meta">
+                    <div class="meta-item">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>{{ house_name if house_name else 'Sin casa' }}</span>
+                    </div>
+                    <div class="meta-item status-meta">
+                        <i class="fas fa-heartbeat"></i>
+                        <span class="status-text">{{ character.status.title() }}</span>
+                    </div>
+                </div>
+                
+                <div class="character-rating-display">
+                    <div class="rating-stars">
+                        <div class="stars-background">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <div class="stars-filled" data-rating-width="{{ ((character.get_average_rating() / 5) * 100)|round(1) }}">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <span class="rating-text">{{ "%.1f"|format(character.get_average_rating()) }} de 5 estrellas</span>
+                    <span class="rating-count">({{ character.rating_count }} valoraciones)</span>
+                </div>
+            </div>
+            
+            <div class="character-actions">
+                {% if current_user.is_authenticated %}
+                <button class="btn btn-primary favorite-btn" data-character-id="{{ character.__oid__ }}">
+                    <i class="far fa-heart"></i>
+                    <span>Agregar a favoritos</span>
+                </button>
+                
+                <button class="btn btn-secondary rate-btn" data-bs-toggle="modal" data-bs-target="#ratingModal">
+                    <i class="fas fa-star"></i>
+                    <span>Valorar</span>
+                </button>
+                
+                <!-- Admin controls - only visible to admins -->
+                <button class="btn btn-danger admin-delete-btn" title="Eliminar personaje" data-entity-type="character" data-entity-id="{{ character.__oid__ }}" style="display: none;">
+                    <i class="fas fa-trash-alt"></i>
+                    <span>Eliminar</span>
+                </button>
+                
+                <a href="{{ url_for('characters.characters') }}" class="btn btn-outline">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Volver a personajes</span>
+                </a>
+                {% else %}
+                <a href="{{ url_for('auth.login') }}" class="btn btn-primary">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span>Inicia sesión para interactuar</span>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Floating elements -->
+        <div class="floating-elements">
+            <div class="floating-crown"><i class="fas fa-crown"></i></div>
+            <div class="floating-sword"><i class="fas fa-sword"></i></div>
+            <div class="floating-dragon"><i class="fas fa-dragon"></i></div>
+        </div>
+    </div>
+
+    <!-- Character Details -->
+    <div class="character-content">
+        <div class="container">
+            <div class="content-grid">
+                <!-- Main Information -->
+                <div class="main-content">
+                    <div class="content-card description-card">
+                        <div class="card-header">
+                            <h2>
+                                <i class="fas fa-scroll"></i>
+                                Historia del Personaje
+                            </h2>
+                        </div>
+                        <div class="card-body">
+                            <p class="character-description">{{ character.description }}</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Character Stats -->
+                    <div class="content-card stats-card">
+                        <div class="card-header">
+                            <h2>
+                                <i class="fas fa-chart-bar"></i>
+                                Estadísticas
+                            </h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="stats-grid">
+                                <div class="stat-item">
+                                    <div class="stat-value">{{ character.rating_count }}</div>
+                                    <div class="stat-label">Valoraciones</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value">{{ character.view_count if character.view_count else 0 }}</div>
+                                    <div class="stat-label">Visualizaciones</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value">{{ character.favorite_count if character.favorite_count else 0 }}</div>
+                                    <div class="stat-label">Favoritos</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Sidebar -->
+                <div class="sidebar-content">
+                    <div class="content-card quick-info-card">
+                        <div class="card-header">
+                            <h2>
+                                <i class="fas fa-info-circle"></i>
+                                Información Rápida
+                            </h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="quick-info-list">
+                                <div class="info-item">
+                                    <span class="info-label">Casa:</span>
+                                    <span class="info-value">{{ house_name if house_name else 'Sin casa' }}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Estado:</span>
+                                    <span class="info-value status-{{ character.status }}">{{ character.status.title() }}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Valoración:</span>
+                                    <span class="info-value">{{ "%.1f"|format(character.get_average_rating()) }}/5</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Rating Modal -->
+{% if current_user.is_authenticated %}
+<div class="modal fade" id="ratingModal" tabindex="-1" aria-labelledby="ratingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="ratingModalLabel">
+                    <i class="fas fa-star"></i>
+                    Valorar {{ character.name }}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="rating-section">
+                    <p class="rating-instruction">Selecciona tu valoración:</p>
+                    <div class="rating-stars-interactive">
+                        <i class="fas fa-star" data-rating="1"></i>
+                        <i class="fas fa-star" data-rating="2"></i>
+                        <i class="fas fa-star" data-rating="3"></i>
+                        <i class="fas fa-star" data-rating="4"></i>
+                        <i class="fas fa-star" data-rating="5"></i>
+                    </div>
+                    <div class="rating-feedback">
+                        <span id="ratingText">Selecciona una puntuación</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="submitRating" disabled>Enviar Valoración</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Success/Error Messages -->
+<div id="messageContainer" class="message-container"></div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    class CharacterDetailManager {
+        constructor() {
+            this.characterId = "{{ character.__oid__ }}";
+            this.currentRating = 0;
+            this.init();
+        }
+
+        init() {
+            this.setupEventListeners();
+            this.checkUserAuthentication();
+            this.initializeRatingDisplay();
+            this.setBackgroundImage();
+            this.incrementView();
+        }
+
+        setBackgroundImage() {
+            // Set the background image from data attribute
+            const heroElement = document.querySelector('.character-hero');
+            if (heroElement) {
+                const bgImage = heroElement.getAttribute('data-bg-image');
+                if (bgImage) {
+                    heroElement.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('${bgImage}')`;
+                }
+            }
+        }
+
+        initializeRatingDisplay() {
+            // Set the rating stars width from data attribute
+            const starsFilled = document.querySelector('.stars-filled');
+            if (starsFilled) {
+                const width = starsFilled.getAttribute('data-rating-width');
+                if (width) {
+                    starsFilled.style.width = `${width}%`;
+                }
+            }
+        }
+
+        checkUserAuthentication() {
+            // Check if user is authenticated by looking for the favorite button
+            const favoriteBtn = document.querySelector('.favorite-btn');
+            if (favoriteBtn) {
+                this.checkFavoriteStatus();
+            }
+        }
+
+        setupEventListeners() {
+            const favoriteBtn = document.querySelector('.favorite-btn');
+            const ratingStars = document.querySelectorAll('.rating-stars-interactive i');
+            const submitBtn = document.getElementById('submitRating');
+
+            if (favoriteBtn) {
+                favoriteBtn.addEventListener('click', () => this.toggleFavorite());
+            }
+
+            ratingStars.forEach(star => {
+                star.addEventListener('mouseenter', () => {
+                    const rating = parseInt(star.dataset.rating);
+                    this.highlightStars(rating);
+                });
+
+                star.addEventListener('mouseleave', () => {
+                    this.resetStars();
+                });
+
+                star.addEventListener('click', () => {
+                    const rating = parseInt(star.dataset.rating);
+                    this.selectRating(rating);
+                });
+            });
+
+            if (submitBtn) {
+                submitBtn.addEventListener('click', () => this.submitRating());
+            }
+        }
+
+        async checkFavoriteStatus() {
+            try {
+                const response = await fetch(`/characters/${this.characterId}/favorite-status`);
+                if (response.ok) {
+                    const data = await response.json();
+                    this.updateFavoriteButton(data.is_favorite);
+                }
+            } catch (error) {
+                console.error('Error checking favorite status:', error);
+            }
+        }
+
+        async toggleFavorite() {
+            try {
+                const response = await fetch(`/characters/${this.characterId}/favorite`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('meta[name=csrf-token]')?.getAttribute('content')
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    this.updateFavoriteButton(data.is_favorite);
+                    this.showSuccessMessage(data.message);
+                } else {
+                    this.showErrorMessage('Error al actualizar favoritos');
+                }
+            } catch (error) {
+                console.error('Error toggling favorite:', error);
+                this.showErrorMessage('Error de conexión');
+            }
+        }
+
+        updateFavoriteButton(isFavorite) {
+            const btn = document.querySelector('.favorite-btn');
+            const icon = btn.querySelector('i');
+            const text = btn.querySelector('span');
+
+            if (isFavorite) {
+                icon.className = 'fas fa-heart';
+                text.textContent = 'Remover de favoritos';
+                btn.classList.add('favorited');
+            } else {
+                icon.className = 'far fa-heart';
+                text.textContent = 'Agregar a favoritos';
+                btn.classList.remove('favorited');
+            }
+        }
+
+        highlightStars(rating) {
+            const stars = document.querySelectorAll('.rating-stars-interactive i');
+            stars.forEach((star, index) => {
+                if (index < rating) {
+                    star.classList.add('highlighted');
+                } else {
+                    star.classList.remove('highlighted');
+                }
+            });
+            this.updateRatingFeedback(rating);
+        }
+
+        resetStars() {
+            if (this.currentRating === 0) {
+                const stars = document.querySelectorAll('.rating-stars-interactive i');
+                stars.forEach(star => star.classList.remove('highlighted'));
+                this.updateRatingFeedback(0);
+            } else {
+                this.highlightStars(this.currentRating);
+            }
+        }
+
+        selectRating(rating) {
+            this.currentRating = rating;
+            this.highlightStars(rating);
+            
+            const submitBtn = document.getElementById('submitRating');
+            if (submitBtn) {
+                submitBtn.disabled = false;
+            }
+        }
+
+        updateRatingFeedback(rating) {
+            const feedback = document.getElementById('ratingText');
+            const messages = {
+                0: 'Selecciona una puntuación',
+                1: 'Muy malo',
+                2: 'Malo',
+                3: 'Regular',
+                4: 'Bueno',
+                5: 'Excelente'
+            };
+            
+            if (feedback) {
+                feedback.textContent = messages[rating];
+            }
+        }
+
+        async submitRating() {
+            if (this.currentRating === 0) return;
+
+            try {
+                const response = await fetch(`/characters/${this.characterId}/rate`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('meta[name=csrf-token]')?.getAttribute('content')
+                    },
+                    body: JSON.stringify({ rating: this.currentRating })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    this.updateRatingDisplay(data.new_average, data.total_ratings);
+                    this.showSuccessMessage('¡Valoración enviada exitosamente!');
+                    
+                    // Close modal
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('ratingModal'));
+                    if (modal) {
+                        modal.hide();
+                    }
+                } else {
+                    const errorData = await response.json();
+                    this.showErrorMessage(errorData.message || 'Error al enviar valoración');
+                }
+            } catch (error) {
+                console.error('Error submitting rating:', error);
+                this.showErrorMessage('Error de conexión');
+            }
+        }
+
+        updateRatingDisplay(newAverage, totalRatings) {
+            const ratingText = document.querySelector('.rating-text');
+            const ratingCount = document.querySelector('.rating-count');
+            const starsFilled = document.querySelector('.stars-filled');
+
+            if (ratingText) {
+                ratingText.textContent = `${newAverage.toFixed(1)} de 5 estrellas`;
+            }
+            
+            if (ratingCount) {
+                ratingCount.textContent = `(${totalRatings} valoraciones)`;
+            }
+            
+            if (starsFilled) {
+                const percentage = (newAverage / 5 * 100).toFixed(1);
+                starsFilled.style.width = `${percentage}%`;
+            }
+        }
+
+        async incrementView() {
+            try {
+                await fetch(`/characters/${this.characterId}/view`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+            } catch (error) {
+                console.error('Error incrementing view:', error);
+            }
+        }
+
+        showSuccessMessage(message) {
+            this.showMessage(message, 'success');
+        }
+
+        showErrorMessage(message) {
+            this.showMessage(message, 'error');
+        }
+
+        showMessage(message, type) {
+            const container = document.getElementById('messageContainer');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show`;
+            messageDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            container.appendChild(messageDiv);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (messageDiv.parentNode) {
+                    messageDiv.remove();
+                }
+            }, 5000);
+        }
+    }
+
+    // Initialize the character detail manager
+    new CharacterDetailManager();
+});
+</script>
+{% endblock %}

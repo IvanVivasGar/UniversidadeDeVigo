@@ -1,0 +1,22 @@
+Las prácticas no deben ser entregadas, en su caso, más allá del día del examen en primera, segunda convocatoria o convocatoria extraordinaria. En caso de que se especifique una fecha de entrega sera esta la que rija.
+La entrega se realizará utilizando la plataforma de docencia, a no ser que se indique lo contrario. El título del trabajo y el nombre del archivo seguirán el esquema [asignatura]_[número de práctica | proyecto]- [apellido1_apellido2_nombre-dni]. Por ejemplo, "ALS-proyecto-rdgz_gcia_manuel-12345678D".
+Además de entregar el código como se indica (debido a cuestiones de archivo), se subirá el mismo a un repositorio a elección del alumno. Este se indicará en el archivo info.txt (ver más adelante).
+Cada práctica se entregará en un envío diferente3, siendo obligatorio incluir los distintos archivos en un fichero adjunto en formato zip (absténgase de usar cualesquiera otros formatos, con mención especial al no estándar rar).
+A no ser que se especifique lo contrario, el archivo zip contendrá las siguientes carpetas. El nombre del archivo será igual al del asunto del envío. El contenido principal del archivo zip, serán las carpetas src/, bin/ y doc/, que estarán a su vez dentro de una carpeta con el mismo nombre que el archivo zip.
+ALS_1-rdgz_gcia_manuel.zip
+ALS_1-rdgz_gcia_manuel/
+src/
+Código fuente completo de la práctica.
+bin/ (si no es aplicación web)
+Ejecutable de la práctica1. Debe de ser capaz de funcionar sin librerías externas, en una medida razonable. Así, se cree con el entorno que se cree, debe ser compilado de manera estática, es decir, con todas las dll's necesarias en su interior.
+doc/
+info.txt
+Título del proyecto.
+URL del proyecto (si es web).
+Apellidos y nombre.
+DNI
+Documentación de la práctica, en formato PDF2. 
+Diagramas (si fueren necesarios), en formato png o jpg.
+Todas las prácticas son estricta y exclusivamente individuales (a no ser que se especifique lo contrario). Deben seguirse al menos las normas de diseño, formato y documentación vistas en clase.
+La inobservancia de estas normas conllevará la no consideración de la práctica.
+Recomendaciones: autoevaluación (tomado del curso: Aprendizaje basado en problemas, Javier Bará y Miguel Valero)

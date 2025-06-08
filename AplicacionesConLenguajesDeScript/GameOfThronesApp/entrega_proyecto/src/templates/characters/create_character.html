@@ -1,0 +1,287 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if character %}Editar Personaje{% else %}Crear Personaje{% endif %} - WesterosTracker
+{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/character_creation.css') }}?v={{ range(1000, 9999) | random }}">
+<style>
+/* Force CSS application */
+body.character-creation {
+    background: 
+        radial-gradient(ellipse at top, #722f37 0%, transparent 50%),
+        radial-gradient(ellipse at bottom, #0a0a0a 0%, transparent 50%),
+        linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 25%, #722f37 50%, #1a1a1a 75%, #0a0a0a 100%) !important;
+    background-size: 100% 100%, 100% 100%, 100% 400% !important;
+    background-attachment: fixed !important;
+    min-height: 100vh !important;
+}
+
+.create-character-container {
+    min-height: 100vh !important;
+    padding: 2rem !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.creation-panel {
+    width: 100% !important;
+    max-width: 1000px !important;
+    background: rgba(20, 20, 20, 0.85) !important;
+    backdrop-filter: blur(25px) saturate(1.2) !important;
+    border: 1px solid rgba(212, 175, 55, 0.3) !important;
+    border-radius: 30px !important;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6) !important;
+}
+</style>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.body.classList.add('character-creation');
+});
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="create-character-container">
+    <div class="creation-panel">
+        <!-- Header integrado -->
+        <div class="creation-header">
+            <div class="hero-icon">
+                <i class="fas fa-{% if character %}user-edit{% else %}user-plus{% endif %}"></i>
+            </div>
+            <h1 class="hero-title">
+                {% if character %}Editar Personaje{% else %}Crear Personaje{% endif %}
+            </h1>
+            <p class="hero-subtitle">
+                {% if character %}Modifica la leyenda de {{ character.name }}{% else %}Forja una nueva leyenda en los Siete Reinos{% endif %}
+            </p>
+            
+            <!-- Elementos flotantes elegantes -->
+            <div class="creation-elements">
+                <div class="floating-quill">✒️</div>
+                <div class="floating-scroll">📜</div>
+                <div class="floating-ink">🖋️</div>
+            </div>
+        </div>
+
+        <!-- Contenido del formulario -->
+        <div class="creation-content">
+            <!-- Progress Steps -->
+            <div class="form-progress">
+                <div class="progress-steps">
+                    <div class="step active" data-step="1">
+                        <div class="step-number">1</div>
+                        <div class="step-label">Información Básica</div>
+                    </div>
+                    <div class="step" data-step="2">
+                        <div class="step-number">2</div>
+                        <div class="step-label">Detalles</div>
+                    </div>
+                    <div class="step" data-step="3">
+                        <div class="step-number">3</div>
+                        <div class="step-label">Revisión</div>
+                    </div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 33.33%"></div>
+                </div>
+            </div>
+
+            <!-- Formulario -->
+            <form id="characterForm" class="character-creation-form" method="POST" enctype="multipart/form-data">
+                <!-- Step 1: Información Básica -->
+                <div class="form-step active" data-step="1">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="name" class="form-label">
+                                <i class="fas fa-signature"></i>
+                                Nombre del Personaje
+                                <span class="required">*</span>
+                            </label>
+                            <input 
+                                type="text" 
+                                id="name" 
+                                name="name" 
+                                class="form-input" 
+                                value="{{ character.name if character else '' }}"
+                                required
+                                placeholder="Ej: Jon Snow, Daenerys Targaryen..."
+                            >
+                            <div class="validation-message" id="name-validation"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="status" class="form-label">
+                                <i class="fas fa-heartbeat"></i>
+                                Estado
+                                <span class="required">*</span>
+                            </label>
+                            <select id="status" name="status" class="form-select" required>
+                                <option value="">Selecciona el estado</option>
+                                <option value="Vivo" {{ 'selected' if character and character.status == 'Vivo' else '' }}>🟢 Vivo</option>
+                                <option value="Muerto" {{ 'selected' if character and character.status == 'Muerto' else '' }}>🔴 Muerto</option>
+                                <option value="Desconocido" {{ 'selected' if character and character.status == 'Desconocido' else '' }}>❓ Desconocido</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="house_affiliation" class="form-label">
+                                <i class="fas fa-shield-alt"></i>
+                                Casa Noble
+                            </label>
+                            <select id="house_affiliation" name="house_affiliation" class="form-select">
+                                <option value="">Sin afiliación específica</option>
+                                {% for house in houses %}
+                                    <option value="{{ house.__oid__ }}" 
+                                        {{ 'selected' if character and character.house_affiliation == house.__oid__ else '' }}>
+                                        {{ house.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <div class="help-text">La casa a la que pertenece o sirve este personaje</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Detalles -->
+                <div class="form-step" data-step="2">
+                    <div class="form-group">
+                        <label for="description" class="form-label">
+                            <i class="fas fa-scroll"></i>
+                            Descripción del Personaje
+                            <span class="required">*</span>
+                        </label>
+                        <textarea 
+                            id="description" 
+                            name="description" 
+                            class="form-textarea" 
+                            rows="6" 
+                            required
+                            placeholder="Describe la personalidad, historia y características importantes..."
+                        >{{ character.description if character else '' }}</textarea>
+                        <div class="char-counter">
+                            <span id="desc-count">{{ character.description|length if character else 0 }}</span>/1500 caracteres
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="image" class="form-label">
+                            <i class="fas fa-image"></i>
+                            Imagen del Personaje
+                        </label>
+                        {% if character and character.image_url %}
+                            <div class="current-image-preview">
+                                <p class="image-label">Imagen actual:</p>
+                                <img src="{{ character.image_url }}" alt="{{ character.name }}" class="current-image">
+                                <p class="help-text">Puedes subir una nueva imagen para reemplazar la actual</p>
+                            </div>
+                        {% endif %}
+                        <div class="image-upload-area" id="imageUploadArea">
+                            <div class="upload-content">
+                                <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                                <h4>{% if character %}Cambiar retrato épico{% else %}Subir retrato épico{% endif %}</h4>
+                                <p>Arrastra una imagen aquí o haz clic para seleccionar</p>
+                                <div class="file-info">Formatos: JPG, PNG, GIF (máx. 5MB)</div>
+                            </div>
+                            <input type="file" id="image" name="image" accept="image/*" style="display: none;">
+                        </div>
+                        <div id="image-preview" class="image-preview" style="display: none;">
+                            <img id="preview-img" src="" alt="Preview">
+                            <button type="button" class="remove-preview" id="removePreview">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Revisión -->
+                <div class="form-step" data-step="3">
+                    <div class="review-section">
+                        <h3 class="review-title">
+                            <i class="fas fa-eye"></i>
+                            {% if character %}Revisar Cambios{% else %}Revisar Personaje{% endif %}
+                        </h3>
+                        <div class="review-card">
+                            <div class="review-image">
+                                <img id="review-image" 
+                                     src="{{ character.image_url if character and character.image_url else '/static/images/default-character.jpg' }}" 
+                                     alt="Preview">
+                            </div>
+                            <div class="review-details">
+                                <h4 id="review-name">{{ character.name if character else 'Nombre del personaje' }}</h4>
+                                <div class="review-item">
+                                    <strong>Estado:</strong> <span id="review-status">{{ character.status if character else '-' }}</span>
+                                </div>
+                                <div class="review-item">
+                                    <strong>Casa:</strong> <span id="review-house">
+                                        {% if character and character.house_affiliation %}
+                                            {% for house in houses %}
+                                                {% if house.__oid__ == character.house_affiliation %}{{ house.name }}{% endif %}
+                                            {% endfor %}
+                                        {% else %}
+                                            Sin afiliación
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                <div class="review-item">
+                                    <strong>Descripción:</strong>
+                                    <p id="review-description">{{ character.description if character else '-' }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation Buttons -->
+                <div class="form-navigation">
+                    <button type="button" id="prevBtn" class="btn btn-secondary" style="display: none;">
+                        <i class="fas fa-arrow-left"></i>
+                        Anterior
+                    </button>
+                    <button type="button" id="nextBtn" class="btn btn-primary">
+                        Siguiente
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                    <button type="submit" id="submitBtn" class="btn btn-primary" style="display: none;">
+                        <i class="fas fa-{% if character %}save{% else %}plus-circle{% endif %}"></i>
+                        {% if character %}Actualizar Personaje{% else %}Crear Personaje{% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Modal -->
+<div id="loadingModal" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+        <div class="loading-animation">
+            <div class="dragon-loader">🐉</div>
+            <h3>{% if character %}Actualizando la leyenda...{% else %}Forjando la leyenda...{% endif %}</h3>
+            <p>{% if character %}Los cambios están siendo guardados{% else %}Tu personaje está siendo creado{% endif %}</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/character_form.js') }}"></script>
+<script>
+// Initialize form with existing data if editing
+document.addEventListener('DOMContentLoaded', function() {
+    {% if character %}
+        // Pre-fill review section with existing data
+        updateReviewSection();
+        
+        // Set character counter
+        const descTextarea = document.getElementById('description');
+        const charCount = document.getElementById('desc-count');
+        if (descTextarea && charCount) {
+            charCount.textContent = descTextarea.value.length;
+        }
+    {% endif %}
+});
+</script>
+{% endblock %}

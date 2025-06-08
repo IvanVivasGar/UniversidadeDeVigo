@@ -1,0 +1,1053 @@
+/* ========================================
+   WESTEROS TRACKER - EPIC LOGIN DESIGN
+   Diseño épico inspirado en Game of Thrones
+   ======================================== */
+
+/* Importar fuentes temáticas */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Cinzel+Decorative:wght@400;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
+
+/* Variables CSS para consistencia */
+:root {
+    --got-gold: #D4AF37;
+    --got-dark-gold: #B8860B;
+    --got-red: #8B0000;
+    --got-dark-red: #660000;
+    --got-black: #1a1a1a;
+    --got-dark-gray: #2c2c2c;
+    --got-medium-gray: #3a3a3a;
+    --got-light-gray: #cccccc;
+    --got-white: #f5f5f5;
+    --got-blue: #1e3a5f;
+    --got-shadow: rgba(0, 0, 0, 0.8);
+    --got-glow: rgba(212, 175, 55, 0.6);
+    --animation-duration: 0.6s;
+    --border-radius: 12px;
+}
+
+/* Reset y configuración base */
+* {
+    box-sizing: border-box;
+}
+
+/* Contenedor principal del login */
+.epic-login-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, 
+        var(--got-black) 0%, 
+        var(--got-dark-gray) 35%, 
+        var(--got-medium-gray) 65%, 
+        var(--got-black) 100%);
+}
+
+/* Fondo animado con efectos de fuego */
+.epic-login-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    overflow: hidden;
+}
+
+/* Partículas de brasas flotantes */
+.floating-embers {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.ember {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: var(--got-gold);
+    border-radius: 50%;
+    box-shadow: 0 0 10px var(--got-gold);
+    animation: float-ember 8s infinite linear;
+    opacity: 0;
+}
+
+.ember:nth-child(1) { left: 10%; animation-delay: 0s; }
+.ember:nth-child(2) { left: 30%; animation-delay: 2s; }
+.ember:nth-child(3) { left: 50%; animation-delay: 4s; }
+.ember:nth-child(4) { left: 70%; animation-delay: 6s; }
+.ember:nth-child(5) { left: 90%; animation-delay: 1s; }
+
+@keyframes float-ember {
+    0% {
+        transform: translateY(100vh) scale(0);
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    90% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-100px) scale(1);
+        opacity: 0;
+    }
+}
+
+/* Dragones decorativos */
+.epic-dragons {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.dragon-silhouette {
+    position: absolute;
+    font-size: 8rem;
+    color: rgba(139, 0, 0, 0.1);
+    animation: dragon-breathe 4s ease-in-out infinite;
+}
+
+.dragon-left {
+    top: 20%;
+    left: -5%;
+    transform: rotate(-15deg);
+    animation-delay: 0s;
+}
+
+.dragon-right {
+    bottom: 20%;
+    right: -5%;
+    transform: rotate(15deg) scaleX(-1);
+    animation-delay: 2s;
+}
+
+@keyframes dragon-breathe {
+    0%, 100% { 
+        opacity: 0.1; 
+        transform: scale(1) rotate(-15deg);
+    }
+    50% { 
+        opacity: 0.2; 
+        transform: scale(1.05) rotate(-15deg);
+    }
+}
+
+/* Tarjeta principal de login */
+.epic-login-card {
+    background: linear-gradient(145deg, 
+        rgba(26, 26, 26, 0.95) 0%,
+        rgba(44, 44, 44, 0.95) 50%,
+        rgba(26, 26, 26, 0.95) 100%);
+    backdrop-filter: blur(10px);
+    border: 2px solid var(--got-gold);
+    border-radius: var(--border-radius);
+    box-shadow: 
+        0 20px 40px var(--got-shadow),
+        inset 0 1px 0 rgba(212, 175, 55, 0.3),
+        0 0 50px rgba(212, 175, 55, 0.2);
+    width: 100%;
+    max-width: 450px;
+    padding: 3rem 2.5rem;
+    position: relative;
+    z-index: 10;
+    transform: translateY(20px);
+    opacity: 0;
+    animation: card-entrance 1s ease-out forwards;
+    animation-delay: 0.3s;
+}
+
+@keyframes card-entrance {
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Header épico con corona */
+.epic-login-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+    position: relative;
+}
+
+.crown-icon {
+    font-size: 3rem;
+    color: var(--got-gold);
+    margin-bottom: 1rem;
+    display: block;
+    text-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
+    animation: crown-glow 3s ease-in-out infinite;
+}
+
+@keyframes crown-glow {
+    0%, 100% { 
+        transform: scale(1);
+        text-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
+    }
+    50% { 
+        transform: scale(1.1);
+        text-shadow: 0 0 30px rgba(212, 175, 55, 0.8);
+    }
+}
+
+.epic-login-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--got-gold);
+    margin: 0 0 0.5rem 0;
+    text-shadow: 2px 2px 4px var(--got-shadow);
+    letter-spacing: 2px;
+}
+
+.epic-login-subtitle {
+    font-family: 'Crimson Text', serif;
+    font-size: 1.1rem;
+    color: var(--got-light-gray);
+    font-style: italic;
+    margin: 0 0 1.5rem 0;
+    opacity: 0.9;
+}
+
+.header-divider {
+    height: 2px;
+    background: linear-gradient(90deg, 
+        transparent 0%, 
+        var(--got-gold) 50%, 
+        transparent 100%);
+    margin: 1.5rem 0;
+    position: relative;
+}
+
+.header-divider::after {
+    content: '⚔️';
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--got-black);
+    padding: 0 10px;
+    font-size: 1rem;
+}
+
+/* Formulario */
+.epic-login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.8rem;
+}
+
+.epic-form-group {
+    position: relative;
+}
+
+.epic-form-label {
+    display: flex;
+    align-items: center;
+    font-family: 'Cinzel', serif;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--got-gold);
+    margin-bottom: 0.8rem;
+    letter-spacing: 1px;
+}
+
+.label-icon {
+    margin-right: 8px;
+    font-size: 1rem;
+}
+
+.epic-input-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.epic-input {
+    width: 100%;
+    padding: 1rem 1.2rem;
+    font-family: 'Crimson Text', serif;
+    font-size: 1.1rem;
+    background: rgba(58, 58, 58, 0.7);
+    border: 2px solid rgba(212, 175, 55, 0.3);
+    border-radius: 8px;
+    color: var(--got-white);
+    transition: all var(--animation-duration) ease;
+    backdrop-filter: blur(5px);
+}
+
+.epic-input:focus {
+    outline: none;
+    border-color: var(--got-gold);
+    background: rgba(58, 58, 58, 0.9);
+    box-shadow: 
+        0 0 20px rgba(212, 175, 55, 0.3),
+        inset 0 2px 4px rgba(0, 0, 0, 0.3);
+    transform: translateY(-2px);
+}
+
+.epic-input::placeholder {
+    color: rgba(245, 245, 245, 0.6);
+    font-style: italic;
+}
+
+/* Botón de mostrar/ocultar contraseña */
+.password-toggle {
+    position: absolute;
+    right: 12px;
+    background: none;
+    border: none;
+    color: var(--got-light-gray);
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: color 0.3s ease;
+    z-index: 5;
+}
+
+.password-toggle:hover {
+    color: var(--got-gold);
+}
+
+.password-toggle.active {
+    color: var(--got-gold);
+}
+
+/* Opciones del formulario */
+.epic-form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0.5rem 0;
+}
+
+.epic-remember-me {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-family: 'Crimson Text', serif;
+    color: var(--got-light-gray);
+    font-size: 0.95rem;
+}
+
+.epic-checkbox {
+    width: 18px;
+    height: 18px;
+    margin-right: 8px;
+    accent-color: var(--got-gold);
+    cursor: pointer;
+}
+
+.epic-forgot-password {
+    font-family: 'Crimson Text', serif;
+    color: var(--got-gold);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.epic-forgot-password:hover {
+    color: var(--got-dark-gold);
+    text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+}
+
+.epic-forgot-password::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 1px;
+    background: var(--got-gold);
+    transition: width 0.3s ease;
+}
+
+.epic-forgot-password:hover::after {
+    width: 100%;
+}
+
+/* Botón de submit épico */
+.epic-submit-btn {
+    background: linear-gradient(145deg, var(--got-gold), var(--got-dark-gold));
+    border: 2px solid var(--got-gold);
+    border-radius: 8px;
+    color: var(--got-black);
+    font-family: 'Cinzel', serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    padding: 1rem 2rem;
+    cursor: pointer;
+    transition: all var(--animation-duration) ease;
+    position: relative;
+    overflow: hidden;
+    text-transform: uppercase;
+    margin-top: 1rem;
+}
+
+.epic-submit-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 
+        0 10px 20px rgba(212, 175, 55, 0.4),
+        0 0 30px rgba(212, 175, 55, 0.3);
+}
+
+.epic-submit-btn:active {
+    transform: translateY(-1px);
+}
+
+.epic-submit-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.6s ease;
+}
+
+.epic-submit-btn:hover::before {
+    left: 100%;
+}
+
+.btn-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.btn-loading {
+    display: none;
+    color: var(--got-black);
+}
+
+.epic-submit-btn.loading .btn-content {
+    display: none;
+}
+
+.epic-submit-btn.loading .btn-loading {
+    display: block;
+}
+
+/* Divisor */
+.epic-divider {
+    display: flex;
+    align-items: center;
+    margin: 2rem 0;
+    color: var(--got-light-gray);
+    font-family: 'Cinzel', serif;
+}
+
+.epic-divider::before,
+.epic-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--got-gold), transparent);
+}
+
+.epic-divider span {
+    padding: 0 1rem;
+    background: var(--got-black);
+    border: 1px solid var(--got-gold);
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+/* Footer del login */
+.epic-login-footer {
+    text-align: center;
+    margin-top: 2rem;
+}
+
+.epic-login-footer p {
+    font-family: 'Crimson Text', serif;
+    color: var(--got-light-gray);
+    margin-bottom: 1rem;
+    font-size: 1rem;
+}
+
+.epic-register-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Cinzel', serif;
+    color: var(--got-gold);
+    text-decoration: none;
+    font-weight: 500;
+    padding: 0.8rem 1.5rem;
+    border: 2px solid var(--got-gold);
+    border-radius: 6px;
+    transition: all var(--animation-duration) ease;
+    background: rgba(212, 175, 55, 0.1);
+}
+
+.epic-register-link:hover {
+    background: var(--got-gold);
+    color: var(--got-black);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(212, 175, 55, 0.4);
+}
+
+/* Notificaciones épicas */
+.epic-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: linear-gradient(145deg, var(--got-dark-gray), var(--got-black));
+    border: 2px solid var(--got-gold);
+    border-radius: 8px;
+    padding: 1rem 1.5rem;
+    color: var(--got-white);
+    box-shadow: 0 10px 30px var(--got-shadow);
+    z-index: 1000;
+    transform: translateX(400px);
+    transition: transform 0.5s ease;
+    max-width: 350px;
+}
+
+.epic-notification.show {
+    transform: translateX(0);
+}
+
+.epic-notification.success {
+    border-color: #4CAF50;
+}
+
+.epic-notification.error {
+    border-color: var(--got-red);
+}
+
+.notification-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: 'Crimson Text', serif;
+}
+
+.notification-close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: none;
+    border: none;
+    color: var(--got-light-gray);
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.notification-close:hover {
+    color: var(--got-gold);
+}
+
+/* Efectos de carga épicos */
+.epic-loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(26, 26, 26, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    backdrop-filter: blur(5px);
+}
+
+.epic-loading-content {
+    text-align: center;
+    color: var(--got-gold);
+}
+
+.epic-loading-spinner {
+    font-size: 3rem;
+    animation: spin 2s linear infinite;
+    margin-bottom: 1rem;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.epic-loading-text {
+    font-family: 'Cinzel', serif;
+    font-size: 1.2rem;
+    letter-spacing: 2px;
+}
+
+/* ========================================
+   REGISTRO ÉPICO - EXTENSIONES ESPECÍFICAS
+   ======================================== */
+
+/* Contenedor específico para registro */
+.epic-register-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, 
+        var(--got-black) 0%, 
+        var(--got-dark-red) 20%,
+        var(--got-dark-gray) 50%, 
+        var(--got-dark-red) 80%,
+        var(--got-black) 100%);
+}
+
+/* Tarjeta de registro más amplia */
+.epic-register-card {
+    background: linear-gradient(145deg, 
+        rgba(26, 26, 26, 0.95) 0%,
+        rgba(44, 44, 44, 0.95) 50%,
+        rgba(26, 26, 26, 0.95) 100%);
+    backdrop-filter: blur(10px);
+    border: 2px solid var(--got-gold);
+    border-radius: var(--border-radius);
+    box-shadow: 
+        0 20px 40px var(--got-shadow),
+        inset 0 1px 0 rgba(212, 175, 55, 0.3),
+        0 0 50px rgba(212, 175, 55, 0.2);
+    width: 100%;
+    max-width: 520px;
+    padding: 3rem 2.5rem;
+    position: relative;
+    z-index: 10;
+    transform: translateY(20px);
+    opacity: 0;
+    animation: card-entrance 1s ease-out forwards;
+    animation-delay: 0.3s;
+}
+
+/* Header específico para registro */
+.epic-register-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+    position: relative;
+}
+
+.scroll-icon {
+    font-size: 3rem;
+    color: var(--got-gold);
+    margin-bottom: 1rem;
+    display: block;
+    text-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
+    animation: scroll-glow 3s ease-in-out infinite;
+}
+
+@keyframes scroll-glow {
+    0%, 100% { 
+        transform: scale(1) rotate(0deg);
+        text-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
+    }
+    50% { 
+        transform: scale(1.1) rotate(5deg);
+        text-shadow: 0 0 30px rgba(212, 175, 55, 0.8);
+    }
+}
+
+.epic-register-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--got-gold);
+    margin: 0 0 0.5rem 0;
+    text-shadow: 2px 2px 4px var(--got-shadow);
+    letter-spacing: 2px;
+}
+
+.epic-register-subtitle {
+    font-family: 'Crimson Text', serif;
+    font-size: 1.1rem;
+    color: var(--got-light-gray);
+    font-style: italic;
+    margin: 0 0 1.5rem 0;
+    opacity: 0.9;
+}
+
+/* Formulario de registro con más espaciado */
+.epic-register-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* Validación en tiempo real */
+.epic-input-feedback {
+    font-family: 'Crimson Text', serif;
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+    padding: 0.3rem 0.8rem;
+    border-radius: 4px;
+    display: none;
+    transition: all 0.3s ease;
+}
+
+.epic-input-feedback.success {
+    color: #4CAF50;
+    background: rgba(76, 175, 80, 0.1);
+    border: 1px solid rgba(76, 175, 80, 0.3);
+    display: block;
+}
+
+.epic-input-feedback.error {
+    color: var(--got-red);
+    background: rgba(139, 0, 0, 0.1);
+    border: 1px solid rgba(139, 0, 0, 0.3);
+    display: block;
+}
+
+.epic-input-container.success .epic-input {
+    border-color: #4CAF50;
+    box-shadow: 0 0 10px rgba(76, 175, 80, 0.2);
+}
+
+.epic-input-container.error .epic-input {
+    border-color: var(--got-red);
+    box-shadow: 0 0 10px rgba(139, 0, 0, 0.2);
+}
+
+/* Medidor de fortaleza de contraseña épico */
+.epic-password-strength {
+    margin-top: 0.8rem;
+    padding: 0.8rem;
+    background: rgba(58, 58, 58, 0.5);
+    border-radius: 6px;
+    border: 1px solid rgba(212, 175, 55, 0.2);
+}
+
+.strength-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.9rem;
+    color: var(--got-gold);
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.epic-strength-bar {
+    height: 8px;
+    background: rgba(58, 58, 58, 0.8);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+    border: 1px solid rgba(212, 175, 55, 0.3);
+}
+
+.epic-strength-fill {
+    height: 100%;
+    width: 0%;
+    transition: all 0.4s ease;
+    border-radius: 3px;
+    position: relative;
+}
+
+.epic-strength-fill.weak {
+    background: linear-gradient(90deg, var(--got-red), #ff4444);
+}
+
+.epic-strength-fill.medium {
+    background: linear-gradient(90deg, #FFA500, #FFD700);
+}
+
+.epic-strength-fill.strong {
+    background: linear-gradient(90deg, #4CAF50, #8BC34A);
+}
+
+.epic-strength-text {
+    font-family: 'Crimson Text', serif;
+    font-size: 0.85rem;
+    color: var(--got-light-gray);
+    font-weight: 500;
+}
+
+/* Checkbox épico para términos */
+.epic-terms-group {
+    margin: 1.5rem 0;
+    padding: 1rem;
+    background: rgba(58, 58, 58, 0.3);
+    border-radius: 8px;
+    border: 1px solid rgba(212, 175, 55, 0.2);
+}
+
+.epic-terms-checkbox {
+    display: flex;
+    align-items: flex-start;
+    cursor: pointer;
+    font-family: 'Crimson Text', serif;
+    color: var(--got-light-gray);
+    font-size: 0.95rem;
+    line-height: 1.4;
+}
+
+.epic-custom-checkbox {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--got-gold);
+    border-radius: 4px;
+    margin-right: 12px;
+    margin-top: 2px;
+    position: relative;
+    background: rgba(58, 58, 58, 0.7);
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.epic-custom-checkbox:hover {
+    border-color: var(--got-dark-gold);
+    background: rgba(212, 175, 55, 0.1);
+}
+
+.epic-custom-checkbox.checked {
+    background: var(--got-gold);
+    border-color: var(--got-gold);
+}
+
+.epic-custom-checkbox.checked::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--got-black);
+    font-weight: bold;
+    font-size: 12px;
+}
+
+.epic-terms-link {
+    color: var(--got-gold);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.epic-terms-link:hover {
+    color: var(--got-dark-gold);
+    text-shadow: 0 0 8px rgba(212, 175, 55, 0.5);
+}
+
+.epic-terms-link::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 0;
+    height: 1px;
+    background: var(--got-gold);
+    transition: width 0.3s ease;
+}
+
+.epic-terms-link:hover::after {
+    width: 100%;
+}
+
+/* Botón de registro épico */
+.epic-register-btn {
+    background: linear-gradient(145deg, var(--got-gold), var(--got-dark-gold));
+    border: 2px solid var(--got-gold);
+    border-radius: 8px;
+    color: var(--got-black);
+    font-family: 'Cinzel', serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    padding: 1rem 2rem;
+    cursor: pointer;
+    transition: all var(--animation-duration) ease;
+    position: relative;
+    overflow: hidden;
+    text-transform: uppercase;
+    margin-top: 1rem;
+    opacity: 0.6;
+}
+
+.epic-register-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+    transform: none;
+    box-shadow: none;
+}
+
+.epic-register-btn.form-valid {
+    opacity: 1;
+    cursor: pointer;
+}
+
+.epic-register-btn.form-valid:hover {
+    transform: translateY(-3px);
+    box-shadow: 
+        0 10px 20px rgba(212, 175, 55, 0.4),
+        0 0 30px rgba(212, 175, 55, 0.3);
+}
+
+.epic-register-btn:disabled::before {
+    display: none;
+}
+
+.epic-register-btn.form-valid::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.6s ease;
+}
+
+.epic-register-btn.form-valid:hover::before {
+    left: 100%;
+}
+
+/* Link de login épico */
+.epic-login-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Cinzel', serif;
+    color: var(--got-gold);
+    text-decoration: none;
+    font-weight: 500;
+    padding: 0.8rem 1.5rem;
+    border: 2px solid var(--got-gold);
+    border-radius: 6px;
+    transition: all var(--animation-duration) ease;
+    background: rgba(212, 175, 55, 0.1);
+}
+
+.epic-login-link:hover {
+    background: var(--got-gold);
+    color: var(--got-black);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(212, 175, 55, 0.4);
+}
+
+/* Estados de validación mejorados */
+.epic-register-form .epic-form-group.invalid .epic-input {
+    border-color: var(--got-red);
+    box-shadow: 0 0 10px rgba(139, 0, 0, 0.3);
+}
+
+.epic-register-form .epic-form-group.valid .epic-input {
+    border-color: #4CAF50;
+    box-shadow: 0 0 10px rgba(76, 175, 80, 0.3);
+}
+
+/* Animación de progreso para el formulario */
+.epic-form-progress {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 3px;
+    background: var(--got-gold);
+    border-radius: 2px;
+    transition: width 0.5s ease;
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+}
+
+/* Responsive específico para registro */
+@media (max-width: 768px) {
+    .epic-register-card {
+        margin: 1rem;
+        padding: 2rem 1.5rem;
+        max-width: none;
+    }
+    
+    .epic-register-title {
+        font-size: 1.8rem;
+    }
+    
+    .epic-register-form {
+        gap: 1.2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .epic-register-card {
+        padding: 1.5rem 1rem;
+    }
+    
+    .epic-register-title {
+        font-size: 1.5rem;
+    }
+    
+    .scroll-icon {
+        font-size: 2rem;
+    }
+    
+    .epic-terms-checkbox {
+        align-items: flex-start;
+    }
+    
+    .epic-custom-checkbox {
+        margin-top: 4px;
+    }
+}
+
+/* Efectos especiales para el registro */
+.epic-register-card:hover {
+    animation: pulse-glow 3s ease-in-out infinite;
+}
+
+/* Estados de éxito y error para el botón de registro */
+.epic-register-btn.success {
+    background: linear-gradient(145deg, #4CAF50, #45a049);
+    border-color: #4CAF50;
+}
+
+.epic-register-btn.error {
+    background: linear-gradient(145deg, var(--got-red), var(--got-dark-red));
+    border-color: var(--got-red);
+    animation: shake 0.5s ease-in-out;
+}
+
+/* Mensaje de bienvenida épico */
+.epic-welcome-message {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: linear-gradient(145deg, var(--got-black), var(--got-dark-gray));
+    border: 3px solid var(--got-gold);
+    border-radius: 12px;
+    padding: 2rem 3rem;
+    text-align: center;
+    z-index: 10000;
+    box-shadow: 0 20px 40px var(--got-shadow);
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.8);
+    transition: all 0.5s ease;
+}
+
+.epic-welcome-message.show {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.epic-welcome-message h3 {
+    font-family: 'Cinzel Decorative', serif;
+    color: var(--got-gold);
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+}
+
+.epic-welcome-message p {
+    font-family: 'Crimson Text', serif;
+    color: var(--got-light-gray);
+    font-size: 1.1rem;
+    font-style: italic;
+}

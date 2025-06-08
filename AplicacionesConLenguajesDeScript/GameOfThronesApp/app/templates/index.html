@@ -1,0 +1,599 @@
+{% extends "base.html" %}
+
+{% block title %}WesterosTracker - El Portal de Poniente{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* Estilos específicos para la página principal */
+    .main-content {
+        margin-top: 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section Épico con Video de Fondo -->
+<section class="hero-section">
+    <!-- Video de Fondo -->
+    <div class="video-background">
+        <video autoplay muted loop playsinline>
+            <source src="{{ url_for('static', filename='videos/got_background.mp4') }}" type="video/mp4">
+            Tu navegador no soporta videos HTML5.
+        </video>
+        <div class="video-overlay"></div>
+    </div>
+    
+    <!-- Efectos de Partículas Flotantes -->
+    <div class="particles-container">
+        <div class="ember"></div>
+        <div class="ember"></div>
+        <div class="ember"></div>
+        <div class="ember"></div>
+        <div class="ember"></div>
+        <div class="ember"></div>
+        <div class="ember"></div>
+        <div class="ember"></div>
+    </div>
+    
+    <!-- Siluetas de Dragones Decorativas -->
+    <div class="dragon-decoration">
+        <div class="dragon-silhouette dragon-left">🐉</div>
+        <div class="dragon-silhouette dragon-right">🐲</div>
+    </div>
+    
+    <!-- Contenido Principal del Hero -->
+    <div class="hero-content">
+        <div class="hero-badge">
+            <i class="fas fa-crown"></i>
+            <span>La Corona del Norte Digital</span>
+        </div>
+        
+        <h1 class="hero-title">
+            <span class="title-line">Bienvenido a</span>
+            <span class="title-main">WesterosTracker</span>
+            <span class="title-subtitle">El Portal Definitivo de Poniente</span>
+        </h1>
+        
+        <p class="hero-description">
+            Sumérgete en el universo épico de Game of Thrones. Explora personajes legendarios, 
+            casas nobles, eventos históricos y únete a la comunidad más apasionada de Poniente.
+        </p>
+        
+        <div class="hero-stats">
+            <div class="stat-item">
+                <span class="stat-number" data-target="{{ total_characters or 0 }}">0</span>
+                <span class="stat-label">Personajes</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number" data-target="{{ total_houses or 0 }}">0</span>
+                <span class="stat-label">Casas</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number" data-target="{{ total_events or 0 }}">0</span>
+                <span class="stat-label">Eventos</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number" data-target="{{ total_discussions or 0 }}">0</span>
+                <span class="stat-label">Discusiones</span>
+            </div>
+        </div>
+        
+        <div class="hero-actions">
+            {% if not current_user.is_authenticated %}
+                <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-hero">
+                    <i class="fas fa-sword"></i>
+                    <span>Únete al Reino</span>
+                </a>
+                <a href="{{ url_for('auth.login') }}" class="btn btn-secondary btn-hero">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span>Iniciar Sesión</span>
+                </a>
+            {% else %}
+                <a href="{{ url_for('characters.characters') }}" class="btn btn-primary btn-hero">
+                    <i class="fas fa-users"></i>
+                    <span>Explorar Personajes</span>
+                </a>
+                <a href="{{ url_for('discussions.create_discussion') }}" class="btn btn-secondary btn-hero">
+                    <i class="fas fa-feather"></i>
+                    <span>Crear Discusión</span>
+                </a>
+            {% endif %}
+        </div>
+        
+        <div class="scroll-indicator">
+            <span class="scroll-text">Descubre más</span>
+            <div class="scroll-arrow">
+                <i class="fas fa-chevron-down"></i>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Sección de Acceso Rápido Mejorada -->
+<section class="quick-access-enhanced">
+    <div class="section-background"></div>
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">
+                <span class="title-icon">⚔️</span>
+                <span class="title-text">Domina los Siete Reinos</span>
+            </h2>
+            <p class="section-subtitle">
+                Explora cada rincón de Poniente a través de nuestras secciones especializadas
+            </p>
+        </div>
+        
+        <div class="quick-access-grid-enhanced">
+            <!-- Tarjeta de Personajes -->
+            <div class="access-card characters-card" data-category="characters">
+                <div class="card-background"></div>
+                <div class="card-glow"></div>
+                <div class="card-content">
+                    <div class="card-icon-container">
+                        <i class="fas fa-user-crown card-icon"></i>
+                        <div class="icon-glow"></div>
+                    </div>
+                    <h3 class="card-title">Personajes Legendarios</h3>
+                    <p class="card-description">
+                        Desde Jon Snow hasta Daenerys Targaryen. Descubre las historias, 
+                        lealtades y destinos de los héroes y villanos más memorables.
+                    </p>
+                    <div class="card-stats">
+                        <span class="stat"><i class="fas fa-users"></i> {{ total_characters or 0 }} personajes</span>
+                        <span class="stat"><i class="fas fa-star"></i> {{ avg_character_rating or 0 }} promedio</span>
+                    </div>
+                    <a href="{{ url_for('characters.characters') }}" class="card-action">
+                        <span>Explorar</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                <div class="card-decoration">
+                    <div class="decoration-element">👑</div>
+                </div>
+            </div>
+            
+            <!-- Tarjeta de Casas -->
+            <div class="access-card houses-card" data-category="houses">
+                <div class="card-background"></div>
+                <div class="card-glow"></div>
+                <div class="card-content">
+                    <div class="card-icon-container">
+                        <i class="fas fa-shield-alt card-icon"></i>
+                        <div class="icon-glow"></div>
+                    </div>
+                    <h3 class="card-title">Casas Nobles</h3>
+                    <p class="card-description">
+                        Stark, Lannister, Targaryen y más. Conoce los lemas, territorios 
+                        y la rica historia de las grandes casas de Poniente.
+                    </p>
+                    <div class="card-stats">
+                        <span class="stat"><i class="fas fa-home"></i> {{ total_houses or 0 }} casas</span>
+                        <span class="stat"><i class="fas fa-star"></i> {{ avg_house_rating or 0 }} promedio</span>
+                    </div>
+                    <a href="{{ url_for('houses.houses') }}" class="card-action">
+                        <span>Explorar</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                <div class="card-decoration">
+                    <div class="decoration-element">🛡️</div>
+                </div>
+            </div>
+            
+            <!-- Tarjeta de Eventos -->
+            <div class="access-card events-card" data-category="events">
+                <div class="card-background"></div>
+                <div class="card-glow"></div>
+                <div class="card-content">
+                    <div class="card-icon-container">
+                        <i class="fas fa-scroll card-icon"></i>
+                        <div class="icon-glow"></div>
+                    </div>
+                    <h3 class="card-title">Eventos Épicos</h3>
+                    <p class="card-description">
+                        La Boda Roja, Batalla de los Bastardos, Quema de Desembarco del Rey. 
+                        Revive los momentos que cambiaron la historia.
+                    </p>
+                    <div class="card-stats">
+                        <span class="stat"><i class="fas fa-calendar"></i> {{ total_events or 0 }} eventos</span>
+                        <span class="stat"><i class="fas fa-fire"></i> {{ avg_event_importance or 0 }} importancia</span>
+                    </div>
+                    <a href="{{ url_for('events.events') }}" class="card-action">
+                        <span>Explorar</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                <div class="card-decoration">
+                    <div class="decoration-element">📜</div>
+                </div>
+            </div>
+            
+            <!-- Tarjeta de Discusiones -->
+            <div class="access-card posts-card" data-category="posts">
+                <div class="card-background"></div>
+                <div class="card-glow"></div>
+                <div class="card-content">
+                    <div class="card-icon-container">
+                        <i class="fas fa-comments card-icon"></i>
+                        <div class="icon-glow"></div>
+                    </div>
+                    <h3 class="card-title">Debates Épicos</h3>
+                    <p class="card-description">
+                        Únete a debates apasionados sobre teorías, personajes favoritos 
+                        y momentos icónicos con fans de todo el mundo.
+                    </p>
+                    <div class="card-stats">
+                        <span class="stat"><i class="fas fa-comments"></i> {{ total_discussions or 0 }} discusiones</span>
+                        <span class="stat"><i class="fas fa-heart"></i> {{ total_likes or 0 }} likes</span>
+                    </div>
+                    <a href="{{ url_for('discussions.discussions') }}" class="card-action">
+                        <span>Explorar</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                <div class="card-decoration">
+                    <div class="decoration-element">💬</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Sección de Contenido Destacado -->
+<section class="featured-content">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">
+                <span class="title-icon">🔥</span>
+                <span class="title-text">Lo Más Reciente en Poniente</span>
+            </h2>
+        </div>
+        
+        <!-- Post Destacado -->
+        {% if latest_post %}
+        <div class="featured-post">
+            <div class="post-badge">
+                <i class="fas fa-fire"></i>
+                <span>Discusión Candente</span>
+            </div>
+            <div class="post-content">
+                <div class="post-header">
+                    <h3 class="post-title">{{ latest_post.title }}</h3>
+                    <div class="post-meta">
+                        <span class="author">
+                            <i class="fas fa-user"></i>
+                            {{ latest_post.author_oid }}
+                        </span>
+                        <span class="date">
+                            <i class="fas fa-clock"></i>
+                            {{ latest_post.get_time_ago() }}
+                        </span>
+                    </div>
+                </div>
+                <div class="post-preview">
+                    <p>{{ latest_post.content[:250] }}{% if latest_post.content|length > 250 %}...{% endif %}</p>
+                </div>
+                <div class="post-actions">
+                    <div class="post-stats">
+                        <span class="stat-item">
+                            <i class="fas fa-heart"></i>
+                            {{ latest_post.like_count }}
+                        </span>
+                        <span class="stat-item">
+                            <i class="fas fa-comment"></i>
+                            {{ latest_post.get_comments_count() }}
+                        </span>
+                    </div>
+                    <a href="{{ url_for('posts.post_detail', post_id=latest_post.__oid__) }}" class="read-more-btn">
+                        <span>Leer Completo</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Grid de Contenido Reciente Mejorado -->
+        <div class="content-showcase">
+            <div class="showcase-header">
+                <h3 class="showcase-title">
+                    <span class="sword-icon">⚔️</span>
+                    Descubre los Últimos Tesoros de Poniente
+                </h3>
+                <p class="showcase-subtitle">
+                    Explora los personajes, casas y eventos más recientes añadidos a nuestro vasto reino digital
+                </p>
+            </div>
+            
+            <div class="content-carousel">
+                <!-- Personajes Recientes -->
+                {% if latest_characters %}
+                <div class="content-category characters-category">
+                    <div class="category-header">
+                        <div class="category-icon">
+                            <i class="fas fa-crown"></i>
+                        </div>
+                        <div class="category-info">
+                            <h4 class="category-title">Héroes y Villanos</h4>
+                            <p class="category-desc">{{ latest_characters|length }} nuevos personajes</p>
+                        </div>
+                    </div>
+                    
+                    <div class="content-cards-grid">
+                        {% for character in latest_characters %}
+                        <div class="showcase-card character-card">
+                            <div class="card-image-container">
+                                {% if character.image_url %}
+                                    <img src="{{ character.image_url }}" alt="{{ character.name }}" loading="lazy">
+                                {% else %}
+                                    <div class="placeholder-image">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                {% endif %}
+                                <div class="card-overlay"></div>
+                                <div class="status-badge status-{{ character.status.lower() }}">
+                                    {{ character.status }}
+                                </div>
+                            </div>
+                            
+                            <div class="card-content">
+                                <h5 class="card-name">{{ character.name }}</h5>
+                                <div class="card-rating">
+                                    {% for i in range(5) %}
+                                        {% if i < character.get_star_display().full %}
+                                            <i class="fas fa-star"></i>
+                                        {% elif i == character.get_star_display().full and character.get_star_display().half %}
+                                            <i class="fas fa-star-half-alt"></i>
+                                        {% else %}
+                                            <i class="far fa-star"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                    <span class="rating-value">{{ character.get_average_rating() }}</span>
+                                </div>
+                            </div>
+                            
+                            <a href="{{ url_for('characters.character_detail', character_id=character.__oid__) }}" class="card-link"></a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <a href="{{ url_for('characters.characters') }}" class="category-view-all">
+                        <span>Ver Todos los Personajes</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                {% endif %}
+                
+                <!-- Casas Recientes -->
+                {% if latest_houses %}
+                <div class="content-category houses-category">
+                    <div class="category-header">
+                        <div class="category-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <div class="category-info">
+                            <h4 class="category-title">Casas Nobles</h4>
+                            <p class="category-desc">{{ latest_houses|length }} nuevas casas</p>
+                        </div>
+                    </div>
+                    
+                    <div class="content-cards-grid">
+                        {% for house in latest_houses %}
+                        <div class="showcase-card house-card">
+                            <div class="card-image-container">
+                                {% if house.get_main_image() %}
+                                    <img src="{{ house.get_main_image() }}" alt="{{ house.name }}" loading="lazy">
+                                {% else %}
+                                    <div class="placeholder-image">
+                                        <i class="fas fa-shield-alt"></i>
+                                    </div>
+                                {% endif %}
+                                <div class="card-overlay"></div>
+                            </div>
+                            
+                            <div class="card-content">
+                                <h5 class="card-name">{{ house.name }}</h5>
+                                <p class="card-motto">"{{ house.motto[:40] }}{% if house.motto|length > 40 %}...{% endif %}"</p>
+                                <div class="card-rating">
+                                    {% for i in range(5) %}
+                                        {% if i < house.get_star_display().full %}
+                                            <i class="fas fa-star"></i>
+                                        {% elif i == house.get_star_display().full and house.get_star_display().half %}
+                                            <i class="fas fa-star-half-alt"></i>
+                                        {% else %}
+                                            <i class="far fa-star"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                    <span class="rating-value">{{ house.get_average_rating() }}</span>
+                                </div>
+                            </div>
+                            
+                            <a href="{{ url_for('houses.house_detail', house_id=house.__oid__) }}" class="card-link"></a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <a href="{{ url_for('houses.houses') }}" class="category-view-all">
+                        <span>Ver Todas las Casas</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                {% endif %}
+                
+                <!-- Eventos Recientes -->
+                {% if latest_events %}
+                <div class="content-category events-category">
+                    <div class="category-header">
+                        <div class="category-icon">
+                            <i class="fas fa-scroll"></i>
+                        </div>
+                        <div class="category-info">
+                            <h4 class="category-title">Eventos Épicos</h4>
+                            <p class="category-desc">{{ latest_events|length }} nuevos eventos</p>
+                        </div>
+                    </div>
+                    
+                    <div class="content-cards-grid">
+                        {% for event in latest_events %}
+                        <div class="showcase-card event-card">
+                            <div class="card-image-container">
+                                {% if event.get_main_image() %}
+                                    <img src="{{ event.get_main_image() }}" alt="{{ event.name }}" loading="lazy">
+                                {% else %}
+                                    <div class="placeholder-image">
+                                        <i class="fas fa-calendar-alt"></i>
+                                    </div>
+                                {% endif %}
+                                <div class="card-overlay"></div>
+                                <div class="importance-badge">
+                                    <span>{{ event.importance_rating or 0 }}/10</span>
+                                </div>
+                            </div>
+                            
+                            <div class="card-content">
+                                <h5 class="card-name">{{ event.name }}</h5>
+                                <p class="card-episode">{{ event.get_season_episode_display() }}</p>
+                                <div class="importance-bar">
+                                    <div class="importance-fill" style="width: {{ ((event.importance_rating or 0) / 10) * 100 }}%"></div>
+                                </div>
+                            </div>
+                            
+                            <a href="{{ url_for('events.event_detail', event_id=event.__oid__) }}" class="card-link"></a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <a href="{{ url_for('events.events') }}" class="category-view-all">
+                        <span>Ver Todos los Eventos</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Sección Call to Action Integrada -->
+        <div class="integrated-cta">
+            {% if not current_user.is_authenticated %}
+            <div class="cta-content">
+                <div class="cta-badge">
+                    <i class="fas fa-crown"></i>
+                    <span>Únete a la Élite</span>
+                </div>
+                <h3 class="cta-title">
+                    <span class="title-main">¿Listo para Conquistar Poniente?</span>
+                </h3>
+                <p class="cta-description">
+                    Únete a miles de fans que ya exploran, califican y debaten sobre el universo 
+                    más épico jamás creado. Tu trono te espera.
+                </p>
+                <div class="cta-features">
+                    <div class="feature-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Acceso completo a todas las secciones</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Participa en discusiones exclusivas</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Crea y califica contenido</span>
+                    </div>
+                </div>
+                <div class="cta-actions">
+                    <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-epic">
+                        <i class="fas fa-sword"></i>
+                        <span>Forjar mi Destino</span>
+                    </a>
+                    <a href="{{ url_for('characters.characters') }}" class="btn btn-outline btn-epic">
+                        <i class="fas fa-eye"></i>
+                        <span>Solo Explorar</span>
+                    </a>
+                </div>
+            </div>
+            {% else %}
+            <!-- Welcome Back Section para usuarios logueados -->
+            <div class="welcome-back-content">
+                <div class="welcome-greeting">
+                    <h3>Bienvenido de vuelta, <span class="username">{{ current_user.username }}</span></h3>
+                    <p>Tu reino te ha echado de menos. ¿Listo para continuar tu conquista?</p>
+                </div>
+                <div class="quick-actions">
+                    <a href="{{ url_for('discussions.create_discussion') }}" class="action-btn">
+                        <i class="fas fa-feather"></i>
+                        <span>Nueva Discusión</span>
+                    </a>
+                    <a href="{{ url_for('auth.profile') }}" class="action-btn">
+                        <i class="fas fa-user"></i>
+                        <span>Mi Perfil</span>
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Dragones decorativos -->
+            <div class="cta-dragons">
+                <div class="dragon-decoration-cta dragon-cta-left">🐉</div>
+                <div class="dragon-decoration-cta dragon-cta-right">🐲</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+// Animación de números contador
+document.addEventListener('DOMContentLoaded', function() {
+    const statNumbers = document.querySelectorAll('.stat-number[data-target]');
+    
+    const animateNumber = (element) => {
+        const target = parseInt(element.dataset.target);
+        const duration = 2000;
+        const steps = 60;
+        const stepValue = target / steps;
+        const stepTime = duration / steps;
+        let current = 0;
+        
+        const timer = setInterval(() => {
+            current += stepValue;
+            if (current >= target) {
+                element.textContent = target;
+                clearInterval(timer);
+            } else {
+                element.textContent = Math.floor(current);
+            }
+        }, stepTime);
+    };
+    
+    // Intersection Observer para animar cuando entre en vista
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                animateNumber(entry.target);
+                observer.unobserve(entry.target);
+            }
+        });
+    });
+    
+    statNumbers.forEach(stat => observer.observe(stat));
+    
+    // Animación de scroll suave para el indicador
+    document.querySelector('.scroll-indicator')?.addEventListener('click', () => {
+        document.querySelector('.quick-access-enhanced').scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+    
+    // Efecto parallax suave para el hero
+    window.addEventListener('scroll', () => {
+        const scrolled = window.pageYOffset;
+        const heroContent = document.querySelector('.hero-content');
+        const rate = scrolled * -0.3;
+        
+        if (heroContent) {
+            heroContent.style.transform = `translateY(${rate}px)`;
+        }
+    });
+});
+</script>
+{% endblock %}

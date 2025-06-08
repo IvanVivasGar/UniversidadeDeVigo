@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}WesterosTracker{% endblock %}</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/favicon.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <a href="{{ url_for('main.index') }}">
+                    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="WesterosTracker" class="logo-img">
+                    <span class="logo-text">WesterosTracker</span>
+                </a>
+            </div>
+            
+            <div class="nav-menu">
+                <a href="{{ url_for('main.index') }}" class="nav-link">
+                    <i class="fas fa-home"></i> Inicio
+                </a>
+                <a href="{{ url_for('characters.characters') }}" class="nav-link">
+                    <i class="fas fa-user-friends"></i> Personajes
+                </a>
+                <a href="{{ url_for('houses.houses') }}" class="nav-link">
+                    <i class="fas fa-shield-alt"></i> Casas
+                </a>
+                <a href="{{ url_for('events.events') }}" class="nav-link">
+                    <i class="fas fa-calendar-alt"></i> Eventos
+                </a>
+                <a href="{{ url_for('discussions.discussions') }}" class="nav-link">
+                    <i class="fas fa-comments"></i> Discusiones
+                </a>
+            </div>
+            
+            <div class="nav-auth">
+                {% if current_user.is_authenticated %}
+                    <span class="welcome-text">Bienvenido, {{ current_user.username }}</span>
+                    <a href="{{ url_for('auth.profile') }}" class="nav-link profile-link">
+                        <i class="fas fa-user"></i> Perfil
+                    </a>
+                    <a href="{{ url_for('auth.logout') }}" class="nav-link logout-btn">
+                        <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                    </a>
+                {% else %}
+                    <a href="{{ url_for('auth.login') }}" class="nav-link login-btn">
+                        <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                    </a>
+                    <a href="{{ url_for('auth.register') }}" class="nav-link register-btn">
+                        <i class="fas fa-user-plus"></i> Registrarse
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                    <div class="flash-message flash-{{ category }}">
+                        <span class="flash-text">{{ message }}</span>
+                        <button class="flash-close">&times;</button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer Épico Mejorado -->
+    <footer class="footer-epic">
+        <!-- Fondo con efectos -->
+        <div class="footer-background">
+            <div class="footer-overlay"></div>
+            <div class="footer-pattern"></div>
+        </div>
+        
+        <!-- Efectos de dragones decorativos -->
+        <div class="footer-dragons">
+            <div class="dragon-silhouette dragon-footer-left">🐉</div>
+            <div class="dragon-silhouette dragon-footer-right">🐲</div>
+        </div>
+        
+        <!-- Contenido principal del footer -->
+        <div class="footer-container">
+            <!-- Sección superior del footer -->
+            <div class="footer-main">
+                <div class="footer-brand">
+                    <div class="footer-logo">
+                        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="WesterosTracker" class="footer-logo-img">
+                        <h3 class="footer-brand-name">WesterosTracker</h3>
+                    </div>
+                    <p class="footer-tagline">
+                        "Winter is coming... y nosotros te mantenemos informado"
+                    </p>
+                    <p class="footer-description">
+                        La plataforma más completa para explorar el universo épico de Game of Thrones. 
+                        Descubre personajes, casas nobles, eventos históricos y únete a la comunidad más apasionada de Poniente.
+                    </p>
+                    
+                    <!-- Estadísticas del footer -->
+                    <div class="footer-stats">
+                        <div class="footer-stat">
+                            <i class="fas fa-users"></i>
+                            <span class="stat-number">{{ total_characters or 0 }}</span>
+                            <span class="stat-label">Personajes</span>
+                        </div>
+                        <div class="footer-stat">
+                            <i class="fas fa-shield-alt"></i>
+                            <span class="stat-number">{{ total_houses or 0 }}</span>
+                            <span class="stat-label">Casas</span>
+                        </div>
+                        <div class="footer-stat">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span class="stat-number">{{ total_events or 0 }}</span>
+                            <span class="stat-label">Eventos</span>
+                        </div>
+                        <div class="footer-stat">
+                            <i class="fas fa-comments"></i>
+                            <span class="stat-number">{{ total_posts or 0 }}</span>
+                            <span class="stat-label">Discusiones</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Enlaces de navegación -->
+                <div class="footer-sections">
+                    <div class="footer-section explore">
+                        <h4 class="footer-section-title">
+                            <i class="fas fa-compass"></i>
+                            Explorar Poniente
+                        </h4>
+                        <ul class="footer-links">
+                            <li><a href="{{ url_for('characters.characters') }}">
+                                <i class="fas fa-user-crown"></i> Personajes Legendarios
+                            </a></li>
+                            <li><a href="{{ url_for('houses.houses') }}">
+                                <i class="fas fa-shield-alt"></i> Casas Nobles
+                            </a></li>
+                            <li><a href="{{ url_for('events.events') }}">
+                                <i class="fas fa-scroll"></i> Eventos Épicos
+                            </a></li>
+                            <li><a href="{{ url_for('discussions.discussions') }}">
+                                <i class="fas fa-comments"></i> Debates Candentes
+                            </a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="footer-section community">
+                        <h4 class="footer-section-title">
+                            <i class="fas fa-users"></i>
+                            Comunidad
+                        </h4>
+                        <ul class="footer-links">
+                            {% if current_user.is_authenticated %}
+                                <li><a href="{{ url_for('auth.profile') }}">
+                                    <i class="fas fa-user"></i> Mi Perfil
+                                </a></li>
+                                <li><a href="{{ url_for('discussions.create_discussion') }}">
+                                    <i class="fas fa-feather"></i> Crear Discusión
+                                </a></li>
+                            {% else %}
+                                <li><a href="{{ url_for('auth.register') }}">
+                                    <i class="fas fa-user-plus"></i> Únete al Reino
+                                </a></li>
+                                <li><a href="{{ url_for('auth.login') }}">
+                                    <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                                </a></li>
+                            {% endif %}
+                            <li><a href="#" class="coming-soon">
+                                <i class="fas fa-trophy"></i> Clasificaciones
+                                <span class="badge-soon">Próximamente</span>
+                            </a></li>
+                            <li><a href="#" class="coming-soon">
+                                <i class="fas fa-star"></i> Favoritos
+                                <span class="badge-soon">Próximamente</span>
+                            </a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="footer-section info">
+                        <h4 class="footer-section-title">
+                            <i class="fas fa-info-circle"></i>
+                            Información
+                        </h4>
+                        <ul class="footer-links">
+                            <li><a href="#" onclick="showAboutModal()">
+                                <i class="fas fa-book"></i> Acerca del Proyecto
+                            </a></li>
+                            <li><a href="#" onclick="showCreditsModal()">
+                                <i class="fas fa-heart"></i> Créditos
+                            </a></li>
+                            <li><a href="#" onclick="showPrivacyModal()">
+                                <i class="fas fa-shield-check"></i> Privacidad
+                            </a></li>
+                            <li><a href="#" onclick="showTermsModal()">
+                                <i class="fas fa-scroll"></i> Términos de Uso
+                            </a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="footer-section universe">
+                        <h4 class="footer-section-title">
+                            <i class="fas fa-globe"></i>
+                            Universo GoT
+                        </h4>
+                        <div class="footer-quotes">
+                            <div class="quote-card active">
+                                <p class="quote-text">"Winter is coming"</p>
+                                <span class="quote-author">- Casa Stark</span>
+                            </div>
+                            <div class="quote-card">
+                                <p class="quote-text">"Fire and Blood"</p>
+                                <span class="quote-author">- Casa Targaryen</span>
+                            </div>
+                            <div class="quote-card">
+                                <p class="quote-text">"Hear Me Roar"</p>
+                                <span class="quote-author">- Casa Lannister</span>
+                            </div>
+                        </div>
+                        <div class="house-symbols">
+                            <div class="symbol-item" title="Casa Stark">❄️</div>
+                            <div class="symbol-item" title="Casa Targaryen">🐉</div>
+                            <div class="symbol-item" title="Casa Lannister">🦁</div>
+                            <div class="symbol-item" title="Casa Baratheon">🦌</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Separador decorativo -->
+            <div class="footer-divider">
+                <div class="divider-line"></div>
+                <div class="divider-icon">
+                    <i class="fas fa-crown"></i>
+                </div>
+                <div class="divider-line"></div>
+            </div>
+            
+            <!-- Footer inferior -->
+            <div class="footer-bottom">
+                <div class="footer-bottom-content">
+                    <div class="footer-copyright">
+                        <p>
+                            &copy; 2024 WesterosTracker | Proyecto académico inspirado en Game of Thrones
+                        </p>
+                        <p class="footer-disclaimer">
+                            Creado con ❤️ por Ivan Vivas | Universidad de Vigo
+                        </p>
+                    </div>
+                    
+                    <div class="footer-tech">
+                        <span class="tech-label">Powered by:</span>
+                        <div class="tech-stack">
+                            <span class="tech-item">
+                                <i class="fab fa-python"></i> Python
+                            </span>
+                            <span class="tech-item">
+                                <i class="fas fa-fire"></i> Flask
+                            </span>
+                            <span class="tech-item">
+                                <i class="fas fa-database"></i> Sirope
+                            </span>
+                            <span class="tech-item">
+                                <i class="fab fa-html5"></i> HTML5
+                            </span>
+                            <span class="tech-item">
+                                <i class="fab fa-css3-alt"></i> CSS3
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="footer-social">
+                        <span class="social-label">Síguenos:</span>
+                        <div class="social-links">
+                            <a href="#" class="social-link" title="GitHub">
+                                <i class="fab fa-github"></i>
+                            </a>
+                            <a href="#" class="social-link" title="Twitter">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                            <a href="#" class="social-link" title="Discord">
+                                <i class="fab fa-discord"></i>
+                            </a>
+                            <a href="#" class="social-link" title="Reddit">
+                                <i class="fab fa-reddit"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Efectos de partículas en el footer -->
+        <div class="footer-particles">
+            <div class="footer-ember"></div>
+            <div class="footer-ember"></div>
+            <div class="footer-ember"></div>
+            <div class="footer-ember"></div>
+            <div class="footer-ember"></div>
+        </div>
+    </footer>
+
+    <!-- Notification Modal -->
+    <div id="notification-modal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <div class="modal-body">
+                <i class="modal-icon"></i>
+                <p class="modal-message"></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    
+    <!-- Admin JavaScript - Solo cargar si el usuario es administrador -->
+    {% if current_user.is_authenticated and current_user.is_administrator() %}
+        <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+        <script>
+            // Make admin status available globally
+            window.currentUserIsAdmin = true;
+        </script>
+    {% else %}
+        <script>
+            window.currentUserIsAdmin = false;
+        </script>
+    {% endif %}
+    
+    <!-- Make current user info available globally -->
+    <script>
+        window.currentUser = {
+            isAuthenticated: {{ 'true' if current_user.is_authenticated else 'false' }},
+            isAdmin: {{ 'true' if current_user.is_authenticated and current_user.is_administrator() else 'false' }},
+            {% if current_user.is_authenticated %}
+            username: "{{ current_user.username }}",
+            id: "{{ current_user.get_oid() }}"
+            {% endif %}
+        };
+    </script>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>

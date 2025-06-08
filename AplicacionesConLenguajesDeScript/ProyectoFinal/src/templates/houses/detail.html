@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+
+{% block title %}{{ house.name }} - Casas - WesterosTracker{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Inicio</a></li>
+    <li class="breadcrumb-item"><a href="{{ url_for('houses.house_list') }}">Casas</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{{ house.name }}</li>
+  </ol>
+</nav>
+
+<div class="row mb-4">
+    <div class="col-lg-8">
+        <div class="detail-header">
+            <h1>Casa {{ house.name }}</h1>
+            {% if house.words %}
+            <div class="subtitle">
+                "{{ house.words }}"
+            </div>
+            {% endif %}
+            <div class="d-flex align-items-center mb-3">
+                <span class="badge bg-secondary me-2">{{ house.region }}</span>
+                {% if current_user.is_authenticated %}
+                <button class="btn btn-sm btn-outline-secondary favorite-btn {% if house.get_id() in current_user.favorites.houses %}active{% endif %}"
+                        data-id="{{ house.get_id() }}"
+                        data-type="houses">
+                    <i class="{% if house.get_id() in current_user.favorites.houses %}fas{% else %}far{% endif %} fa-heart me-1"></i>
+                    Favorito
+                </button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    {% if current_user.is_authenticated %}
+    <div class="col-lg-4 text-end">
+        <a href="{{ url_for('houses.house_edit', house_id=house.get_id()) }}" class="btn btn-outline-primary me-2">
+            <i class="fas fa-edit me-1"></i> Editar
+        </a>
+        <form action="{{ url_for('houses.house_delete', house_id=house.get_id()) }}" method="post" class="d-inline-block" 
+              onsubmit="return confirm('¿Estás seguro de que deseas eliminar esta casa? También se desvinculará de todos sus miembros.')">
+            <button type="submit" class="btn btn-outline-danger">
+                <i class="fas fa-trash-alt me-1"></i> Eliminar
+            </button>
+        </form>
+    </div>
+    {% endif %}
+</div>
+
+<div class="row">
+    <div class="col-md-4 mb-4">
+        <div class="card shadow">
+            {% if house.image_url %}
+            <img src="{{ house.image_url }}" class="card-img-top" alt="Emblema de {{ house.name }}">
+            {% else %}
+            <div class="bg-light d-flex align-items-center justify-content-center p-5">
+                <i class="fas fa-flag fa-6x text-muted"></i>
+            </div>
+            {% endif %}
+            <div class="card-body">
+                <h5 class="card-title">Emblema</h5>
+                <p class="card-text">{{ house.sigil }}</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        <div class="card shadow mb-4">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0">Historia y descripción</h3>
+            </div>
+            <div class="card-body">
+                <div class="house-description">
+                    {{ house.description|safe }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Miembros de la casa -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h3 class="mb-0">Miembros</h3>
+                <span class="badge bg-light text-primary">{{ members|length }}</span>
+            </div>
+            <div class="card-body">
+                {% if members %}
+                <div class="row">
+                    {% for member in members %}
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="card member-card h-100">
+                            {% if member.image_url %}
+                            <img src="{{ member.image_url }}" class="card-img-top member-img" alt="{{ member.name }}">
+                            {% else %}
+                            <div class="card-img-top member-img-placeholder bg-light d-flex align-items-center justify-content-center">
+                                <i class="fas fa-user-circle fa-4x text-muted"></i>
+                            </div>
+                            {% endif %}
+                            <div class="card-body">
+                                <h5 class="card-title">{{ member.name }}</h5>
+                                {% if member.title %}
+                                <h6 class="card-subtitle mb-2 text-muted">{{ member.title }}</h6>
+                                {% endif %}
+                                
+                                <div class="mt-2">
+                                    <span class="badge rounded-pill 
+                                          {% if member.status == 'Vivo' %}bg-success
+                                          {% elif member.status == 'Muerto' %}bg-danger
+                                          {% else %}bg-secondary{% endif %}">
+                                        {{ member.status }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-transparent">
+                                <a href="{{ url_for('characters.character_detail', character_id=member.get_id()) }}" class="btn btn-sm btn-outline-primary w-100">
+                                    Ver detalles
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Esta casa no tiene miembros registrados.
+                    {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('characters.character_create') }}" class="alert-link">Añade un personaje</a> y asígnalo a esta casa.
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Eventos relacionados con esta casa -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0">Eventos relacionados</h3>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-secondary">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Próximamente: eventos importantes relacionados con la Casa {{ house.name }}.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .house-description {
+        font-size: 1.1rem;
+        line-height: 1.7;
+    }
+    
+    .subtitle {
+        font-style: italic;
+        color: var(--secondary);
+        font-weight: 500;
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        border-left: 4px solid var(--secondary);
+        padding-left: 1rem;
+    }
+    
+    .member-card {
+        transition: all 0.3s ease;
+    }
+    
+    .member-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .member-img, .member-img-placeholder {
+        height: 200px;
+        object-fit: cover;
+    }
+</style>
+{% endblock %}

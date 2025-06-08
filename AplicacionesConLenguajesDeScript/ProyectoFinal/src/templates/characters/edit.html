@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Personaje - WesterosTracker{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8 offset-md-2">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h2 class="h5 mb-0">
+                    <i class="fas fa-edit me-2"></i> Editar Personaje: {{ character.name }}
+                </h2>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('characters.character_edit', character_id=character.get_id()) }}">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Nombre *</label>
+                        <input type="text" class="form-control" id="name" name="name" value="{{ character.name }}" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Título</label>
+                        <input type="text" class="form-control" id="title" name="title" 
+                               value="{{ character.title or '' }}" placeholder="Ej. Rey del Norte, Mano del Rey...">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="house_oid" class="form-label">Casa</label>
+                        <select class="form-select" id="house_oid" name="house_oid">
+                            <option value="">-- Sin afiliación --</option>
+                            {% for house in houses %}
+                            <option value="{{ house._oid }}" 
+                                {% if character.house_oid == house._oid %}selected{% endif %}>
+                                {{ house.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="status" class="form-label">Estado *</label>
+                        <select class="form-select" id="status" name="status" required>
+                            <option value="Vivo" {% if character.status == 'Vivo' %}selected{% endif %}>Vivo</option>
+                            <option value="Muerto" {% if character.status == 'Muerto' %}selected{% endif %}>Muerto</option>
+                            <option value="Desconocido" {% if character.status == 'Desconocido' %}selected{% endif %}>Desconocido</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="image_url" class="form-label">URL de Imagen</label>
+                        <input type="url" class="form-control" id="image_url" name="image_url" 
+                               value="{{ character.image_url or '' }}" placeholder="https://...">
+                        <small class="text-muted">Deja en blanco para usar una imagen predeterminada</small>
+                        {% if character.image_url %}
+                        <div class="mt-2">
+                            <img src="{{ character.image_url }}" id="imagePreview" class="img-thumbnail" style="max-height: 200px">
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Descripción *</label>
+                        <textarea class="form-control" id="description" name="description" rows="4" required>{{ character.description }}</textarea>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i> Guardar Cambios
+                        </button>
+                        <a href="{{ url_for('characters.character_detail', character_id=character.get_id()) }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-1"></i> Cancelar y Volver
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Preview de imagen
+        const imageUrlInput = document.getElementById('image_url');
+        let previewContainer = document.querySelector('#imagePreview');
+        
+        if (!previewContainer) {
+            previewContainer = document.createElement('img');
+            previewContainer.id = 'imagePreview';
+            previewContainer.className = 'img-thumbnail mt-2';
+            previewContainer.style.maxHeight = '200px';
+            imageUrlInput.parentNode.appendChild(previewContainer);
+        }
+        
+        imageUrlInput.addEventListener('input', function() {
+            const url = this.value.trim();
+            if (url) {
+                previewContainer.src = url;
+                previewContainer.style.display = 'block';
+            } else {
+                previewContainer.style.display = 'none';
+            }
+        });
+    });
+</script>
+{% endblock %}

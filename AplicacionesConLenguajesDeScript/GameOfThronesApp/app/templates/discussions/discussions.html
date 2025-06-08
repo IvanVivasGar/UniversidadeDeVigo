@@ -1,0 +1,350 @@
+{% extends "base.html" %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/discussions.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/discussions_list.css') }}">
+{% endblock %}
+
+{% block title %}Discusiones de la Comunidad - WesterosTracker{% endblock %}
+
+{% block content %}
+<div class="discussions-page">
+    <!-- Epic Hero Section -->
+    <div class="discussions-hero">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <div class="hero-icon">
+                <i class="fas fa-comments"></i>
+            </div>
+            <h1 class="hero-title">Foro de Discusiones</h1>
+            <p class="hero-subtitle">Únete a los debates más épicos sobre el mundo de Westeros</p>
+            
+            {% if current_user.is_authenticated %}
+            <div class="hero-actions">
+                <a href="{{ url_for('discussions.create_discussion') }}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-plus"></i>
+                    Crear Nueva Discusión
+                </a>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Floating elements -->
+        <div class="floating-elements">
+            <div class="floating-element element-1"><i class="fas fa-crown"></i></div>
+            <div class="floating-element element-2"><i class="fas fa-dragon"></i></div>
+            <div class="floating-element element-3"><i class="fas fa-shield-alt"></i></div>
+            <div class="floating-element element-4"><i class="fas fa-fire"></i></div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="discussions-main">
+        <div class="container">
+            <!-- Header Controls -->
+            <div class="discussions-header">
+                <div class="discussions-stats">
+                    <div class="stat-item">
+                        <i class="fas fa-comments"></i>
+                        <span class="stat-number">{{ discussions|length }}</span>
+                        <span class="stat-label">Discusiones</span>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-users"></i>
+                        <span class="stat-number">{{ total_participants or 0 }}</span>
+                        <span class="stat-label">Participantes</span>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-clock"></i>
+                        <span class="stat-number">{{ active_today or 0 }}</span>
+                        <span class="stat-label">Activas Hoy</span>
+                    </div>
+                </div>
+
+                <!-- Search and Filter Controls -->
+                <div class="discussions-controls">
+                    <div class="search-wrapper">
+                        <form method="GET" class="search-form">
+                            <div class="search-input-wrapper">
+                                <input type="text" 
+                                       name="search" 
+                                       value="{{ request.args.get('search', '') }}" 
+                                       placeholder="Buscar discusiones..."
+                                       class="search-input">
+                                <button type="submit" class="search-btn">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <div class="filter-controls">
+                        <form method="GET" class="filter-form">
+                            <input type="hidden" name="search" value="{{ request.args.get('search', '') }}">
+                            
+                            <select name="category" class="filter-select" onchange="this.form.submit()">
+                                <option value="">Todas las categorías</option>
+                                <option value="general" {{ 'selected' if request.args.get('category') == 'general' }}>General</option>
+                                <option value="teoria" {{ 'selected' if request.args.get('category') == 'teoria' }}>Teorías</option>
+                                <option value="analisis" {{ 'selected' if request.args.get('category') == 'analisis' }}>Análisis</option>
+                                <option value="eventos" {{ 'selected' if request.args.get('category') == 'eventos' }}>Eventos</option>
+                                <option value="casas" {{ 'selected' if request.args.get('category') == 'casas' }}>Casas</option>
+                                <option value="libros" {{ 'selected' if request.args.get('category') == 'libros' }}>Libros vs Serie</option>
+                                <option value="ayuda" {{ 'selected' if request.args.get('category') == 'ayuda' }}>Ayuda</option>
+                                <option value="off-topic" {{ 'selected' if request.args.get('category') == 'off-topic' }}>Off-topic</option>
+                            </select>
+                            
+                            <select name="sort" class="filter-select" onchange="this.form.submit()">
+                                <option value="recent" {{ 'selected' if request.args.get('sort') == 'recent' }}>Más Recientes</option>
+                                <option value="popular" {{ 'selected' if request.args.get('sort') == 'popular' }}>Más Populares</option>
+                                <option value="active" {{ 'selected' if request.args.get('sort') == 'active' }}>Más Activas</option>
+                                <option value="oldest" {{ 'selected' if request.args.get('sort') == 'oldest' }}>Más Antiguas</option>
+                            </select>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Discussions List -->
+            <div class="discussions-content">
+                {% if discussions %}
+                    <div class="discussions-list">
+                        {% for item in discussions %}
+                        {% set discussion = item.discussion %}
+                        {% set author_name = item.author_name %}
+                        <div class="discussion-card {% if discussion.is_pinned %}pinned{% endif %} {% if discussion.is_closed %}closed{% endif %}">
+                            <!-- Discussion Header -->
+                            <div class="discussion-header">
+                                <div class="discussion-meta">
+                                    {% if discussion.is_pinned %}
+                                    <span class="discussion-badge pinned-badge">
+                                        <i class="fas fa-thumbtack"></i>
+                                        Fijada
+                                    </span>
+                                    {% endif %}
+                                    
+                                    {% if discussion.is_closed %}
+                                    <span class="discussion-badge closed-badge">
+                                        <i class="fas fa-lock"></i>
+                                        Cerrada
+                                    </span>
+                                    {% endif %}
+                                    
+                                    <span class="discussion-category category-{{ discussion.category }}">
+                                        <i class="fas fa-{{ 'comments' if discussion.category == 'general' else 'lightbulb' if discussion.category == 'teoria' else 'search' if discussion.category == 'analisis' else 'calendar' if discussion.category == 'eventos' else 'home' if discussion.category == 'casas' else 'book' if discussion.category == 'libros' else 'question-circle' if discussion.category == 'ayuda' else 'chat' }}"></i>
+                                        {{ discussion.category.title() }}
+                                    </span>
+                                </div>
+                                
+                                <div class="discussion-actions">
+                                    <div class="discussion-stats">
+                                        <span class="stat likes" title="Me gusta">
+                                            <i class="fas fa-heart"></i>
+                                            {{ discussion.likes|length }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Discussion Content -->
+                            <div class="discussion-content-wrapper">
+                                {% if discussion.image_url %}
+                                <div class="discussion-image">
+                                    <img src="{{ discussion.image_url }}" alt="Imagen de la discusión" loading="lazy">
+                                </div>
+                                {% endif %}
+                                
+                                <div class="discussion-body">
+                                    <h3 class="discussion-title">
+                                        <a href="{{ url_for('discussions.discussion_detail', discussion_id=item.oid) }}">
+                                            {{ discussion.title }}
+                                        </a>
+                                    </h3>
+                                    
+                                    <p class="discussion-excerpt">
+                                        {% set content_text = discussion.content %}
+                                        {% if content_text|length > 200 %}
+                                            {{ content_text[:200] }}...
+                                        {% else %}
+                                            {{ content_text }}
+                                        {% endif %}
+                                    </p>
+                                    
+                                    {% if discussion.tags %}
+                                    <div class="discussion-tags">
+                                        {% for tag in discussion.tags[:5] %}
+                                        <span class="tag">{{ tag }}</span>
+                                        {% endfor %}
+                                        {% if discussion.tags|length > 5 %}
+                                        <span class="tag-more">+{{ discussion.tags|length - 5 }}</span>
+                                        {% endif %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Discussion Footer -->
+                            <div class="discussion-footer">
+                                <div class="discussion-author">
+                                    <div class="author-avatar">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <div class="author-info">
+                                        <span class="author-name">{{ author_name }}</span>
+                                        <span class="discussion-time">{{ discussion.created_at.strftime('%d/%m/%Y %H:%M') }}</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="discussion-engagement">
+                                    {% if current_user.is_authenticated %}
+                                    <button class="engagement-btn like-btn {% if current_user.__oid__ in discussion.likes %}liked{% endif %}" 
+                                            onclick="toggleLike('{{ item.oid }}', 'discussion')">
+                                        <i class="fas fa-heart"></i>
+                                        <span>{{ discussion.likes|length }}</span>
+                                    </button>
+                                    {% endif %}
+                                    
+                                    <!-- Admin controls -->
+                                    {% if current_user.is_authenticated and current_user.is_administrator() %}
+                                    <button class="engagement-btn admin-delete-btn" 
+                                            data-entity-type="discussion" 
+                                            data-entity-id="{{ item.oid.split('@')[1] if '@' in item.oid else item.oid }}" 
+                                            data-entity-name="{{ discussion.title }}"
+                                            title="Eliminar discusión">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Pagination -->
+                    {% if total_pages > 1 %}
+                    <div class="pagination-wrapper">
+                        <div class="pagination">
+                            {% if page > 1 %}
+                            <a href="{{ url_for('discussions.discussions', page=page-1, search=request.args.get('search', ''), category=request.args.get('category', ''), sort=request.args.get('sort', 'recent')) }}" 
+                               class="pagination-btn">
+                                <i class="fas fa-chevron-left"></i>
+                                Anterior
+                            </a>
+                            {% endif %}
+                            
+                            <span class="pagination-info">
+                                Página {{ page }} de {{ total_pages }}
+                            </span>
+                            
+                            {% if page < total_pages %}
+                            <a href="{{ url_for('discussions.discussions', page=page+1, search=request.args.get('search', ''), category=request.args.get('category', ''), sort=request.args.get('sort', 'recent')) }}" 
+                               class="pagination-btn">
+                                Siguiente
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                {% else %}
+                    <!-- Empty State -->
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="fas fa-comments"></i>
+                        </div>
+                        <h3 class="empty-title">No hay discusiones disponibles</h3>
+                        <p class="empty-message">
+                            {% if request.args.get('search') or request.args.get('category') %}
+                            No se encontraron discusiones que coincidan con tus criterios de búsqueda.
+                            <br>
+                            <a href="{{ url_for('discussions.discussions') }}" class="reset-filters-link">
+                                <i class="fas fa-refresh"></i>
+                                Limpiar filtros
+                            </a>
+                            {% else %}
+                            Sé el primero en iniciar una discusión épica sobre el mundo de Westeros.
+                            {% endif %}
+                        </p>
+                        {% if current_user.is_authenticated %}
+                        <div class="empty-actions">
+                            <a href="{{ url_for('discussions.create_discussion') }}" class="btn btn-primary">
+                                <i class="fas fa-plus"></i>
+                                Crear Primera Discusión
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function toggleLike(discussionId, type) {
+    try {
+        const response = await fetch(`/discussions/${discussionId}/like`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            const button = document.querySelector(`button[onclick="toggleLike('${discussionId}', '${type}')"]`);
+            const icon = button.querySelector('i');
+            const span = button.querySelector('span');
+            
+            if (data.liked) {
+                button.classList.add('liked');
+                icon.className = 'fas fa-heart';
+            } else {
+                button.classList.remove('liked');
+                icon.className = 'far fa-heart';
+            }
+            
+            span.textContent = data.likes_count;
+        } else {
+            showNotification(data.message || 'Error al procesar like', 'error');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showNotification('Error de conexión', 'error');
+    }
+}
+
+function showNotification(message, type = 'info') {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+        <span>${message}</span>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Show notification
+    setTimeout(() => notification.classList.add('show'), 100);
+    
+    // Hide and remove notification
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => document.body.removeChild(notification), 300);
+    }, 3000);
+}
+
+// Auto-submit search form on Enter
+document.querySelector('.search-input').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        this.closest('form').submit();
+    }
+});
+</script>
+{% endblock %}

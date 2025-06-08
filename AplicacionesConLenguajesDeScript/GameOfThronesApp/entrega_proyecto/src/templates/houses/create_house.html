@@ -1,0 +1,1113 @@
+{% extends "base.html" %}
+
+{% block title %}
+{% if editing %}Editar Casa - {{ house.name }}{% else %}Crear Casa{% endif %} - WesterosTracker
+{% endblock %}
+
+{% block extra_head %}
+<style>
+/* ===== HOUSE CREATION - DISEÑO ÉPICO COMPLETO ===== */
+:root {
+    --house-primary: #0f0f23;
+    --house-secondary: #1a1a2e;
+    --house-accent: #c9a96e;
+    --house-gold: #ffd700;
+    --house-red: #8b0000;
+    --house-glass: rgba(15, 15, 35, 0.88);
+    --house-glass-border: rgba(201, 169, 110, 0.35);
+    --house-text: #ffffff;
+    --house-text-muted: #c0c0c0;
+    --house-glow: 0 0 35px rgba(201, 169, 110, 0.5);
+    --house-shadow: 0 30px 70px rgba(0, 0, 0, 0.7);
+    --house-gradient: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 25%, #8b0000 50%, #1a1a2e 75%, #0f0f23 100%);
+
+/* Fondo épico */
+body:has(.create-house-container) {
+    margin: 0 !important;
+    padding: 0 !important;
+    min-height: 100vh !important;
+    background: 
+        radial-gradient(ellipse at top left, #8b0000 0%, transparent 50%),
+        radial-gradient(ellipse at bottom right, #0f0f23 0%, transparent 50%),
+        var(--house-gradient) !important;
+    background-size: 100% 100%, 100% 100%, 100% 500% !important;
+    background-attachment: fixed !important;
+    animation: nobleShift 25s ease-in-out infinite !important;
+    position: relative !important;
+    overflow-x: hidden !important;
+}
+
+@keyframes nobleShift {
+    0%, 100% { background-position: 0% 0%, 100% 100%, 0% 0%; }
+    33% { background-position: 100% 0%, 0% 100%, 0% 50%; }
+    66% { background-position: 0% 100%, 100% 0%, 0% 100%; }
+}
+
+.create-house-container {
+    min-height: 100vh !important;
+    position: relative !important;
+    z-index: 2 !important;
+}
+
+/* Hero Section */
+.create-hero {
+    min-height: 60vh !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    position: relative !important;
+    background: radial-gradient(circle at center, rgba(201, 169, 110, 0.15) 0%, transparent 70%) !important;
+    overflow: hidden !important;
+}
+
+.hero-content {
+    text-align: center !important;
+    z-index: 3 !important;
+    position: relative !important;
+    animation: heroEntrance 1.5s ease-out !important;
+}
+
+@keyframes heroEntrance {
+    0% { opacity: 0; transform: translateY(60px) scale(0.9); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.hero-icon {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 120px !important;
+    height: 120px !important;
+    background: linear-gradient(135deg, var(--house-accent), var(--house-gold)) !important;
+    border-radius: 50% !important;
+    margin-bottom: 2rem !important;
+    box-shadow: var(--house-glow) !important;
+    animation: crownPulse 6s ease-in-out infinite !important;
+}
+
+@keyframes crownPulse {
+    0%, 100% { transform: scale(1) rotate(0deg); }
+    50% { transform: scale(1.08) rotate(2deg); }
+}
+
+.hero-icon i {
+    font-size: 3.5rem !important;
+    color: var(--house-primary) !important;
+}
+
+.hero-title {
+    font-size: 4rem !important;
+    font-weight: 300 !important;
+    color: var(--house-text) !important;
+    margin: 0 0 1.5rem !important;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7) !important;
+    letter-spacing: 3px !important;
+    text-transform: uppercase !important;
+    background: linear-gradient(135deg, var(--house-text), var(--house-accent)) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+}
+
+.hero-subtitle {
+    font-size: 1.4rem !important;
+    color: var(--house-text-muted) !important;
+    margin: 0 !important;
+    font-weight: 300 !important;
+}
+
+/* Formulario */
+.create-form-section {
+    padding: 4rem 2rem !important;
+    position: relative !important;
+}
+
+.container {
+    max-width: 1400px !important;
+    margin: 0 auto !important;
+}
+
+.form-container {
+    display: grid !important;
+    grid-template-columns: 1fr 350px !important;
+    gap: 3rem !important;
+    align-items: start !important;
+}
+
+.form-card {
+    background: var(--house-glass) !important;
+    backdrop-filter: blur(30px) saturate(1.3) !important;
+    border: 1px solid var(--house-glass-border) !important;
+    border-radius: 25px !important;
+    padding: 3rem !important;
+    box-shadow: var(--house-shadow) !important;
+    position: relative !important;
+    overflow: hidden !important;
+    animation: cardEntrance 1s ease-out 0.5s both !important;
+}
+
+@keyframes cardEntrance {
+    0% { opacity: 0; transform: translateY(50px) scale(0.95); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.form-header {
+    text-align: center !important;
+    margin-bottom: 3rem !important;
+    padding-bottom: 2rem !important;
+    border-bottom: 1px solid rgba(201, 169, 110, 0.2) !important;
+}
+
+.form-header h2 {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 1rem !important;
+    font-size: 2rem !important;
+    font-weight: 500 !important;
+    color: var(--house-text) !important;
+    margin: 0 0 1rem !important;
+    letter-spacing: 1px !important;
+}
+
+.form-header h2 i {
+    color: var(--house-accent) !important;
+}
+
+.form-header p {
+    color: var(--house-text-muted) !important;
+    margin: 0 !important;
+    font-size: 1.1rem !important;
+}
+
+.form-grid {
+    display: grid !important;
+    gap: 3rem !important;
+}
+
+.form-section {
+    background: rgba(255, 255, 255, 0.02) !important;
+    border-radius: 20px !important;
+    padding: 2.5rem !important;
+    border: 1px solid rgba(201, 169, 110, 0.1) !important;
+    backdrop-filter: blur(15px) !important;
+    transition: all 0.3s ease !important;
+}
+
+.form-section:hover {
+    border-color: rgba(201, 169, 110, 0.2) !important;
+    transform: translateY(-2px) !important;
+}
+
+.section-title {
+    display: flex !important;
+    align-items: center !important;
+    gap: 1rem !important;
+    font-size: 1.3rem !important;
+    font-weight: 600 !important;
+    color: var(--house-accent) !important;
+    margin: 0 0 2rem !important;
+    padding-bottom: 1rem !important;
+    border-bottom: 1px solid rgba(201, 169, 110, 0.15) !important;
+}
+
+.input-group {
+    margin-bottom: 2rem !important;
+}
+
+.form-label {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.8rem !important;
+    font-size: 1rem !important;
+    font-weight: 500 !important;
+    color: var(--house-text) !important;
+    margin-bottom: 0.8rem !important;
+}
+
+.form-label i {
+    color: var(--house-accent) !important;
+    width: 20px !important;
+    text-align: center !important;
+}
+
+.form-input, .form-select, .form-textarea {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 1.2rem 1.5rem !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(201, 169, 110, 0.25) !important;
+    border-radius: 15px !important;
+    color: var(--house-text) !important;
+    font-size: 1rem !important;
+    transition: all 0.3s ease !important;
+    backdrop-filter: blur(10px) !important;
+    box-sizing: border-box !important;
+    min-width: 0 !important;
+    flex-shrink: 0 !important;
+}
+
+.form-input::placeholder, .form-textarea::placeholder {
+    color: var(--house-text-muted) !important;
+    opacity: 0.7 !important;
+}
+
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+    outline: none !important;
+    border-color: var(--house-accent) !important;
+    box-shadow: 0 0 0 3px rgba(201, 169, 110, 0.2) !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    transform: translateY(-1px) !important;
+}
+
+.form-textarea {
+    resize: vertical !important;
+    min-height: 120px !important;
+    line-height: 1.6 !important;
+}
+
+/* Botones */
+.form-actions {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    margin-top: 3rem !important;
+    padding-top: 2rem !important;
+    border-top: 1px solid rgba(201, 169, 110, 0.2) !important;
+    gap: 1rem !important;
+}
+
+.btn {
+    padding: 1.2rem 2.5rem !important;
+    border-radius: 30px !important;
+    font-size: 1rem !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+    transition: all 0.3s ease !important;
+    border: none !important;
+    cursor: pointer !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.8rem !important;
+    position: relative !important;
+    overflow: hidden !important;
+    min-width: 160px !important;
+    justify-content: center !important;
+    text-decoration: none !important;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--house-accent), var(--house-gold)) !important;
+    color: var(--house-primary) !important;
+    border: 2px solid var(--house-accent) !important;
+    box-shadow: 0 4px 20px rgba(201, 169, 110, 0.3) !important;
+}
+
+.btn-primary:hover {
+    transform: translateY(-3px) !important;
+    box-shadow: 0 8px 30px rgba(201, 169, 110, 0.4) !important;
+    background: linear-gradient(135deg, var(--house-gold), var(--house-accent)) !important;
+}
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: var(--house-text-muted) !important;
+    border: 2px solid rgba(201, 169, 110, 0.3) !important;
+    backdrop-filter: blur(15px) !important;
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.15) !important;
+    color: var(--house-text) !important;
+    border-color: var(--house-accent) !important;
+    transform: translateY(-2px) !important;
+}
+
+/* Tips Card */
+.tips-card {
+    background: var(--house-glass) !important;
+    backdrop-filter: blur(25px) !important;
+    border: 1px solid var(--house-glass-border) !important;
+    border-radius: 20px !important;
+    padding: 2rem !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3) !important;
+    animation: tipsEntrance 1s ease-out 0.8s both !important;
+    position: sticky !important;
+    top: 2rem !important;
+}
+
+@keyframes tipsEntrance {
+    0% { opacity: 0; transform: translateX(30px); }
+    100% { opacity: 1; transform: translateX(0); }
+}
+
+.tips-header h3 {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.8rem !important;
+    color: var(--house-accent) !important;
+    margin: 0 0 1.5rem !important;
+    font-size: 1.2rem !important;
+}
+
+.tip-item {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 1rem !important;
+    margin-bottom: 1rem !important;
+    padding: 0.8rem !important;
+    background: rgba(255, 255, 255, 0.02) !important;
+    border-radius: 10px !important;
+    transition: all 0.3s ease !important;
+}
+
+.tip-item:hover {
+    background: rgba(255, 255, 255, 0.05) !important;
+    transform: translateX(5px) !important;
+}
+
+.tip-item i {
+    color: var(--house-accent) !important;
+    margin-top: 0.2rem !important;
+    flex-shrink: 0 !important;
+}
+
+.tip-item p {
+    margin: 0 !important;
+    color: var(--house-text-muted) !important;
+    line-height: 1.5 !important;
+    font-size: 0.95rem !important;
+}
+
+/* Preview de imagen con tamaño controlado */
+.image-preview {
+    width: 100% !important;
+    max-width: 300px !important;
+    height: 200px !important;
+    border-radius: 15px !important;
+    overflow: hidden !important;
+    background: rgba(0, 0, 0, 0.3) !important;
+    border: 2px dashed rgba(201, 169, 110, 0.3) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.3s ease !important;
+    margin: 0 auto !important;
+}
+
+.image-preview img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    object-position: center !important;
+}
+
+.image-preview-container {
+    max-width: 300px !important;
+    margin: 1rem auto !important;
+}
+
+/* Contador de caracteres */
+.char-counter {
+    text-align: right !important;
+    margin-top: 0.5rem !important;
+    font-size: 0.9rem !important;
+    color: var(--house-text-muted) !important;
+}
+
+/* Modal de éxito personalizado */
+.success-modal {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    background: rgba(0, 0, 0, 0.8) !important;
+    display: none !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 10000 !important;
+    backdrop-filter: blur(10px) !important;
+}
+
+.success-modal.show {
+    display: flex !important;
+    animation: modalFadeIn 0.3s ease-out !important;
+}
+
+@keyframes modalFadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+.modal-content-custom {
+    background: var(--house-glass) !important;
+    backdrop-filter: blur(30px) !important;
+    border: 1px solid var(--house-glass-border) !important;
+    border-radius: 25px !important;
+    padding: 3rem !important;
+    max-width: 500px !important;
+    width: 90% !important;
+    text-align: center !important;
+    box-shadow: var(--house-shadow) !important;
+    animation: modalSlideIn 0.5s ease-out !important;
+}
+
+@keyframes modalSlideIn {
+    0% { transform: translateY(-50px) scale(0.9); opacity: 0; }
+    100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+.modal-icon {
+    width: 80px !important;
+    height: 80px !important;
+    background: linear-gradient(135deg, #4CAF50, #8BC34A) !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 0 auto 2rem !important;
+    animation: checkmarkPulse 2s ease-in-out infinite !important;
+}
+
+@keyframes checkmarkPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+.modal-icon i {
+    font-size: 2.5rem !important;
+    color: white !important;
+}
+
+.modal-title-custom {
+    font-size: 1.8rem !important;
+    color: var(--house-text) !important;
+    margin: 0 0 1rem !important;
+    font-weight: 600 !important;
+}
+
+.modal-message {
+    color: var(--house-text-muted) !important;
+    margin: 0 0 2rem !important;
+    font-size: 1.1rem !important;
+    line-height: 1.5 !important;
+}
+
+.modal-actions {
+    display: flex !important;
+    gap: 1rem !important;
+    justify-content: center !important;
+    flex-wrap: wrap !important;
+}
+
+/* Botones de estado para loading */
+.btn-loading {
+    opacity: 0 !important;
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    pointer-events: none !important;
+}
+
+.btn.loading .btn-content {
+    opacity: 0 !important;
+}
+
+.btn.loading .btn-loading {
+    opacity: 1 !important;
+}
+
+.btn-content {
+    transition: opacity 0.3s ease !important;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .form-container {
+        grid-template-columns: 1fr !important;
+        gap: 2rem !important;
+    }
+    .tips-card {
+        position: static !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: 2.5rem !important;
+    }
+    .form-card {
+        padding: 2rem !important;
+    }
+    .form-actions {
+        flex-direction: column !important;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="create-house-container">
+    <!-- Hero Section -->
+    <div class="create-hero">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <div class="hero-icon">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <h1 class="hero-title">
+                {% if editing %}Editar Casa{% else %}Crear Nueva Casa{% endif %}
+            </h1>
+            <p class="hero-subtitle">
+                {% if editing %}Modifica los datos de {{ house.name }}{% else %}Añade una nueva casa noble a los Siete Reinos{% endif %}
+            </p>
+        </div>
+        <div class="floating-elements">
+            <div class="floating-crown"><i class="fas fa-crown"></i></div>
+            <div class="floating-banner"><i class="fas fa-flag"></i></div>
+            <div class="floating-shield"><i class="fas fa-shield-alt"></i></div>
+        </div>
+    </div>
+
+    <!-- Form Section -->
+    <div class="create-form-section">
+        <div class="container">
+            <div class="form-container">
+                <div class="form-card">
+                    <div class="form-header">
+                        <h2>
+                            <i class="fas fa-{% if editing %}edit{% else %}plus-circle{% endif %}"></i>
+                            {% if editing %}Editar Información{% else %}Información de la Casa{% endif %}
+                        </h2>
+                        <p>{% if editing %}Modifica los campos que desees cambiar{% else %}Completa todos los campos para crear una nueva casa{% endif %}</p>
+                    </div>
+
+                    <form id="create-house-form" class="house-form" method="POST" enctype="multipart/form-data" 
+                          action="{% if editing %}{{ url_for('houses.edit_house', house_id=house.__oid__) }}{% else %}{{ url_for('houses.create_house') }}{% endif %}">
+                        <div class="form-grid">
+                            <!-- Basic Information -->
+                            <div class="form-section">
+                                <h3 class="section-title">
+                                    <i class="fas fa-info-circle"></i>
+                                    Información Básica
+                                </h3>
+                                
+                                <div class="input-group">
+                                    <label for="name" class="form-label">
+                                        <i class="fas fa-home"></i>
+                                        Nombre de la Casa *
+                                    </label>
+                                    <div class="input-container">
+                                        <input type="text" id="name" name="name" class="form-input" required 
+                                               placeholder="Ej: Stark, Lannister, Targaryen"
+                                               value="{% if editing %}{{ house.name }}{% endif %}">
+                                        <div class="input-feedback" id="name-feedback"></div>
+                                    </div>
+                                </div>
+
+                                <div class="input-group">
+                                    <label for="motto" class="form-label">
+                                        <i class="fas fa-quote-left"></i>
+                                        Lema de la Casa
+                                    </label>
+                                    <div class="input-container">
+                                        <input type="text" id="motto" name="motto" class="form-input" 
+                                               placeholder="Ej: Winter is Coming, Hear Me Roar"
+                                               value="{% if editing %}{{ house.motto }}{% endif %}">
+                                        <div class="input-feedback" id="motto-feedback"></div>
+                                    </div>
+                                </div>
+
+                                <div class="input-group">
+                                    <label for="region" class="form-label">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                        Región *
+                                    </label>
+                                    <div class="input-container">
+                                        <select id="region" name="region" class="form-select" required>
+                                            <option value="">Selecciona una región</option>
+                                            <option value="norte" {% if editing and house.region == 'norte' %}selected{% endif %}>El Norte</option>
+                                            <option value="valle" {% if editing and house.region == 'valle' %}selected{% endif %}>El Valle</option>
+                                            <option value="tierras-rios" {% if editing and house.region == 'tierras-rios' %}selected{% endif %}>Tierras de los Ríos</option>
+                                            <option value="occidente" {% if editing and house.region == 'occidente' %}selected{% endif %}>El Occidente</option>
+                                            <option value="corona" {% if editing and house.region == 'corona' %}selected{% endif %}>Tierras de la Corona</option>
+                                            <option value="tormenta" {% if editing and house.region == 'tormenta' %}selected{% endif %}>Tierras de la Tormenta</option>
+                                            <option value="dominio" {% if editing and house.region == 'dominio' %}selected{% endif %}>El Dominio</option>
+                                            <option value="dorne" {% if editing and house.region == 'dorne' %}selected{% endif %}>Dorne</option>
+                                            <option value="islas-hierro" {% if editing and house.region == 'islas-hierro' %}selected{% endif %}>Islas del Hierro</option>
+                                        </select>
+                                        <div class="input-feedback" id="region-feedback"></div>
+                                    </div>
+                                </div>
+
+                                <div class="input-group">
+                                    <label for="status" class="form-label">
+                                        <i class="fas fa-shield-alt"></i>
+                                        Estado de la Casa *
+                                    </label>
+                                    <div class="input-container">
+                                        <select id="status" name="status" class="form-select" required>
+                                            <option value="">Selecciona el estado</option>
+                                            <option value="mayor" {% if editing and house.status == 'mayor' %}selected{% endif %}>Casa Mayor</option>
+                                            <option value="menor" {% if editing and house.status == 'menor' %}selected{% endif %}>Casa Menor</option>
+                                            <option value="extinta" {% if editing and house.status == 'extinta' %}selected{% endif %}>Extinta</option>
+                                        </select>
+                                        <div class="input-feedback" id="status-feedback"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Description -->
+                            <div class="form-section">
+                                <h3 class="section-title">
+                                    <i class="fas fa-scroll"></i>
+                                    Historia y Descripción
+                                </h3>
+                                
+                                <div class="input-group">
+                                    <label for="description" class="form-label">
+                                        <i class="fas fa-align-left"></i>
+                                        Historia de la Casa *
+                                    </label>
+                                    <div class="input-container">
+                                        <textarea id="description" name="description" class="form-textarea" 
+                                                  rows="6" required maxlength="2000"
+                                                  placeholder="Describe la historia, origen y características de la casa...">{% if editing %}{{ house.description }}{% endif %}</textarea>
+                                        <div class="char-counter">
+                                            <span id="description-counter">{% if editing %}{{ house.description|length }}{% else %}0{% endif %}</span>/2000
+                                        </div>
+                                        <div class="input-feedback" id="description-feedback"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Sigil Image -->
+                            <div class="form-section">
+                                <h3 class="section-title">
+                                    <i class="fas fa-image"></i>
+                                    Escudo de la Casa
+                                </h3>
+                                
+                                <div class="input-group">
+                                    <label for="sigil_url" class="form-label">
+                                        <i class="fas fa-link"></i>
+                                        URL del Escudo
+                                    </label>
+                                    <div class="input-container">
+                                        <input type="url" id="sigil_url" name="sigil_url" class="form-input" 
+                                               placeholder="https://ejemplo.com/escudo.jpg"
+                                               value="{% if editing and house.images %}{{ house.images[0] }}{% endif %}">
+                                        <div class="input-feedback" id="sigil_url-feedback"></div>
+                                    </div>
+                                </div>
+
+                                <div class="image-preview-container">
+                                    <div class="image-preview" id="sigil-preview">
+                                        {% if editing and house.images %}
+                                        <img src="{{ house.images[0] }}" alt="Escudo de {{ house.name }}" style="opacity: 1;">
+                                        {% else %}
+                                        <div class="preview-placeholder">
+                                            <i class="fas fa-shield-alt"></i>
+                                            <p>Vista previa del escudo</p>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="form-actions">
+                            <a href="{{ url_for('houses.houses') }}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i>
+                                Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary submit-btn" id="submit-btn">
+                                <div class="btn-content">
+                                    <i class="fas fa-{% if editing %}save{% else %}plus{% endif %}"></i>
+                                    <span>{% if editing %}Guardar Cambios{% else %}Crear Casa{% endif %}</span>
+                                </div>
+                                <div class="btn-loading">
+                                    <i class="fas fa-spinner fa-spin"></i>
+                                    <span>{% if editing %}Guardando...{% else %}Creando...{% endif %}</span>
+                                </div>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Tips Card -->
+                <div class="tips-card">
+                    <div class="tips-header">
+                        <h3>
+                            <i class="fas fa-lightbulb"></i>
+                            Consejos
+                        </h3>
+                    </div>
+                    <div class="tips-content">
+                        <div class="tip-item">
+                            <i class="fas fa-check-circle"></i>
+                            <p>{% if editing %}Puedes cambiar cualquier campo excepto el ID único{% else %}Asegúrate de que el nombre de la casa sea único{% endif %}</p>
+                        </div>
+                        <div class="tip-item">
+                            <i class="fas fa-check-circle"></i>
+                            <p>Los lemas deben ser memorables y representar los valores de la casa</p>
+                        </div>
+                        <div class="tip-item">
+                            <i class="fas fa-check-circle"></i>
+                            <p>Proporciona una descripción detallada de la historia y características</p>
+                        </div>
+                        <div class="tip-item">
+                            <i class="fas fa-check-circle"></i>
+                            <p>{% if editing %}Si cambias la imagen, la anterior será reemplazada{% else %}Usa URLs de imágenes válidas para el escudo de la casa{% endif %}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+class CreateHouseManager {
+    constructor() {
+        this.form = document.getElementById('create-house-form');
+        this.submitBtn = document.getElementById('submit-btn');
+        this.editing = {{ 'true' if editing else 'false' }};
+        this.init();
+    }
+    
+    init() {
+        this.setupEventListeners();
+        this.setupFormValidation();
+        this.setupImagePreview();
+        this.setupCharacterCounter();
+    }
+    
+    setupEventListeners() {
+        this.form.addEventListener('submit', (e) => this.handleSubmit(e));
+        
+        // Real-time validation
+        const inputs = this.form.querySelectorAll('.form-input, .form-select, .form-textarea');
+        inputs.forEach(input => {
+            input.addEventListener('blur', () => this.validateField(input));
+            input.addEventListener('input', () => this.clearFieldError(input));
+        });
+    }
+    
+    setupImagePreview() {
+        const sigilInput = document.getElementById('sigil_url');
+        const preview = document.getElementById('sigil-preview');
+        
+        sigilInput.addEventListener('input', () => {
+            const url = sigilInput.value.trim();
+            
+            if (url && this.isValidUrl(url)) {
+                this.showImagePreview(url, preview);
+            } else {
+                this.hideImagePreview(preview);
+            }
+        });
+    }
+    
+    showImagePreview(url, container) {
+        container.innerHTML = `
+            <img src="${url}" alt="Vista previa del escudo" 
+                 onload="this.style.opacity='1'" 
+                 onerror="this.parentElement.innerHTML='<div class=&quot;preview-error&quot;><i class=&quot;fas fa-exclamation-triangle&quot;></i><p>Error al cargar la imagen</p></div>'">
+        `;
+    }
+    
+    hideImagePreview(container) {
+        container.innerHTML = `
+            <div class="preview-placeholder">
+                <i class="fas fa-shield-alt"></i>
+                <p>Vista previa del escudo</p>
+            </div>
+        `;
+    }
+    
+    setupCharacterCounter() {
+        const textarea = document.getElementById('description');
+        const counter = document.getElementById('description-counter');
+        
+        textarea.addEventListener('input', () => {
+            const length = textarea.value.length;
+            counter.textContent = length;
+            
+            if (length > 2000) {
+                counter.parentElement.classList.add('over-limit');
+                textarea.value = textarea.value.substring(0, 2000);
+                counter.textContent = 2000;
+            } else {
+                counter.parentElement.classList.remove('over-limit');
+            }
+        });
+    }
+    
+    setupFormValidation() {
+        // Add real-time validation for all inputs
+        const inputs = document.querySelectorAll('.form-input, .form-select, .form-textarea');
+        inputs.forEach(input => {
+            input.addEventListener('blur', () => this.validateField(input));
+            input.addEventListener('focus', () => this.clearFieldError(input));
+        });
+    }
+    
+    validateField(field) {
+        const value = field.value.trim();
+        const isRequired = field.hasAttribute('required');
+        const fieldType = field.type;
+        
+        if (isRequired && !value) {
+            this.showFieldError(field, 'Este campo es requerido');
+            return false;
+        }
+        
+        // URL validation
+        if (fieldType === 'url' && value && !this.isValidUrl(value)) {
+            this.showFieldError(field, 'Por favor, introduce una URL válida');
+            return false;
+        }
+        
+        // Name validation
+        if (field.name === 'name' && value) {
+            if (value.length < 2) {
+                this.showFieldError(field, 'El nombre debe tener al menos 2 caracteres');
+                return false;
+            }
+            if (value.length > 50) {
+                this.showFieldError(field, 'El nombre no puede exceder 50 caracteres');
+                return false;
+            }
+        }
+        
+        // Description validation
+        if (field.name === 'description' && value) {
+            if (value.length < 10) {
+                this.showFieldError(field, 'La descripción debe tener al menos 10 caracteres');
+                return false;
+            }
+        }
+        
+        this.clearFieldError(field);
+        return true;
+    }
+    
+    showFieldError(field, message) {
+        const feedback = document.getElementById(`${field.name}-feedback`);
+        const container = field.closest('.input-container');
+        
+        if (feedback) {
+            feedback.textContent = message;
+            feedback.className = 'input-feedback error';
+            feedback.style.display = 'block';
+        }
+        
+        if (container) {
+            container.classList.add('error');
+        }
+        
+        field.classList.add('error');
+    }
+    
+    clearFieldError(field) {
+        const feedback = document.getElementById(`${field.name}-feedback`);
+        const container = field.closest('.input-container');
+        
+        if (feedback) {
+            feedback.style.display = 'none';
+        }
+        
+        if (container) {
+            container.classList.remove('error');
+        }
+        
+        field.classList.remove('error');
+    }
+    
+    validateForm() {
+        const inputs = this.form.querySelectorAll('.form-input, .form-select, .form-textarea');
+        let isValid = true;
+        
+        inputs.forEach(input => {
+            if (!this.validateField(input)) {
+                isValid = false;
+            }
+        });
+        
+        return isValid;
+    }
+    
+    async handleSubmit(e) {
+        e.preventDefault();
+        
+        if (!this.validateForm()) {
+            this.showErrorMessage('Por favor, corrige los errores en el formulario');
+            return;
+        }
+        
+        const formData = new FormData(this.form);
+        
+        // Show loading state
+        this.setLoadingState(true);
+        
+        try {
+            const response = await fetch(this.form.action || '/houses/create', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                // Mostrar éxito brevemente y redirigir automáticamente
+                this.showSuccessAndRedirect();
+            } else {
+                this.showErrorMessage(data.message || 'Error al crear la casa');
+            }
+        } catch (error) {
+            console.error('Error submitting form:', error);
+            this.showErrorMessage('Error de conexión. Inténtalo de nuevo.');
+        } finally {
+            this.setLoadingState(false);
+        }
+    }
+    
+    setLoadingState(loading) {
+        const btnContent = this.submitBtn.querySelector('.btn-content');
+        const btnLoading = this.submitBtn.querySelector('.btn-loading');
+        
+        if (loading) {
+            btnContent.style.opacity = '0';
+            btnLoading.style.opacity = '1';
+            this.submitBtn.disabled = true;
+            this.submitBtn.classList.add('loading');
+        } else {
+            setTimeout(() => {
+                btnContent.style.opacity = '1';
+                btnLoading.style.opacity = '0';
+                this.submitBtn.disabled = false;
+                this.submitBtn.classList.remove('loading');
+            }, 500);
+        }
+    }
+    
+    showSuccessAndRedirect() {
+        // Cambiar el botón para mostrar éxito
+        this.submitBtn.classList.add('success');
+        const btnContent = this.submitBtn.querySelector('.btn-content');
+        const btnLoading = this.submitBtn.querySelector('.btn-loading');
+        
+        // Mostrar mensaje de éxito en el botón
+        btnContent.innerHTML = `
+            <i class="fas fa-check"></i>
+            <span>${this.editing ? '¡Casa Actualizada!' : '¡Casa Creada!'}</span>
+        `;
+        btnContent.style.opacity = '1';
+        btnLoading.style.opacity = '0';
+        this.submitBtn.disabled = false;
+        this.submitBtn.classList.remove('loading');
+        
+        // Mostrar notificación de éxito
+        this.showSuccessNotification(`Casa ${this.editing ? 'actualizada' : 'creada'} exitosamente. Redirigiendo...`);
+        
+        // Redirigir automáticamente después de 1.5 segundos
+        setTimeout(() => {
+            window.location.href = '/houses/';
+        }, 1500);
+    }
+    
+    showSuccessNotification(message) {
+        // Crear notificación flotante
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #4CAF50, #8BC34A);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(76, 175, 80, 0.3);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+            animation: slideInRight 0.5s ease-out;
+        `;
+        
+        notification.innerHTML = `
+            <i class="fas fa-check-circle"></i>
+            <span>${message}</span>
+        `;
+        
+        // Agregar animación CSS
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideInRight {
+                0% { transform: translateX(100%); opacity: 0; }
+                100% { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOutRight {
+                0% { transform: translateX(0); opacity: 1; }
+                100% { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+        document.body.appendChild(notification);
+        
+        // Quitar notificación después de 3 segundos
+        setTimeout(() => {
+            notification.style.animation = 'slideOutRight 0.3s ease-in';
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+                if (style.parentNode) {
+                    style.parentNode.removeChild(style);
+                }
+            }, 300);
+        }, 3000);
+    }
+    
+    showErrorMessage(message) {
+        if (typeof showNotification === 'function') {
+            showNotification(message, 'error');
+        } else {
+            alert(message);
+        }
+        
+        // Add error animation to submit button
+        this.submitBtn.classList.add('error');
+        setTimeout(() => {
+            this.submitBtn.classList.remove('error');
+        }, 2000);
+    }
+    
+    isValidUrl(string) {
+        try {
+            new URL(string);
+            return true;
+        } catch (_) {
+            return false;
+        }
+    }
+}
+
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    new CreateHouseManager();
+});
+</script>
+{% endblock %}

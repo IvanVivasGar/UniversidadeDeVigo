@@ -1,0 +1,795 @@
+/* ===== HOUSE CREATION - DISEÑO ÉPICO DE CASAS NOBLES ===== */
+
+/* Variables temáticas para casas */
+:root {
+    --house-primary: #0f0f23;
+    --house-secondary: #1a1a2e;
+    --house-accent: #c9a96e;
+    --house-gold: #ffd700;
+    --house-red: #8b0000;
+    --house-glass: rgba(15, 15, 35, 0.88);
+    --house-glass-border: rgba(201, 169, 110, 0.35);
+    --house-text: #ffffff;
+    --house-text-muted: #c0c0c0;
+    --house-glow: 0 0 35px rgba(201, 169, 110, 0.5);
+    --house-shadow: 0 30px 70px rgba(0, 0, 0, 0.7);
+    --house-gradient: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 25%, #8b0000 50%, #1a1a2e 75%, #0f0f23 100%);
+}
+
+/* ===== FONDO ÉPICO TEMÁTICO DE CASAS ===== */
+body:has(.create-house-container) {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    background: 
+        radial-gradient(ellipse at top left, #8b0000 0%, transparent 50%),
+        radial-gradient(ellipse at bottom right, #0f0f23 0%, transparent 50%),
+        var(--house-gradient);
+    background-size: 100% 100%, 100% 100%, 100% 500%;
+    background-attachment: fixed;
+    animation: nobleShift 25s ease-in-out infinite;
+    position: relative;
+    overflow-x: hidden;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+@keyframes nobleShift {
+    0%, 100% { background-position: 0% 0%, 100% 100%, 0% 0%; }
+    33% { background-position: 100% 0%, 0% 100%, 0% 50%; }
+    66% { background-position: 0% 100%, 100% 0%, 0% 100%; }
+}
+
+/* Textura heráldica */
+body:has(.create-house-container)::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 120%;
+    height: 120%;
+    background: 
+        radial-gradient(circle at 25% 75%, rgba(201, 169, 110, 0.1) 0%, transparent 40%),
+        radial-gradient(circle at 75% 25%, rgba(139, 0, 0, 0.1) 0%, transparent 40%),
+        url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80"><defs><pattern id="heraldic" width="80" height="80" patternUnits="userSpaceOnUse"><path d="M40 10 L50 30 L70 30 L56 42 L62 62 L40 50 L18 62 L24 42 L10 30 L30 30 Z" fill="%23c9a96e" opacity="0.08"/><circle cx="20" cy="20" r="2" fill="%238b0000" opacity="0.1"/><circle cx="60" cy="60" r="2" fill="%238b0000" opacity="0.1"/></pattern></defs><rect width="100%" height="100%" fill="url(%23heraldic)"/></svg>');
+    animation: heraldryFloat 50s linear infinite;
+    z-index: 1;
+    pointer-events: none;
+}
+
+@keyframes heraldryFloat {
+    0% { transform: translate(0, 0) rotate(0deg); }
+    100% { transform: translate(-80px, -80px) rotate(360deg); }
+}
+
+/* ===== CONTAINER PRINCIPAL DE CASAS ===== */
+.create-house-container {
+    min-height: 100vh;
+    position: relative;
+    z-index: 2;
+}
+
+/* ===== HERO SECTION ÉPICO ===== */
+.create-hero {
+    min-height: 60vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    background: 
+        radial-gradient(circle at center, rgba(201, 169, 110, 0.15) 0%, transparent 70%),
+        linear-gradient(45deg, transparent 30%, rgba(139, 0, 0, 0.1) 50%, transparent 70%);
+    overflow: hidden;
+}
+
+.hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(ellipse at center, transparent 0%, rgba(0, 0, 0, 0.4) 100%);
+    z-index: 1;
+}
+
+.hero-content {
+    text-align: center;
+    z-index: 3;
+    position: relative;
+    animation: heroEntrance 1.5s ease-out;
+}
+
+@keyframes heroEntrance {
+    0% { 
+        opacity: 0; 
+        transform: translateY(60px) scale(0.9); 
+    }
+    100% { 
+        opacity: 1; 
+        transform: translateY(0) scale(1); 
+    }
+}
+
+.hero-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 120px;
+    height: 120px;
+    background: 
+        linear-gradient(135deg, var(--house-accent), var(--house-gold)),
+        radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.3), transparent);
+    border-radius: 50%;
+    margin-bottom: 2rem;
+    box-shadow: 
+        var(--house-glow),
+        inset 0 2px 0 rgba(255, 255, 255, 0.3),
+        0 0 0 4px rgba(201, 169, 110, 0.2);
+    animation: crownPulse 6s ease-in-out infinite;
+    position: relative;
+}
+
+@keyframes crownPulse {
+    0%, 100% { 
+        transform: scale(1) rotate(0deg); 
+        box-shadow: var(--house-glow), inset 0 2px 0 rgba(255, 255, 255, 0.3), 0 0 0 4px rgba(201, 169, 110, 0.2);
+    }
+    50% { 
+        transform: scale(1.08) rotate(2deg); 
+        box-shadow: 0 0 50px rgba(201, 169, 110, 0.7), inset 0 2px 0 rgba(255, 255, 255, 0.4), 0 0 0 6px rgba(201, 169, 110, 0.3);
+    }
+}
+
+.hero-icon::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    right: -10px;
+    bottom: -10px;
+    border: 2px solid rgba(201, 169, 110, 0.3);
+    border-radius: 50%;
+    animation: ringRotate 15s linear infinite;
+}
+
+@keyframes ringRotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.hero-icon i {
+    font-size: 3.5rem;
+    color: var(--house-primary);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.hero-title {
+    font-size: 4rem;
+    font-weight: 300;
+    color: var(--house-text);
+    margin: 0 0 1.5rem;
+    text-shadow: 
+        0 2px 10px rgba(0, 0, 0, 0.7),
+        0 0 30px rgba(201, 169, 110, 0.3);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    background: linear-gradient(135deg, var(--house-text), var(--house-accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.hero-subtitle {
+    font-size: 1.4rem;
+    color: var(--house-text-muted);
+    margin: 0;
+    font-weight: 300;
+    line-height: 1.6;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* ===== ELEMENTOS FLOTANTES HERÁLDICOS ===== */
+.floating-elements {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.floating-crown, .floating-banner, .floating-shield {
+    position: absolute;
+    color: rgba(201, 169, 110, 0.2);
+    font-size: 2.5rem;
+    animation: nobleFloat 15s ease-in-out infinite;
+    filter: blur(1px);
+}
+
+.floating-crown {
+    top: 20%;
+    left: 15%;
+    animation-delay: 0s;
+}
+
+.floating-banner {
+    top: 30%;
+    right: 20%;
+    animation-delay: 5s;
+}
+
+.floating-shield {
+    bottom: 25%;
+    left: 25%;
+    animation-delay: 10s;
+}
+
+@keyframes nobleFloat {
+    0%, 100% { 
+        transform: translateY(0) rotate(0deg) scale(1); 
+        opacity: 0.2; 
+    }
+    25% { 
+        transform: translateY(-30px) rotate(10deg) scale(1.1); 
+        opacity: 0.35; 
+    }
+    50% { 
+        transform: translateY(-15px) rotate(0deg) scale(1); 
+        opacity: 0.2; 
+    }
+    75% { 
+        transform: translateY(-40px) rotate(-10deg) scale(1.1); 
+        opacity: 0.35; 
+    }
+}
+
+/* ===== SECCIÓN DEL FORMULARIO ===== */
+.create-form-section {
+    padding: 4rem 2rem;
+    position: relative;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.form-container {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 3rem;
+    align-items: start;
+}
+
+/* ===== TARJETA DEL FORMULARIO ===== */
+.form-card {
+    background: var(--house-glass);
+    backdrop-filter: blur(30px) saturate(1.3);
+    border: 1px solid var(--house-glass-border);
+    border-radius: 25px;
+    padding: 3rem;
+    box-shadow: 
+        var(--house-shadow),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1),
+        0 0 0 1px rgba(201, 169, 110, 0.1);
+    position: relative;
+    overflow: hidden;
+    animation: cardEntrance 1s ease-out 0.5s both;
+}
+
+@keyframes cardEntrance {
+    0% { 
+        opacity: 0; 
+        transform: translateY(50px) scale(0.95); 
+    }
+    100% { 
+        opacity: 1; 
+        transform: translateY(0) scale(1); 
+    }
+}
+
+.form-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, 
+        transparent 0%, 
+        var(--house-accent) 50%, 
+        transparent 100%);
+    animation: topShine 4s ease-in-out infinite;
+}
+
+@keyframes topShine {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 0.9; }
+}
+
+/* ===== HEADER DEL FORMULARIO ===== */
+.form-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid rgba(201, 169, 110, 0.2);
+    position: relative;
+}
+
+.form-header::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 50%;
+    width: 100px;
+    height: 2px;
+    background: linear-gradient(90deg, 
+        transparent 0%, 
+        var(--house-accent) 50%, 
+        transparent 100%);
+    transform: translateX(-50%);
+}
+
+.form-header h2 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    font-size: 2rem;
+    font-weight: 500;
+    color: var(--house-text);
+    margin: 0 0 1rem;
+    letter-spacing: 1px;
+}
+
+.form-header h2 i {
+    color: var(--house-accent);
+}
+
+.form-header p {
+    color: var(--house-text-muted);
+    margin: 0;
+    font-size: 1.1rem;
+    line-height: 1.5;
+}
+
+/* ===== GRID DEL FORMULARIO ===== */
+.form-grid {
+    display: grid;
+    gap: 3rem;
+}
+
+.form-section {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 20px;
+    padding: 2.5rem;
+    border: 1px solid rgba(201, 169, 110, 0.1);
+    backdrop-filter: blur(15px);
+    transition: all 0.3s ease;
+}
+
+.form-section:hover {
+    border-color: rgba(201, 169, 110, 0.2);
+    box-shadow: 0 5px 20px rgba(201, 169, 110, 0.1);
+    transform: translateY(-2px);
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--house-accent);
+    margin: 0 0 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(201, 169, 110, 0.15);
+}
+
+.section-title i {
+    font-size: 1.2rem;
+}
+
+/* ===== CAMPOS DEL FORMULARIO ===== */
+.input-group {
+    margin-bottom: 2rem;
+}
+
+.form-label {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--house-text);
+    margin-bottom: 0.8rem;
+}
+
+.form-label i {
+    color: var(--house-accent);
+    width: 20px;
+    text-align: center;
+}
+
+.input-container {
+    position: relative;
+}
+
+.form-input, .form-select, .form-textarea {
+    width: 100%;
+    padding: 1.2rem 1.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(201, 169, 110, 0.25);
+    border-radius: 15px;
+    color: var(--house-text);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    box-sizing: border-box;
+}
+
+.form-input::placeholder, .form-textarea::placeholder {
+    color: var(--house-text-muted);
+    opacity: 0.7;
+}
+
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+    outline: none;
+    border-color: var(--house-accent);
+    box-shadow: 
+        0 0 0 3px rgba(201, 169, 110, 0.2),
+        0 5px 15px rgba(201, 169, 110, 0.1);
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateY(-1px);
+}
+
+.form-textarea {
+    resize: vertical;
+    min-height: 120px;
+    line-height: 1.6;
+}
+
+/* ===== PREVIEW DE IMAGEN ===== */
+.image-preview-container {
+    margin-top: 1.5rem;
+}
+
+.image-preview {
+    width: 100%;
+    height: 200px;
+    border-radius: 15px;
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.3);
+    border: 2px dashed rgba(201, 169, 110, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.image-preview:hover {
+    border-color: var(--house-accent);
+    transform: scale(1.02);
+}
+
+.preview-placeholder {
+    text-align: center;
+    color: var(--house-text-muted);
+}
+
+.preview-placeholder i {
+    font-size: 3rem;
+    color: var(--house-accent);
+    margin-bottom: 1rem;
+    opacity: 0.7;
+}
+
+.preview-placeholder p {
+    margin: 0;
+    font-size: 1rem;
+}
+
+.image-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.preview-error {
+    text-align: center;
+    color: #ff6b6b;
+}
+
+.preview-error i {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+/* ===== CONTADOR DE CARACTERES ===== */
+.char-counter {
+    text-align: right;
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--house-text-muted);
+    transition: color 0.3s ease;
+}
+
+.char-counter.over-limit {
+    color: #ff6b6b;
+    font-weight: 600;
+}
+
+/* ===== VALIDACIÓN ===== */
+.input-feedback {
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    display: none;
+    transition: all 0.3s ease;
+}
+
+.input-feedback.error {
+    background: rgba(255, 107, 107, 0.1);
+    color: #ff6b6b;
+    border: 1px solid rgba(255, 107, 107, 0.3);
+    display: block;
+    animation: errorShake 0.5s ease-in-out;
+}
+
+@keyframes errorShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+.input-container.error .form-input,
+.input-container.error .form-select,
+.input-container.error .form-textarea {
+    border-color: #ff6b6b;
+    box-shadow: 0 0 0 2px rgba(255, 107, 107, 0.2);
+}
+
+/* ===== ACCIONES DEL FORMULARIO ===== */
+.form-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(201, 169, 110, 0.2);
+    gap: 1rem;
+}
+
+.btn {
+    padding: 1.2rem 2.5rem;
+    border-radius: 30px;
+    font-size: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.8rem;
+    position: relative;
+    overflow: hidden;
+    min-width: 160px;
+    justify-content: center;
+    text-decoration: none;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--house-accent), var(--house-gold));
+    color: var(--house-primary);
+    border: 2px solid var(--house-accent);
+    box-shadow: 0 4px 20px rgba(201, 169, 110, 0.3);
+}
+
+.btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 
+        0 8px 30px rgba(201, 169, 110, 0.4),
+        0 0 40px rgba(201, 169, 110, 0.3);
+    background: linear-gradient(135deg, var(--house-gold), var(--house-accent));
+}
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--house-text-muted);
+    border: 2px solid rgba(201, 169, 110, 0.3);
+    backdrop-filter: blur(15px);
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: var(--house-text);
+    border-color: var(--house-accent);
+    transform: translateY(-2px);
+}
+
+/* ===== BOTÓN CON LOADING ===== */
+.submit-btn {
+    position: relative;
+}
+
+.btn-content, .btn-loading {
+    transition: opacity 0.3s ease;
+}
+
+.btn-loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+}
+
+.submit-btn.loading .btn-content {
+    opacity: 0;
+}
+
+.submit-btn.loading .btn-loading {
+    opacity: 1;
+}
+
+/* ===== TARJETA DE CONSEJOS ===== */
+.tips-card {
+    background: var(--house-glass);
+    backdrop-filter: blur(25px);
+    border: 1px solid var(--house-glass-border);
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    animation: tipsEntrance 1s ease-out 0.8s both;
+    position: sticky;
+    top: 2rem;
+}
+
+@keyframes tipsEntrance {
+    0% { 
+        opacity: 0; 
+        transform: translateX(30px); 
+    }
+    100% { 
+        opacity: 1; 
+        transform: translateX(0); 
+    }
+}
+
+.tips-header {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(201, 169, 110, 0.2);
+}
+
+.tips-header h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    color: var(--house-accent);
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+.tip-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    padding: 0.8rem;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.tip-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    transform: translateX(5px);
+}
+
+.tip-item:last-child {
+    margin-bottom: 0;
+}
+
+.tip-item i {
+    color: var(--house-accent);
+    margin-top: 0.2rem;
+    flex-shrink: 0;
+}
+
+.tip-item p {
+    margin: 0;
+    color: var(--house-text-muted);
+    line-height: 1.5;
+    font-size: 0.95rem;
+}
+
+/* ===== ANIMACIONES DE ESTADO ===== */
+.submit-btn.success {
+    background: linear-gradient(135deg, #22c55e, #16a34a) !important;
+    animation: successPulse 0.6s ease-out;
+}
+
+@keyframes successPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.submit-btn.error {
+    background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+    animation: errorShake 0.5s ease-in-out;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1200px) {
+    .form-container {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+    
+    .tips-card {
+        position: static;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: 2.5rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.1rem;
+    }
+    
+    .hero-icon {
+        width: 90px;
+        height: 90px;
+    }
+    
+    .hero-icon i {
+        font-size: 2.5rem;
+    }
+    
+    .form-card {
+        padding: 2rem;
+    }
+    
+    .form-section {
+        padding: 1.5rem;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+    }
+    
+    .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .create-form-section {
+        padding: 2rem 1rem;
+    }
+    
+    .hero-title {
+        font-size: 2rem;
+    }
+    
+    .form-card {
+        padding: 1.5rem;
+    }
+    
+    .btn {
+        padding: 1rem 2rem;
+        font-size: 0.9rem;
+    }
+}

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}{{ error_title }} - WesterosTracker{% endblock %}
+
+{% block content %}
+<div class="error-container text-center my-5">
+    <div class="error-icon mb-4">
+        <i class="fas {{ error_icon }} fa-4x text-danger"></i>
+    </div>
+    <h1 class="error-code display-1">{{ error_code }}</h1>
+    <h2 class="error-title mb-4">{{ error_title }}</h2>
+    <p class="error-description lead mb-4">{{ error_message }}</p>
+    <div class="error-actions mt-5">
+        <a href="{{ url_for('index') }}" class="btn btn-primary btn-lg">
+            <i class="fas fa-home me-2"></i>Volver a inicio
+        </a>
+        {% if show_back_button %}
+        <button onclick="history.back()" class="btn btn-outline-secondary btn-lg ms-3">
+            <i class="fas fa-arrow-left me-2"></i>Volver atrás
+        </button>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

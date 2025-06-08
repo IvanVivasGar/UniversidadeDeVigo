@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if house %}Editar Casa{% else %}Crear Casa{% endif %} - WesterosTracker
+{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/houses.css') }}?v={{ range(1000, 9999) | random }}">
+{% endblock %}
+
+{% block content %}
+<div class="form-container"
+     data-edit-mode="{% if house %}true{% else %}false{% endif %}"
+     data-house-name="{% if house %}{{ house.name|replace('"', '&quot;') }}{% else %}{% endif %}">
+    <div class="form-background">
+        <div class="form-overlay"></div>
+    </div>
+    
+    <div class="form-content">
+        <div class="form-header">
+            <h1 class="form-title">
+                <i class="fas fa-shield-alt"></i>
+                {% if house %}
+                    <span>Editar Casa Noble</span>
+                {% else %}
+                    <span>Fundar Nueva Casa</span>
+                {% endif %}
+            </h1>
+            <p class="form-subtitle">
+                {% if house %}
+                    Modifica los detalles de la Casa {{ house.name }}
+                {% else %}
+                    Establece una nueva casa noble en los Siete Reinos
+                {% endif %}
+            </p>
+        </div>
+
+        <form class="house-form" method="POST" enctype="multipart/form-data" id="houseForm">
+            <div class="form-grid">
+                <!-- Información Principal -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-crown"></i>
+                        Información Principal
+                    </h3>
+                    
+                    <div class="form-group">
+                        <label for="name" class="form-label">
+                            <i class="fas fa-flag"></i>
+                            Nombre de la Casa *
+                        </label>
+                        <input 
+                            type="text" 
+                            id="name" 
+                            name="name" 
+                            class="form-input" 
+                            value="{{ house.name if house else '' }}" 
+                            required
+                            placeholder="Ej: Casa Stark, Casa Targaryen..."
+                        >
+                        <div class="input-feedback"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="motto" class="form-label">
+                            <i class="fas fa-quote-left"></i>
+                            Lema de la Casa *
+                        </label>
+                        <input 
+                            type="text" 
+                            id="motto" 
+                            name="motto" 
+                            class="form-input" 
+                            value="{{ house.motto if house else '' }}" 
+                            required
+                            placeholder="Ej: Winter is Coming, Fire and Blood..."
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description" class="form-label">
+                            <i class="fas fa-scroll"></i>
+                            Descripción de la Casa *
+                        </label>
+                        <textarea 
+                            id="description" 
+                            name="description" 
+                            class="form-textarea" 
+                            rows="6" 
+                            required
+                            placeholder="Describe la historia, características y tradiciones de esta casa noble..."
+                        >{{ house.description if house else '' }}</textarea>
+                        <div class="char-counter">
+                            <span id="desc-count">{{ house.description|length if house else 0 }}</span>/1500 caracteres
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Imagen Principal -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-image"></i>
+                        Escudo de Armas
+                    </h3>
+                    
+                    <div class="form-group">
+                        <label for="image" class="form-label">
+                            <i class="fas fa-shield-virus"></i>
+                            Imagen Principal de la Casa
+                        </label>
+                        <div class="image-upload-container">
+                            <input type="file" id="image" name="image" class="file-input" accept="image/*">
+                            <label for="image" class="file-label">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <span>Subir escudo de armas</span>
+                            </label>
+                            <div class="file-info">
+                                Formatos: JPG, PNG, GIF (máx. 5MB)
+                            </div>
+                        </div>
+                        {% if house and house.image_urls and house.image_urls|length > 0 %}
+                            <div class="current-image">
+                                <p class="image-label">Escudo actual:</p>
+                                <img src="{{ house.image_urls[0] }}" alt="{{ house.name }}" class="preview-image">
+                            </div>
+                        {% endif %}
+                        <div id="image-preview" class="image-preview" style="display: none;">
+                            <img id="preview-img" src="" alt="Preview">
+                            <button type="button" class="remove-preview" id="removePreview">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Imágenes Adicionales -->
+                    <div class="form-group">
+                        <label for="additional_images" class="form-label">
+                            <i class="fas fa-images"></i>
+                            Imágenes Adicionales
+                        </label>
+                        <div class="image-upload-container">
+                            <input type="file" id="additional_images" name="additional_images" class="file-input" accept="image/*" multiple>
+                            <label for="additional_images" class="file-label">
+                                <i class="fas fa-plus-circle"></i>
+                                <span>Agregar más imágenes</span>
+                            </label>
+                            <div class="file-info">
+                                Puedes seleccionar múltiples imágenes (máx. 3 adicionales)
+                            </div>
+                        </div>
+                        {% if house and house.image_urls and house.image_urls|length > 1 %}
+                            <div class="additional-images">
+                                <p class="image-label">Imágenes adicionales actuales:</p>
+                                <div class="image-grid">
+                                    {% for img_url in house.image_urls[1:] %}
+                                        <img src="{{ img_url }}" alt="{{ house.name }}" class="additional-image">
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endif %}
+                        <div id="additional-preview" class="additional-preview"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botones de Acción -->
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="history.back()">
+                    <i class="fas fa-arrow-left"></i>
+                    Cancelar
+                </button>
+                <button type="submit" class="btn btn-primary" id="submitBtn">
+                    <i class="fas fa-save"></i>
+                    {% if house %}Actualizar Casa{% else %}Fundar Casa{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/house_form.js') }}"></script>
+{% endblock %}

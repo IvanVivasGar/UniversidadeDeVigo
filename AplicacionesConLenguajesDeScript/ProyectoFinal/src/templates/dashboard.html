@@ -1,0 +1,246 @@
+{% extends "base.html" %}
+
+{% block title %}Mi Panel - WesterosTracker{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1>Mi Panel</h1>
+        <p class="text-muted">Bienvenido, {{ current_user.username }}. Gestiona tus favoritos.</p>
+    </div>
+    <div class="col-md-4 text-md-end">
+        <a href="{{ url_for('auth.profile') }}" class="btn btn-outline-primary">
+            <i class="fas fa-user-cog me-1"></i> Editar perfil
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-4 mb-4">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">Personajes Favoritos</h4>
+                <span class="badge bg-light text-primary">{{ favorite_characters|length }}</span>
+            </div>
+            <div class="card-body">
+                {% if favorite_characters %}
+                <div class="list-group">
+                    {% for character in favorite_characters %}
+                    <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
+                            {% if character.image_url %}
+                            <img src="{{ character.image_url }}" alt="{{ character.name }}" class="me-3 rounded-circle" style="width: 40px; height: 40px; object-fit: cover;">
+                            {% else %}
+                            <div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                                <i class="fas fa-user text-muted"></i>
+                            </div>
+                            {% endif %}
+                            <div>
+                                <h6 class="mb-0">{{ character.name }}</h6>
+                                {% if character.title %}
+                                <small class="text-muted">{{ character.title }}</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div>
+                            <a href="{{ url_for('characters.character_detail', character_id=character.get_id()) }}" class="btn btn-sm btn-outline-primary me-2">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <button class="btn btn-sm btn-outline-danger favorite-btn" data-id="{{ character.get_id() }}" data-type="characters">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="alert alert-light">
+                    <i class="fas fa-info-circle me-2"></i>
+                    No tienes personajes favoritos todavía.
+                    <a href="{{ url_for('characters.character_list') }}" class="alert-link">Explora los personajes</a> y marca algunos como favoritos.
+                </div>
+                {% endif %}
+            </div>
+            <div class="card-footer text-center">
+                <a href="{{ url_for('characters.character_list') }}" class="btn btn-outline-primary btn-sm">Ver todos los personajes</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4 mb-4">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">Casas Favoritas</h4>
+                <span class="badge bg-light text-primary">{{ favorite_houses|length }}</span>
+            </div>
+            <div class="card-body">
+                {% if favorite_houses %}
+                <div class="list-group">
+                    {% for house in favorite_houses %}
+                    <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
+                            {% if house.image_url %}
+                            <img src="{{ house.image_url }}" alt="{{ house.name }}" class="me-3" style="width: 40px; height: 40px; object-fit: contain;">
+                            {% else %}
+                            <div class="bg-light d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                                <i class="fas fa-flag text-muted"></i>
+                            </div>
+                            {% endif %}
+                            <div>
+                                <h6 class="mb-0">{{ house.name }}</h6>
+                                <small class="text-muted">{{ house.region }}</small>
+                            </div>
+                        </div>
+                        <div>
+                            <a href="{{ url_for('houses.house_detail', house_id=house.get_id()) }}" class="btn btn-sm btn-outline-primary me-2">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <button class="btn btn-sm btn-outline-danger favorite-btn" data-id="{{ house.get_id() }}" data-type="houses">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="alert alert-light">
+                    <i class="fas fa-info-circle me-2"></i>
+                    No tienes casas favoritas todavía.
+                    <a href="{{ url_for('houses.house_list') }}" class="alert-link">Explora las casas</a> y marca algunas como favoritas.
+                </div>
+                {% endif %}
+            </div>
+            <div class="card-footer text-center">
+                <a href="{{ url_for('houses.house_list') }}" class="btn btn-outline-primary btn-sm">Ver todas las casas</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4 mb-4">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">Eventos Favoritos</h4>
+                <span class="badge bg-light text-primary">{{ favorite_events|length }}</span>
+            </div>
+            <div class="card-body">
+                {% if favorite_events %}
+                <div class="list-group">
+                    {% for event in favorite_events %}
+                    <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
+                            {% if event.image_url %}
+                            <img src="{{ event.image_url }}" alt="{{ event.name }}" class="me-3" style="width: 40px; height: 40px; object-fit: cover;">
+                            {% else %}
+                            <div class="bg-light d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                                <i class="fas fa-landmark text-muted"></i>
+                            </div>
+                            {% endif %}
+                            <div>
+                                <h6 class="mb-0">{{ event.name }}</h6>
+                                <small class="text-muted">S{{ event.season }}E{{ event.episode }}</small>
+                            </div>
+                        </div>
+                        <div>
+                            <a href="{{ url_for('events.event_detail', event_id=event.get_id()) }}" class="btn btn-sm btn-outline-primary me-2">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <button class="btn btn-sm btn-outline-danger favorite-btn" data-id="{{ event.get_id() }}" data-type="events">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="alert alert-light">
+                    <i class="fas fa-info-circle me-2"></i>
+                    No tienes eventos favoritos todavía.
+                    <a href="{{ url_for('events.event_list') }}" class="alert-link">Explora los eventos</a> y marca algunos como favoritos.
+                </div>
+                {% endif %}
+            </div>
+            <div class="card-footer text-center">
+                <a href="{{ url_for('events.event_list') }}" class="btn btn-outline-primary btn-sm">Ver todos los eventos</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Actividad reciente</h4>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-light">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Próximamente: El historial de tu actividad reciente.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Manejar la eliminación de favoritos desde el dashboard
+    const favoriteButtons = document.querySelectorAll('.favorite-btn');
+    
+    favoriteButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const itemId = this.dataset.id;
+            const itemType = this.dataset.type;
+            const listItem = this.closest('.list-group-item');
+            
+            fetch(`/favorites/${itemType}/${itemId}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Eliminar el elemento de la lista con animación
+                    listItem.style.transition = 'all 0.3s ease';
+                    listItem.style.opacity = '0';
+                    listItem.style.height = '0';
+                    listItem.style.overflow = 'hidden';
+                    
+                    setTimeout(() => {
+                        listItem.remove();
+                        
+                        // Actualizar el contador
+                        const container = btn.closest('.card');
+                        const counter = container.querySelector('.badge');
+                        const listItems = container.querySelectorAll('.list-group-item');
+                        counter.textContent = listItems.length - 1;
+                        
+                        // Mostrar alerta si no quedan favoritos
+                        if (listItems.length <= 1) {
+                            const listGroup = container.querySelector('.list-group');
+                            const type = itemType === 'characters' ? 'personajes' : 
+                                       itemType === 'houses' ? 'casas' : 'eventos';
+                            
+                            listGroup.innerHTML = `
+                                <div class="alert alert-light">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    No tienes ${type} favoritos todavía.
+                                    <a href="{{ url_for('index') }}" class="alert-link">Explora los ${type}</a> y marca algunos como favoritos.
+                                </div>
+                            `;
+                        }
+                    }, 300);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    });
+});
+</script>
+{% endblock %}

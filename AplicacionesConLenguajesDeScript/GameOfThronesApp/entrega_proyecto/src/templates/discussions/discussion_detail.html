@@ -1,0 +1,887 @@
+{% extends "base.html" %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/discussion_detail.css') }}">
+{% endblock %}
+
+{% block title %}{{ discussion.title }} - Discusiones - WesterosTracker{% endblock %}
+
+{% block content %}
+<div class="discussion-detail-page">
+    <!-- Hero Section with Discussion Header -->
+    <div class="discussion-hero-header">
+        <div class="container">
+            <!-- Breadcrumb Navigation -->
+            <nav class="breadcrumb-nav">
+                <div class="breadcrumb">
+                    <a href="{{ url_for('discussions.discussions') }}" class="breadcrumb-link">
+                        <i class="fas fa-comments"></i>
+                        Discusiones
+                    </a>
+                    <span class="breadcrumb-separator">
+                        <i class="fas fa-chevron-right"></i>
+                    </span>
+                    <span class="breadcrumb-current">{{ discussion.title }}</span>
+                </div>
+            </nav>
+
+            <!-- Discussion Title and Meta Information -->
+            <div class="discussion-hero-content">
+                <div class="discussion-title-section">
+                    <h1 class="discussion-main-title">{{ discussion.title }}</h1>
+                    
+                    <!-- Discussion Badges and Category -->
+                    <div class="discussion-meta-badges">
+                        {% if discussion.is_pinned %}
+                        <span class="discussion-badge pinned-badge">
+                            <i class="fas fa-thumbtack"></i>
+                            Fijada
+                        </span>
+                        {% endif %}
+                        
+                        {% if discussion.is_closed %}
+                        <span class="discussion-badge closed-badge">
+                            <i class="fas fa-lock"></i>
+                            Cerrada
+                        </span>
+                        {% endif %}
+                        
+                        <span class="discussion-category category-{{ discussion.category }}">
+                            <i class="fas fa-{{ 'comments' if discussion.category == 'general' else 'lightbulb' if discussion.category == 'teoria' else 'search' if discussion.category == 'analisis' else 'calendar' if discussion.category == 'eventos' else 'home' if discussion.category == 'casas' else 'book' if discussion.category == 'libros' else 'question-circle' if discussion.category == 'ayuda' else 'chat' }}"></i>
+                            {{ discussion.category.title() }}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Author and Post Information -->
+                <div class="discussion-author-section">
+                    <div class="author-card">
+                        <div class="author-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="author-details">
+                            <span class="author-name">{{ author_name }}</span>
+                            <span class="author-role">Autor de la discusión</span>
+                            <time class="post-time" datetime="{{ discussion.created_at.isoformat() }}">
+                                {{ discussion.created_at.strftime('%d de %B de %Y a las %H:%M') }}
+                            </time>
+                        </div>
+                    </div>
+
+                    <!-- Discussion Statistics -->
+                    <div class="discussion-stats-hero">
+                        <div class="stat-item">
+                            <i class="fas fa-eye"></i>
+                            <span class="stat-number">{{ discussion.view_count }}</span>
+                            <span class="stat-label">visualizaciones</span>
+                        </div>
+                        <div class="stat-item">
+                            <i class="fas fa-heart"></i>
+                            <span class="stat-number">{{ discussion.likes|length }}</span>
+                            <span class="stat-label">me gusta</span>
+                        </div>
+                        <div class="stat-item">
+                            <i class="fas fa-reply"></i>
+                            <span class="stat-number">{{ discussion.replies|length }}</span>
+                            <span class="stat-label">respuestas</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Admin Actions (if applicable) -->
+                {% if current_user.is_authenticated and (current_user.__oid__ == discussion.author_oid or current_user.is_admin) %}
+                <div class="admin-actions">
+                    <div class="dropdown">
+                        <button class="admin-dropdown-btn">
+                            <i class="fas fa-cog"></i>
+                            Administrar
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="dropdown-menu">
+                            {% if not discussion.is_pinned %}
+                            <a href="#" onclick="pinDiscussion('{{ discussion.get_oid() }}')" class="dropdown-item">
+                                <i class="fas fa-thumbtack"></i>
+                                Fijar Discusión
+                            </a>
+                            {% endif %}
+                            
+                            {% if not discussion.is_closed %}
+                            <a href="#" onclick="closeDiscussion('{{ discussion.get_oid() }}')" class="dropdown-item">
+                                <i class="fas fa-lock"></i>
+                                Cerrar Discusión
+                            </a>
+                            {% else %}
+                            <a href="#" onclick="reopenDiscussion('{{ discussion.get_oid() }}')" class="dropdown-item">
+                                <i class="fas fa-unlock"></i>
+                                Reabrir Discusión
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="discussion-main-content">
+        <div class="container">
+            <div class="discussion-layout">
+                <!-- Primary Content Column -->
+                <div class="discussion-primary">
+                    <!-- Original Discussion Post -->
+                    <article class="original-post">
+                        <div class="post-content-wrapper">
+                            {% if discussion.featured_image %}
+                            <div class="featured-image">
+                                <img src="{{ discussion.featured_image }}" alt="Imagen destacada" loading="lazy">
+                            </div>
+                            {% endif %}
+                            
+                            <div class="post-content">
+                                {{ discussion.content|safe }}
+                            </div>
+                            
+                            {% if discussion.tags %}
+                            <div class="post-tags-section">
+                                <span class="tags-label">
+                                    <i class="fas fa-tags"></i>
+                                    Etiquetas:
+                                </span>
+                                <div class="tags-list">
+                                    {% for tag in discussion.tags %}
+                                    <span class="tag">{{ tag }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Post Engagement Actions -->
+                        <div class="post-engagement">
+                            <div class="engagement-actions">
+                                {% if current_user.is_authenticated %}
+                                <button class="engagement-btn like-btn {% if current_user.get_oid() in discussion.likes %}liked{% endif %}" 
+                                        onclick="toggleLike('{{ discussion.get_oid() }}', 'discussion')">
+                                    <i class="fas fa-heart"></i>
+                                    <span>{{ discussion.likes|length }}</span>
+                                    <span class="btn-label">Me gusta</span>
+                                </button>
+                                {% endif %}
+                                
+                                <button class="engagement-btn share-btn" onclick="shareDiscussion()">
+                                    <i class="fas fa-share"></i>
+                                    <span class="btn-label">Compartir</span>
+                                </button>
+                                
+                                <button class="engagement-btn bookmark-btn" onclick="bookmarkDiscussion()">
+                                    <i class="fas fa-bookmark"></i>
+                                    <span class="btn-label">Guardar</span>
+                                </button>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- Replies Section -->
+                    <section class="replies-section">
+                        <!-- Replies Header with Controls -->
+                        <div class="replies-header">
+                            <div class="replies-title-section">
+                                <h2 class="replies-title">
+                                    <i class="fas fa-reply"></i>
+                                    Respuestas 
+                                    <span class="replies-count">({{ discussion.replies|length }})</span>
+                                </h2>
+                                
+                                {% if discussion.replies|length > 0 %}
+                                <p class="replies-subtitle">
+                                    {% if discussion.replies|length == 1 %}
+                                    Hay 1 respuesta en esta discusión
+                                    {% else %}
+                                    Hay {{ discussion.replies|length }} respuestas en esta discusión. Cada usuario puede agregar múltiples respuestas.
+                                    {% endif %}
+                                </p>
+                                {% endif %}
+                            </div>
+                            
+                            {% if discussion.replies|length > 1 %}
+                            <div class="replies-controls">
+                                <label for="reply-sort" class="sort-label">Ordenar por:</label>
+                                <select id="reply-sort" class="sort-select" onchange="sortReplies(this.value)">
+                                    <option value="newest">Más recientes</option>
+                                    <option value="oldest">Más antiguas</option>
+                                    <option value="popular">Más populares</option>
+                                </select>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Reply Form Section -->
+                        {% if current_user.is_authenticated and not discussion.is_closed %}
+                        <div class="reply-form-section" id="replyFormContainer">
+                            <div class="reply-form-header">
+                                <h3 class="form-title">
+                                    <i class="fas fa-edit"></i>
+                                    Añadir una nueva respuesta
+                                </h3>
+                                <p class="form-subtitle">Comparte tu opinión o ayuda a resolver la discusión. Puedes responder múltiples veces.</p>
+                            </div>
+                            
+                            <div class="reply-form-wrapper">
+                                <div class="user-info">
+                                    <div class="user-avatar">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <span class="user-name">{{ current_user.username }}</span>
+                                </div>
+                                
+                                <form action="{{ url_for('discussions.add_reply', discussion_id=discussion.get_oid()) }}" 
+                                      method="POST" 
+                                      id="simpleReplyForm" 
+                                      class="reply-form">
+                                    <div class="textarea-wrapper">
+                                        <textarea name="content"
+                                                 id="replyTextarea"
+                                                 placeholder="Escribe tu respuesta aquí... (mínimo 5 caracteres)"
+                                                 class="reply-textarea"
+                                                 rows="5"
+                                                 required></textarea>
+                                        
+                                        <div class="textarea-footer">
+                                            <div class="formatting-help">
+                                                <small class="help-text">
+                                                    <i class="fas fa-info-circle"></i>
+                                                    Puedes usar **negrita**, *cursiva* y > citas
+                                                </small>
+                                            </div>
+                                            <div class="character-count">
+                                                <span id="charCount">0</span> caracteres
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-actions">
+                                        <button type="button" class="btn btn-secondary" onclick="clearReplyForm()">
+                                            <i class="fas fa-times"></i>
+                                            Cancelar
+                                        </button>
+                                        <button type="button" class="btn btn-primary" id="submitReplyBtn">
+                                            <i class="fas fa-paper-plane"></i>
+                                            Publicar respuesta
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        
+                        {% elif not current_user.is_authenticated %}
+                        <div class="auth-prompt">
+                            <div class="prompt-content">
+                                <div class="prompt-icon">
+                                    <i class="fas fa-sign-in-alt"></i>
+                                </div>
+                                <div class="prompt-text">
+                                    <h3>¿Quieres participar en esta discusión?</h3>
+                                    <p>
+                                        <a href="{{ url_for('auth.login') }}" class="auth-link">Inicia sesión</a> 
+                                        o 
+                                        <a href="{{ url_for('auth.register') }}" class="auth-link">regístrate</a>
+                                        para añadir tus respuestas (puedes responder múltiples veces)
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {% elif discussion.is_closed %}
+                        <div class="closed-notice">
+                            <div class="notice-content">
+                                <div class="notice-icon">
+                                    <i class="fas fa-lock"></i>
+                                </div>
+                                <div class="notice-text">
+                                    <h3>Discusión cerrada</h3>
+                                    <p>Esta discusión está cerrada y no acepta nuevas respuestas</p>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Replies List -->
+                        {% if replies_with_authors %}
+                        <div class="replies-list" id="repliesList">
+                            {% for item in replies_with_authors %}
+                            {% set reply = item.reply %}
+                            {% set reply_author_name = item.author_name %}
+                            <article class="reply-item" data-reply-id="{{ item.oid }}" data-created="{{ reply.created_at.timestamp() }}">
+                                <div class="reply-header">
+                                    <div class="reply-author">
+                                        <div class="author-avatar">
+                                            <i class="fas fa-user"></i>
+                                        </div>
+                                        <div class="author-info">
+                                            <span class="author-name">{{ reply_author_name }}</span>
+                                            <time class="reply-time" datetime="{{ reply.created_at.isoformat() }}">
+                                                {{ reply.created_at.strftime('%d/%m/%Y %H:%M') }}
+                                            </time>
+                                            {% if reply.is_solution %}
+                                            <span class="solution-badge">
+                                                <i class="fas fa-check-circle"></i>
+                                                Solución
+                                            </span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="reply-actions">
+                                        {% if current_user.is_authenticated %}
+                                        <button class="action-btn like-btn {% if current_user.__oid__ in reply.likes %}liked{% endif %}" 
+                                                onclick="toggleReplyLike('{{ item.oid }}')" title="Me gusta">
+                                            <i class="fas fa-heart"></i>
+                                            <span>{{ reply.likes|length }}</span>
+                                        </button>
+                                        {% endif %}
+                                        
+                                        <button class="action-btn quote-btn" 
+                                                onclick="quoteReply('{{ reply_author_name }}', `{{ reply.content[:100] }}`)" 
+                                                title="Citar respuesta">
+                                            <i class="fas fa-quote-right"></i>
+                                        </button>
+                                        
+                                        {% if current_user.is_authenticated and current_user.__oid__ == discussion.author_oid and not reply.is_solution %}
+                                        <button class="action-btn solution-btn" 
+                                                onclick="markAsSolution('{{ item.oid }}')" 
+                                                title="Marcar como solución">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="reply-content">
+                                    {{ reply.content|safe }}
+                                </div>
+                                
+                                <div class="reply-footer">
+                                    <div class="reply-meta">
+                                        <span class="reply-time-ago">{{ reply.get_time_ago() }}</span>
+                                        {% if reply.updated_at != reply.created_at %}
+                                        <span class="edited-indicator">
+                                            <i class="fas fa-edit"></i>
+                                            Editado
+                                        </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </article>
+                            {% endfor %}
+                        </div>
+                        
+                        {% else %}
+                        <div class="no-replies-state">
+                            <div class="no-replies-content">
+                                <div class="no-replies-icon">
+                                    <i class="fas fa-comment-slash"></i>
+                                </div>
+                                <h3>Aún no hay respuestas</h3>
+                                <p>Esta discusión no tiene respuestas todavía.</p>
+                                {% if current_user.is_authenticated and not discussion.is_closed %}
+                                <p class="cta-text">¡Sé el primero en responder y comenzar el debate! Puedes agregar múltiples respuestas.</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </section>
+                </div>
+                
+                <!-- Sidebar Column -->
+                <aside class="discussion-sidebar">
+                    <!-- Discussion Information Card -->
+                    <div class="sidebar-card info-card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-info-circle"></i>
+                                Información de la discusión
+                            </h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="info-list">
+                                <div class="info-item">
+                                    <span class="info-icon"><i class="fas fa-calendar-plus"></i></span>
+                                    <div class="info-details">
+                                        <span class="info-label">Creada</span>
+                                        <span class="info-value">{{ discussion.created_at.strftime('%d/%m/%Y') }}</span>
+                                    </div>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-icon"><i class="fas fa-folder"></i></span>
+                                    <div class="info-details">
+                                        <span class="info-label">Categoría</span>
+                                        <span class="info-value">{{ discussion.category.title() }}</span>
+                                    </div>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-icon"><i class="fas fa-user-edit"></i></span>
+                                    <div class="info-details">
+                                        <span class="info-label">Autor</span>
+                                        <span class="info-value">{{ author_name }}</span>
+                                    </div>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-icon"><i class="fas fa-clock"></i></span>
+                                    <div class="info-details">
+                                        <span class="info-label">Última actividad</span>
+                                        <span class="info-value">
+                                            {% if discussion.replies %}
+                                            {{ discussion.replies[-1].created_at.strftime('%d/%m/%Y') }}
+                                            {% else %}
+                                            {{ discussion.created_at.strftime('%d/%m/%Y') }}
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Related Discussions Card -->
+                    <div class="sidebar-card related-card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-lightbulb"></i>
+                                Discusiones relacionadas
+                            </h3>
+                        </div>
+                        <div class="card-content">
+                            {% if related_discussions %}
+                            <div class="related-list">
+                                {% for related in related_discussions %}
+                                <div class="related-item">
+                                    <a href="{{ url_for('discussions.discussion_detail', discussion_id=related.get_oid()) }}" 
+                                       class="related-link">
+                                        <h4 class="related-title">{{ related.title }}</h4>
+                                        <div class="related-stats">
+                                            <span class="related-stat">
+                                                <i class="fas fa-reply"></i> 
+                                                {{ related.replies|length }}
+                                            </span>
+                                            <span class="related-stat">
+                                                <i class="fas fa-heart"></i> 
+                                                {{ related.likes|length }}
+                                            </span>
+                                        </div>
+                                    </a>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <div class="no-related">
+                                <i class="fas fa-search"></i>
+                                <p>No hay discusiones relacionadas disponibles</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Quick Navigation Card -->
+                    <div class="sidebar-card navigation-card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-compass"></i>
+                                Navegación rápida
+                            </h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="nav-links">
+                                <a href="{{ url_for('discussions.discussions') }}" class="nav-link">
+                                    <i class="fas fa-arrow-left"></i>
+                                    Volver a discusiones
+                                </a>
+                                {% if current_user.is_authenticated %}
+                                <a href="{{ url_for('discussions.create_discussion') }}" class="nav-link">
+                                    <i class="fas fa-plus"></i>
+                                    Crear nueva discusión
+                                </a>
+                                {% endif %}
+                                <a href="#replyFormContainer" class="nav-link scroll-link">
+                                    <i class="fas fa-reply"></i>
+                                    Responder
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Variables globales
+const DISCUSSION_ID = '{{ discussion.get_oid() }}';
+const CURRENT_USER_NAME = '{{ current_user.username if current_user.is_authenticated else "" }}';
+
+console.log('Inicializando sistema de respuestas múltiples...');
+console.log('Discussion ID:', DISCUSSION_ID);
+console.log('Current user:', CURRENT_USER_NAME);
+
+// Función para mostrar notificaciones
+function showNotification(message, type = 'info') {
+    console.log('Mostrando notificación:', message, type);
+    
+    // Remover notificaciones existentes
+    const existingNotifications = document.querySelectorAll('.notification');
+    existingNotifications.forEach(notification => notification.remove());
+    
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+        <span>${message}</span>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => notification.classList.add('show'), 100);
+    
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 300);
+    }, 3000);
+}
+
+// Event listener para el formulario de respuesta
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM cargado, configurando event listeners para respuestas múltiples...');
+    
+    // Event listener para el botón de responder
+    const submitBtn = document.getElementById('submitReplyBtn');
+    console.log('Botón encontrado:', submitBtn);
+    
+    if (submitBtn) {
+        submitBtn.addEventListener('click', function(e) {
+            console.log('Botón de responder clickeado - permitiendo múltiples respuestas');
+            e.preventDefault();
+            e.stopPropagation();
+            submitReply();
+        });
+        console.log('Event listener del botón configurado correctamente');
+    } else {
+        console.error('No se encontró el botón #submitReplyBtn');
+    }
+    
+    // Auto-resize textarea y contador de caracteres
+    const textarea = document.querySelector('.reply-textarea');
+    const charCount = document.getElementById('charCount');
+    
+    if (textarea) {
+        textarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = this.scrollHeight + 'px';
+            
+            // Actualizar contador de caracteres
+            if (charCount) {
+                charCount.textContent = this.value.length;
+            }
+        });
+    }
+});
+
+// Función principal para enviar respuesta (permitiendo múltiples respuestas)
+async function submitReply() {
+    console.log('submitReply() llamada - enviando nueva respuesta');
+    
+    const submitBtn = document.getElementById('submitReplyBtn');
+    const textarea = document.getElementById('replyTextarea');
+    const content = textarea.value.trim();
+    
+    console.log('Contenido a enviar:', content);
+    
+    // Validaciones
+    if (!content) {
+        showNotification('El contenido de la respuesta es requerido', 'error');
+        return;
+    }
+    
+    if (content.length < 5) {
+        showNotification('La respuesta debe tener al menos 5 caracteres', 'error');
+        return;
+    }
+    
+    // Desabilitar botón y mostrar loading
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando respuesta...';
+    
+    try {
+        console.log('Enviando petición AJAX a:', `/discussions/${DISCUSSION_ID}/reply`);
+        
+        const formData = new FormData();
+        formData.append('content', content);
+        
+        const response = await fetch(`/discussions/${DISCUSSION_ID}/reply`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+        
+        console.log('Respuesta recibida - Status:', response.status);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log('Datos recibidos:', data);
+        
+        if (data.success) {
+            // Limpiar formulario
+            textarea.value = '';
+            textarea.style.height = 'auto';
+            
+            // Actualizar contador de caracteres
+            const charCount = document.getElementById('charCount');
+            if (charCount) {
+                charCount.textContent = '0';
+            }
+            
+            // Mostrar notificación de éxito
+            showNotification(`${data.message} - Total de respuestas: ${data.reply_count || 'desconocido'}`, 'success');
+            
+            // Recargar la página para mostrar la nueva respuesta
+            setTimeout(() => {
+                console.log('Recargando página para mostrar nueva respuesta...');
+                window.location.reload();
+            }, 1500);
+            
+        } else {
+            showNotification(data.message || 'Error al enviar la respuesta', 'error');
+        }
+        
+    } catch (error) {
+        console.error('Error completo:', error);
+        showNotification('Error de conexión al enviar la respuesta', 'error');
+    } finally {
+        // Restaurar botón
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Publicar respuesta';
+    }
+}
+
+// Otras funciones del sistema
+async function toggleLike(discussionId, type) {
+    try {
+        const response = await fetch(`/discussions/${discussionId}/like`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            const button = document.querySelector(`button[onclick="toggleLike('${discussionId}', '${type}')"]`);
+            updateLikeButton(button, data.liked, data.like_count);
+        } else {
+            showNotification(data.message || 'Error al procesar like', 'error');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showNotification('Error de conexión', 'error');
+    }
+}
+
+async function toggleReplyLike(replyId) {
+    try {
+        const response = await fetch(`/discussions/reply/${replyId}/like`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            const button = document.querySelector(`button[onclick="toggleReplyLike('${replyId}')"]`);
+            updateLikeButton(button, data.liked, data.like_count);
+        } else {
+            showNotification(data.message || 'Error al procesar like', 'error');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showNotification('Error de conexión', 'error');
+    }
+}
+
+function updateLikeButton(button, liked, count) {
+    const icon = button.querySelector('i');
+    const span = button.querySelector('span');
+    
+    if (liked) {
+        button.classList.add('liked');
+        icon.className = 'fas fa-heart';
+    } else {
+        button.classList.remove('liked');
+        icon.className = 'far fa-heart';
+    }
+    
+    span.textContent = count;
+}
+
+function quoteReply(author, content) {
+    const textarea = document.querySelector('.reply-textarea');
+    if (textarea) {
+        const quote = `> **${author}** escribió:\n> ${content.replace(/\n/g, '\n> ')}\n\n`;
+        textarea.value = quote + textarea.value;
+        textarea.focus();
+        textarea.scrollIntoView({ behavior: 'smooth' });
+        
+        // Actualizar altura del textarea
+        textarea.style.height = 'auto';
+        textarea.style.height = textarea.scrollHeight + 'px';
+        
+        // Actualizar contador de caracteres
+        const charCount = document.getElementById('charCount');
+        if (charCount) {
+            charCount.textContent = textarea.value.length;
+        }
+    }
+}
+
+function clearReplyForm() {
+    const textarea = document.querySelector('.reply-textarea');
+    const charCount = document.getElementById('charCount');
+    
+    if (textarea) {
+        textarea.value = '';
+        textarea.style.height = 'auto';
+    }
+    
+    if (charCount) {
+        charCount.textContent = '0';
+    }
+}
+
+function shareDiscussion() {
+    if (navigator.share) {
+        navigator.share({
+            title: document.title,
+            url: window.location.href
+        });
+    } else {
+        navigator.clipboard.writeText(window.location.href).then(() => {
+            showNotification('Enlace copiado al portapapeles', 'success');
+        });
+    }
+}
+
+function sortReplies(sortBy) {
+    const repliesList = document.getElementById('repliesList');
+    if (!repliesList) return;
+    
+    const replies = Array.from(repliesList.children);
+    
+    replies.sort((a, b) => {
+        switch(sortBy) {
+            case 'newest':
+                return parseFloat(b.dataset.created) - parseFloat(a.dataset.created);
+            case 'oldest':
+                return parseFloat(a.dataset.created) - parseFloat(b.dataset.created);
+            case 'popular':
+                const aLikes = parseInt(a.querySelector('.like-btn span')?.textContent) || 0;
+                const bLikes = parseInt(b.querySelector('.like-btn span')?.textContent) || 0;
+                return bLikes - aLikes;
+            default:
+                return 0;
+        }
+    });
+    
+    replies.forEach(reply => repliesList.appendChild(reply));
+}
+
+// Funciones adicionales para administración
+async function markAsSolution(replyId) {
+    try {
+        const response = await fetch(`/discussions/reply/${replyId}/solution`, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showNotification(data.message, 'success');
+            setTimeout(() => window.location.reload(), 1000);
+        } else {
+            showNotification(data.message || 'Error al marcar solución', 'error');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showNotification('Error de conexión', 'error');
+    }
+}
+
+async function closeDiscussion(discussionId) {
+    if (!confirm('¿Estás seguro de que quieres cerrar esta discusión?')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/discussions/${discussionId}/close`, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showNotification(data.message, 'success');
+            setTimeout(() => window.location.reload(), 1000);
+        } else {
+            showNotification(data.message || 'Error al cerrar discusión', 'error');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showNotification('Error de conexión', 'error');
+    }
+}
+
+async function pinDiscussion(discussionId) {
+    try {
+        const response = await fetch(`/discussions/${discussionId}/pin`, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showNotification(data.message, 'success');
+            setTimeout(() => window.location.reload(), 1000);
+        } else {
+            showNotification(data.message || 'Error al fijar discusión', 'error');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showNotification('Error de conexión', 'error');
+    }
+}
+</script>
+{% endblock %

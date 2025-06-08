@@ -1,0 +1,397 @@
+{% extends "base.html" %}
+
+{% block title %}Inicio - WesterosTracker{% endblock %}
+
+{% block content %}
+<!-- Página especial sin espacios -->
+<style>
+    /* Quitamos el padding y margen del contenedor principal solo en la página de inicio */
+    main.py-4 {
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+    }
+    
+    main.py-4 > .container {
+        padding-left: 0;
+        padding-right: 0;
+        max-width: 100%;
+        width: 100%;
+        margin-top: -2rem; /* Elimina el espacio de los mensajes flash */
+    }
+    
+    .mt-5 {
+        margin-top: 3rem !important;
+    }
+    
+    .fixed-top-banner {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        z-index: 1030;
+    }
+</style>
+
+<!-- Hero Section with Local Video Background (Full Width) -->
+<div class="hero-section-fullwidth">
+    <!-- Video Background usando el archivo local -->
+    <div class="hero-video-container">
+        <video class="hero-video-fullwidth" autoplay loop muted playsinline>
+            <source src="{{ url_for('static', filename='img/got_background.mp4') }}" type="video/mp4">
+        </video>
+    </div>
+    
+    <!-- Overlay para mejorar contraste -->
+    <div class="hero-overlay-fullwidth"></div>
+    
+    <!-- Contenido del Hero -->
+    <div class="container position-relative">
+        <div class="row align-items-center hero-height">
+            <div class="col-md-8 py-5">
+                <div class="hero-content">
+                    <h1 class="display-4 fw-bold mb-4 text-white hero-text-shadow">Bienvenido a WesterosTracker</h1>
+                    <p class="lead mb-4 text-white hero-text-shadow">Explora el mundo de Game of Thrones. Descubre personajes, casas nobles y eventos icónicos de la serie.</p>
+                    <div class="d-flex flex-wrap">
+                        <a href="{{ url_for('characters.character_list') }}" class="btn btn-primary btn-lg me-2 mb-2">
+                            <i class="fas fa-users me-2"></i>Explorar Personajes
+                        </a>
+                        <a href="{{ url_for('houses.house_list') }}" class="btn btn-secondary btn-lg me-2 mb-2">
+                            <i class="fas fa-flag me-2"></i>Descubrir Casas
+                        </a>
+                        <a href="{{ url_for('events.event_list') }}" class="btn btn-outline-light btn-lg mb-2">
+                            <i class="fas fa-landmark me-2"></i>Ver Eventos
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="container mt-5">
+    <div class="row mb-5">
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 feature-card">
+                <div class="card-body text-center">
+                    <div class="feature-icon mb-3">
+                        <i class="fas fa-user-circle fa-3x"></i>
+                    </div>
+                    <h3 class="card-title">Personajes</h3>
+                    <p class="card-text">
+                        Explora a los personajes icónicos de Game of Thrones, conoce su historia, relaciones y evolución a lo largo de la serie.
+                    </p>
+                    <a href="{{ url_for('characters.character_list') }}" class="btn btn-outline-primary">Descubrir personajes</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 feature-card">
+                <div class="card-body text-center">
+                    <div class="feature-icon mb-3">
+                        <i class="fas fa-flag fa-3x"></i>
+                    </div>
+                    <h3 class="card-title">Casas</h3>
+                    <p class="card-text">
+                        Conoce las grandes casas de Westeros, sus emblemas, lemas y los territorios que dominan en los Siete Reinos.
+                    </p>
+                    <a href="{{ url_for('houses.house_list') }}" class="btn btn-outline-primary">Explorar casas</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 feature-card">
+                <div class="card-body text-center">
+                    <div class="feature-icon mb-3">
+                        <i class="fas fa-landmark fa-3x"></i>
+                    </div>
+                    <h3 class="card-title">Eventos</h3>
+                    <p class="card-text">
+                        Revive los momentos más impactantes de la serie, desde batallas épicas hasta traiciones que cambiaron el curso de la historia.
+                    </p>
+                    <a href="{{ url_for('events.event_list') }}" class="btn btn-outline-primary">Ver eventos</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Additions Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="section-title">Adiciones Recientes</h2>
+            <p class="text-muted">Los últimos personajes, casas y eventos añadidos por nuestra comunidad.</p>
+        </div>
+    </div>
+
+    <div class="row mb-5">
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Últimos Personajes</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_characters %}
+                    <div class="list-group list-group-flush">
+                        {% for character in recent_characters %}
+                        <a href="{{ url_for('characters.character_detail', character_id=character._oid) }}" class="list-group-item list-group-item-action d-flex align-items-center">
+                            {% if character.image_url %}
+                            <img src="{{ character.image_url }}" alt="{{ character.name }}" class="me-3 rounded-circle" style="width: 40px; height: 40px; object-fit: cover;">
+                            {% else %}
+                            <div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                                <i class="fas fa-user text-muted"></i>
+                            </div>
+                            {% endif %}
+                            <div>
+                                <h6 class="mb-0">{{ character.name }}</h6>
+                                {% if character.title %}
+                                <small class="text-muted">{{ character.title }}</small>
+                                {% endif %}
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="alert alert-light">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Próximamente personajes destacados.
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="card-footer text-center">
+                    <a href="{{ url_for('characters.character_list') }}" class="btn btn-sm btn-outline-primary">Ver todos</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Últimas Casas</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_houses %}
+                    <div class="list-group list-group-flush">
+                        {% for house in recent_houses %}
+                        <a href="{{ url_for('houses.house_detail', house_id=house._oid) }}" class="list-group-item list-group-item-action d-flex align-items-center">
+                            {% if house.image_url %}
+                            <img src="{{ house.image_url }}" alt="{{ house.name }}" class="me-3" style="width: 40px; height: 40px; object-fit: contain;">
+                            {% else %}
+                            <div class="bg-light d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                                <i class="fas fa-flag text-muted"></i>
+                            </div>
+                            {% endif %}
+                            <div>
+                                <h6 class="mb-0">Casa {{ house.name }}</h6>
+                                <small class="text-muted">{{ house.region }}</small>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="alert alert-light">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Próximamente casas destacadas.
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="card-footer text-center">
+                    <a href="{{ url_for('houses.house_list') }}" class="btn btn-sm btn-outline-primary">Ver todas</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Últimos Eventos</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_events %}
+                    <div class="list-group list-group-flush">
+                        {% for event in recent_events %}
+                        <a href="{{ url_for('events.event_detail', event_id=event.oid) }}" class="list-group-item list-group-item-action d-flex align-items-center">
+                            {% if event.image_url %}
+                            <img src="{{ event.image_url }}" alt="{{ event.name }}" class="me-3" style="width: 40px; height: 40px; object-fit: cover;">
+                            {% else %}
+                            <div class="bg-light d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                                <i class="fas fa-landmark text-muted"></i>
+                            </div>
+                            {% endif %}
+                            <div>
+                                <h6 class="mb-0">{{ event.name }}</h6>
+                                <small class="text-muted">S{{ event.season }}E{{ event.episode }}</small>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="alert alert-light">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Próximamente eventos destacados.
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="card-footer text-center">
+                    <a href="{{ url_for('events.event_list') }}" class="btn btn-sm btn-outline-primary">Ver todos</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Call to Action Section - Solo mostrar si NO está autenticado -->
+    {% if not is_authenticated %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card bg-dark text-white">
+                <div class="card-body text-center py-5">
+                    <h2 class="card-title mb-4">Únete a nuestra comunidad</h2>
+                    <p class="card-text lead mb-4">
+                        Registrate para guardar tus favoritos, participar en discusiones y contribuir con nuevo contenido sobre el mundo de Westeros.
+                    </p>
+                    <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg me-2">
+                        <i class="fas fa-user-plus me-2"></i>Registrarse
+                    </a>
+                    <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-sign-in-alt me-2"></i>Iniciar sesión
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block css %}
+<style>
+    /* Estilos para video a pantalla completa */
+    .hero-section-fullwidth {
+        position: relative;
+        width: 100vw;
+        height: 100vh;
+        max-height: 800px;
+        margin-left: calc(-50vw + 50%);
+        margin-right: calc(-50vw + 50%);
+        margin-top: 0; /* Cambiado de -70px a 0 para no superponer el navbar */
+        overflow: hidden;
+        z-index: 1; /* Aseguramos que esté por debajo del navbar */
+    }
+    
+    /* Contenedor para el video que lo posiciona debajo del navbar */
+    .hero-video-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 0;
+    }
+    
+    /* Navbar específico para la página de inicio */
+    .navbar {
+        position: relative;
+        z-index: 1050; /* Valor alto para asegurar que esté por encima del video */
+    }
+    
+    .hero-video-fullwidth {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .hero-overlay-fullwidth {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.6);
+        z-index: 1;
+    }
+    
+    .container.position-relative {
+        position: relative;
+        z-index: 2;
+        height: 100%;
+    }
+    
+    .hero-content {
+        background-color: rgba(0, 0, 0, 0.5);
+        padding: 2rem;
+        border-radius: 10px;
+        backdrop-filter: blur(2px);
+    }
+    
+    .hero-height {
+        height: calc(100vh - 56px); /* Ajustado para considerar la altura de la navbar */
+        max-height: 750px; /* Ajustado para dar espacio al navbar */
+        display: flex;
+        align-items: center;
+    }
+    
+    .hero-text-shadow {
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+    }
+    
+    /* Ajustes responsivos */
+    @media (max-width: 768px) {
+        .hero-section-fullwidth {
+            height: 80vh;
+        }
+        
+        .hero-height {
+            height: 80vh;
+        }
+    }
+    
+    /* Estilos para las características */
+    .feature-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border: none;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .feature-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+    }
+    
+    .feature-icon {
+        color: var(--bs-primary);
+    }
+    
+    .section-title {
+        position: relative;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .section-title::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        height: 3px;
+        width: 50px;
+        background-color: var(--bs-primary);
+    }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Verificar que el video se carga correctamente
+        const video = document.querySelector('.hero-video-fullwidth');
+        
+        if (video) {
+            // Manejo de errores en la carga del video
+            video.addEventListener('error', function() {
+                console.error('Error al cargar el video de fondo');
+                video.style.display = 'none';
+                document.querySelector('.hero-section-fullwidth').style.backgroundImage = "url('https://cdn.pixabay.com/photo/2019/05/04/14/33/game-of-thrones-4178960_1280.jpg')";
+            });
+        }
+    });
+</script>
+{% endblock %}

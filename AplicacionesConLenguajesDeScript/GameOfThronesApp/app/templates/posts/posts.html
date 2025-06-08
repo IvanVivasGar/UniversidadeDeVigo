@@ -1,0 +1,2335 @@
+{% extends "base.html" %}
+
+{% block title %}Discusiones - WesterosTracker{% endblock %}
+
+{% block content %}
+<div class="posts-container">
+    <!-- Hero Section -->
+    <div class="posts-hero">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <div class="hero-icon">
+                <i class="fas fa-comments"></i>
+            </div>
+            <h1 class="hero-title">Discusiones de Westeros</h1>
+            <p class="hero-subtitle">Comparte teorías, debates y análisis sobre el mundo de Game of Thrones</p>
+        </div>
+        <div class="floating-elements">
+            <div class="floating-scroll"><i class="fas fa-scroll"></i></div>
+            <div class="floating-quill"><i class="fas fa-feather-alt"></i></div>
+            <div class="floating-book"><i class="fas fa-book"></i></div>
+        </div>
+    </div>
+
+    <!-- Controls and Filters -->
+    <div class="posts-controls">
+        <div class="container">
+            <div class="controls-header">
+                <div class="search-section">
+                    <div class="search-container">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" id="post-search" placeholder="Buscar discusiones..." 
+                               class="search-input">
+                        <div class="search-border"></div>
+                    </div>
+                    <div class="search-suggestions" id="search-suggestions"></div>
+                </div>
+                
+                {% if current_user.is_authenticated %}
+                <div class="action-section">
+                    <a href="{{ url_for('discussions.create_discussion') }}" class="btn btn-primary create-btn">
+                        <i class="fas fa-plus"></i>
+                        <span>Nueva Discusión</span>
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Filters -->
+            <div class="filters-section">
+                <div class="filter-group">
+                    <label class="filter-label">
+                        <i class="fas fa-filter"></i>
+                        Filtrar por:
+                    </label>
+                    <div class="filter-options">
+                        <select id="category-filter" class="filter-select">
+                            <option value="">Todas las categorías</option>
+                            <option value="teoria">Teorías</option>
+                            <option value="analisis">Análisis</option>
+                            <option value="debate">Debates</option>
+                            <option value="personaje">Personajes</option>
+                            <option value="casa">Casas</option>
+                            <option value="evento">Eventos</option>
+                            <option value="libro">Libros</option>
+                            <option value="serie">Serie TV</option>
+                        </select>
+                        
+                        <select id="author-filter" class="filter-select">
+                            <option value="">Todos los autores</option>
+                            <!-- Will be populated dynamically -->
+                        </select>
+                        
+                        <select id="time-filter" class="filter-select">
+                            <option value="">Todo el tiempo</option>
+                            <option value="today">Hoy</option>
+                            <option value="week">Esta semana</option>
+                            <option value="month">Este mes</option>
+                            <option value="year">Este año</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="sort-group">
+                    <label class="filter-label">
+                        <i class="fas fa-sort"></i>
+                        Ordenar por:
+                    </label>
+                    <select id="sort-order" class="filter-select">
+                        <option value="newest">Más recientes</option>
+                        <option value="oldest">Más antiguos</option>
+                        <option value="popular">Más populares</option>
+                        <option value="likes">Más likes</option>
+                        <option value="comments">Más comentarios</option>
+                        <option value="title">Título (A-Z)</option>
+                        <option value="title-desc">Título (Z-A)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Posts Grid -->
+    <div class="posts-main">
+        <div class="container">
+            <div class="posts-stats">
+                <div class="stats-item">
+                    <span class="stats-number" id="total-posts">0</span>
+                    <span class="stats-label">Discusiones</span>
+                </div>
+                <div class="stats-item">
+                    <span class="stats-number" id="filtered-posts">0</span>
+                    <span class="stats-label">Mostradas</span>
+                </div>
+                <div class="stats-item">
+                    <span class="stats-number" id="active-users">0</span>
+                    <span class="stats-label">Usuarios activos</span>
+                </div>
+            </div>
+
+            <div class="posts-grid" id="posts-grid">
+                <!-- Posts will be loaded here -->
+            </div>
+
+            <!-- Loading State -->
+            <div class="loading-state" id="loading-state">
+                <div class="loading-spinner">
+                    <i class="fas fa-comments"></i>
+                </div>
+                <p>Cargando discusiones...</p>
+            </div>
+
+            <!-- Empty State -->
+            <div class="empty-state" id="empty-state" style="display: none;">
+                <div class="empty-icon">
+                    <i class="fas fa-comment-slash"></i>
+                </div>
+                <h3>No se encontraron discusiones</h3>
+                <p>Intenta ajustar los filtros de búsqueda o crear una nueva discusión.</p>
+                {% if current_user.is_authenticated %}
+                <a href="{{ url_for('discussions.create_discussion') }}" class="btn btn-secondary">
+                    <i class="fas fa-plus"></i>
+                    Crear Nueva Discusión
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Post Card Template -->
+<template id="post-card-template">
+    <div class="post-card" data-post-id="">
+        <div class="post-header">
+            <div class="post-category">
+                <span class="category-badge"></span>
+            </div>
+            <div class="post-actions">
+                {% if current_user.is_authenticated %}
+                <button class="btn-icon like-btn" title="Me gusta">
+                    <i class="far fa-heart"></i>
+                </button>
+                <button class="btn-icon bookmark-btn" title="Guardar">
+                    <i class="far fa-bookmark"></i>
+                </button>
+                {% endif %}
+                <button class="btn-icon share-btn" title="Compartir">
+                    <i class="fas fa-share"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div class="post-content">
+            <h3 class="post-title">
+                <a href="" class="post-link"></a>
+            </h3>
+            
+            <div class="post-preview">
+                <p class="preview-text"></p>
+            </div>
+            
+            <div class="post-meta">
+                <div class="author-info">
+                    <div class="author-avatar">
+                        <img src="/static/images/default-avatar.jpg" alt="">
+                    </div>
+                    <div class="author-details">
+                        <span class="author-name"></span>
+                        <span class="post-date"></span>
+                    </div>
+                </div>
+                
+                <div class="post-stats">
+                    <span class="stat-item likes-stat">
+                        <i class="fas fa-heart"></i>
+                        <span class="count"></span>
+                    </span>
+                    <span class="stat-item comments-stat">
+                        <i class="fas fa-comment"></i>
+                        <span class="count"></span>
+                    </span>
+                    <span class="stat-item views-stat">
+                        <i class="fas fa-eye"></i>
+                        <span class="count"></span>
+                    </span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="post-footer">
+            <div class="post-tags">
+                <!-- Tags will be added dynamically -->
+            </div>
+            <a href="" class="btn btn-outline read-more-btn">
+                <i class="fas fa-arrow-right"></i>
+                Leer completo
+            </a>
+        </div>
+    </div>
+</template>
+
+<style>
+/* Posts Page Specific Styles */
+.posts-container {
+    min-height: 100vh;
+    background: var(--gradient-dark);
+}
+
+/* Hero Section */
+.posts-hero {
+    position: relative;
+    height: 60vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--primary-black) 0%, var(--dark-red) 50%, var(--primary-black) 100%);
+    overflow: hidden;
+}
+
+.hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: 1;
+}
+
+.hero-content {
+    text-align: center;
+    z-index: 2;
+    max-width: 800px;
+    padding: 2rem;
+}
+
+.hero-icon {
+    font-size: 4rem;
+    color: var(--accent-gold);
+    margin-bottom: 1rem;
+    animation: pulse 2s infinite;
+}
+
+.hero-title {
+    font-family: var(--font-heading);
+    font-size: 3.5rem;
+    margin-bottom: 1rem;
+    background: var(--gradient-gold);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.hero-subtitle {
+    font-size: 1.3rem;
+    color: var(--off-white);
+    opacity: 0.9;
+}
+
+.floating-elements {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.floating-scroll,
+.floating-quill,
+.floating-book {
+    position: absolute;
+    font-size: 2rem;
+    color: var(--accent-gold);
+    opacity: 0.3;
+    animation: float 6s ease-in-out infinite;
+}
+
+.floating-scroll {
+    top: 20%;
+    left: 10%;
+    animation-delay: 0s;
+}
+
+.floating-quill {
+    top: 30%;
+    right: 15%;
+    animation-delay: 2s;
+}
+
+.floating-book {
+    bottom: 20%;
+    left: 20%;
+    animation-delay: 4s;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-20px) rotate(5deg); }
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+/* Controls Section */
+.posts-controls {
+    background: var(--secondary-black);
+    border-bottom: 2px solid var(--accent-red);
+    padding: 2rem 0;
+}
+
+.controls-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    gap: 2rem;
+}
+
+.search-section {
+    flex: 1;
+    position: relative;
+}
+
+.search-container {
+    position: relative;
+    max-width: 500px;
+}
+
+.search-input {
+    width: 100%;
+    padding: 1rem 1rem 1rem 3rem;
+    background: var(--tertiary-black);
+    border: 2px solid transparent;
+    border-radius: 8px;
+    color: var(--pure-white);
+    font-size: 1rem;
+    transition: all var(--transition-normal);
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--accent-gold);
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+}
+
+.search-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--accent-gold);
+    font-size: 1.1rem;
+    z-index: 1;
+}
+
+.create-btn {
+    white-space: nowrap;
+    padding: 1rem 2rem;
+    font-weight: 600;
+}
+
+/* Filters Section */
+.filters-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.filter-group,
+.sort-group {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.filter-label {
+    color: var(--accent-gold);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+}
+
+.filter-options {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.filter-select {
+    padding: 0.75rem 1rem;
+    background: var(--tertiary-black);
+    border: 2px solid transparent;
+    border-radius: 6px;
+    color: var(--pure-white);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    min-width: 150px;
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: var(--accent-gold);
+}
+
+.filter-select:hover {
+    border-color: var(--accent-red);
+}
+
+/* Posts Main */
+.posts-main {
+    padding: 3rem 0;
+    background: var(--primary-black);
+    min-height: 60vh;
+}
+
+.posts-stats {
+    display: flex;
+    justify-content: center;
+    gap: 3rem;
+    margin-bottom: 3rem;
+    padding: 2rem;
+    background: var(--secondary-black);
+    border-radius: 12px;
+    border: 1px solid var(--tertiary-black);
+}
+
+.stats-item {
+    text-align: center;
+}
+
+.stats-number {
+    display: block;
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: var(--accent-gold);
+    margin-bottom: 0.5rem;
+}
+
+.stats-label {
+    color: var(--off-white);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Posts Grid */
+.posts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.post-card {
+    background: var(--secondary-black);
+    border: 2px solid transparent;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all var(--transition-normal);
+    position: relative;
+    opacity: 0;
+    transform: translateY(30px);
+}
+
+.post-card:hover {
+    border-color: var(--accent-red);
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-heavy);
+}
+
+.post-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 1.5rem 0;
+}
+
+.category-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.category-teoria { background: var(--gradient-gold); color: var(--primary-black); }
+.category-analisis { background: var(--gradient-red); color: var(--pure-white); }
+.category-debate { background: linear-gradient(135deg, #4a148c, #7b1fa2); color: var(--pure-white); }
+.category-personaje { background: linear-gradient(135deg, #1565c0, #1976d2); color: var(--pure-white); }
+.category-casa { background: linear-gradient(135deg, #2e7d32, #388e3c); color: var(--pure-white); }
+.category-evento { background: linear-gradient(135deg, #d84315, #f4511e); color: var(--pure-white); }
+.category-libro { background: linear-gradient(135deg, #5d4037, #6d4c41); color: var(--pure-white); }
+.category-serie { background: linear-gradient(135deg, #37474f, #455a64); color: var(--pure-white); }
+.category-general { background: var(--tertiary-black); color: var(--off-white); }
+
+.post-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-icon {
+    background: none;
+    border: none;
+    color: var(--off-white);
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 50%;
+    transition: all var(--transition-fast);
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-icon:hover {
+    background: var(--tertiary-black);
+    color: var(--accent-gold);
+    transform: scale(1.1);
+}
+
+.btn-icon.liked {
+    color: var(--accent-red);
+}
+
+.btn-icon.bookmarked {
+    color: var(--accent-gold);
+}
+
+.post-content {
+    padding: 1.5rem;
+}
+
+.post-title {
+    margin-bottom: 1rem;
+}
+
+.post-link {
+    color: var(--pure-white);
+    font-family: var(--font-heading);
+    font-size: 1.3rem;
+    font-weight: 600;
+    line-height: 1.3;
+    text-decoration: none;
+    transition: color var(--transition-fast);
+}
+
+.post-link:hover {
+    color: var(--accent-gold);
+}
+
+.preview-text {
+    color: var(--off-white);
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+}
+
+.post-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.author-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.author-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid var(--accent-gold);
+}
+
+.author-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.author-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.author-name {
+    color: var(--accent-gold);
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.post-date {
+    color: var(--off-white);
+    font-size: 0.8rem;
+    opacity: 0.8;
+}
+
+.post-stats {
+    display: flex;
+    gap: 1rem;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    color: var(--off-white);
+    font-size: 0.8rem;
+}
+
+.stat-item i {
+    color: var(--accent-gold);
+}
+
+.post-footer {
+    padding: 0 1.5rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.post-tags {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.btn-outline {
+    background: transparent;
+    border: 2px solid var(--accent-red);
+    color: var(--accent-red);
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+}
+
+.btn-outline:hover {
+    background: var(--accent-red);
+    color: var(--pure-white);
+}
+
+/* Loading and Empty States */
+.loading-state,
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--off-white);
+}
+
+.loading-spinner {
+    font-size: 3rem;
+    color: var(--accent-gold);
+    animation: spin 2s linear infinite;
+    margin-bottom: 1rem;
+}
+
+.empty-icon {
+    font-size: 4rem;
+    color: var(--accent-red);
+    margin-bottom: 1rem;
+    opacity: 0.6;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Search Suggestions */
+.search-suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: var(--shadow-lg);
+    z-index: 1000;
+    max-height: 300px;
+    overflow-y: auto;
+    display: none;
+}
+
+.suggestion-item {
+    padding: 12px 16px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--border-color);
+    transition: background-color 0.2s ease;
+}
+
+.suggestion-item:hover,
+.suggestion-item.active {
+    background: var(--hover-bg);
+}
+
+.suggestion-item:last-child {
+    border-bottom: none;
+}
+
+.suggestion-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.suggestion-content i {
+    width: 16px;
+    color: var(--text-secondary);
+}
+
+.suggestion-text {
+    flex: 1;
+    font-weight: 500;
+}
+
+.suggestion-text mark {
+    background: var(--primary-color);
+    color: white;
+    padding: 2px 4px;
+    border-radius: 3px;
+}
+
+.suggestion-type {
+    font-size: 12px;
+    color: var(--text-secondary);
+    background: var(--hover-bg);
+    padding: 4px 8px;
+    border-radius: 12px;
+}
+
+/* Notifications */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: var(--shadow-lg);
+    z-index: 10000;
+    min-width: 300px;
+    max-width: 400px;
+    animation: slideInRight 0.3s ease;
+}
+
+.notification-success {
+    border-left: 4px solid #10b981;
+}
+
+.notification-error {
+    border-left: 4px solid #ef4444;
+}
+
+.notification-info {
+    border-left: 4px solid var(--primary-color);
+}
+
+.notification-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.notification-close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+}
+
+.notification-close:hover {
+    background: var(--hover-bg);
+}
+
+/* Keyboard Hints */
+.keyboard-hints {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 16px 24px;
+    box-shadow: var(--shadow-lg);
+    z-index: 10000;
+    display: flex;
+    gap: 24px;
+    animation: slideInUp 0.3s ease;
+}
+
+.hint-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.hint-item kbd {
+    background: var(--hover-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-family: monospace;
+    font-size: 12px;
+    min-width: 24px;
+    text-align: center;
+}
+
+.hint-item span {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+/* Floating Action Button */
+.floating-create {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    background: var(--accent-red);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-heavy);
+    cursor: pointer;
+    z-index: 1000;
+    transition: all 0.3s ease;
+}
+
+.floating-create:hover {
+    transform: scale(1.1) rotate(90deg);
+    background: var(--accent-gold);
+}
+
+.floating-create i {
+    color: var(--pure-white);
+    font-size: 24px;
+}
+
+.fab-hidden {
+    transform: translateY(100px);
+}
+
+.fab-tooltip {
+    position: absolute;
+    top: -40px;
+    background: var(--secondary-black);
+    color: var(--pure-white);
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.floating-create:hover .fab-tooltip {
+    opacity: 1;
+}
+
+/* Export Menu */
+.export-container {
+    position: relative;
+}
+
+.export-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: var(--secondary-black);
+    border: 1px solid var(--tertiary-black);
+    border-radius: 8px;
+    box-shadow: var(--shadow-heavy);
+    display: none;
+    min-width: 200px;
+    z-index: 1000;
+}
+
+.export-dropdown.show {
+    display: block;
+    animation: fadeIn 0.2s ease;
+}
+
+.dropdown-item {
+    padding: 12px 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--off-white);
+    transition: all var(--transition-fast);
+}
+
+.dropdown-item:hover {
+    background: var(--tertiary-black);
+    color: var(--accent-gold);
+}
+
+.dropdown-item i {
+    width: 20px;
+    text-align: center;
+}
+
+/* Touch hover effect */
+.post-card.touch-hover {
+    border-color: var(--accent-red);
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-heavy);
+}
+
+/* Additional loading states */
+.loading-more {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 40px 0;
+}
+
+.retry-btn {
+    margin-top: 10px;
+}
+
+/* Scroll sentinel */
+.scroll-sentinel {
+    height: 1px;
+    grid-column: 1 / -1;
+}
+
+/* Accessibility */
+.reduced-motion * {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+}
+
+/* Fade in animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Print styles */
+@media print {
+    .posts-hero,
+    .posts-controls,
+    .posts-stats,
+    .empty-state,
+    .loading-state,
+    .floating-create,
+    .theme-toggle,
+    .keyboard-hints {
+        display: none !important;
+    }
+    
+    .posts-grid {
+        display: block;
+    }
+    
+    .post-card {
+        page-break-inside: avoid;
+        break-inside: avoid;
+        margin-bottom: 30px;
+        border: 1px solid #000;
+    }
+    
+    body {
+        background: #fff !important;
+        color: #000 !important;
+    }
+    
+    .post-link, 
+    .author-name,
+    .post-title,
+    .post-date {
+        color: #000 !important;
+    }
+    
+    .category-badge {
+        background: #eee !important;
+        color: #000 !important;
+    }
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+class PostsManager {
+    constructor() {
+        this.posts = [];
+        this.filteredPosts = [];
+        this.currentFilters = {
+            search: '',
+            category: '',
+            author: '',
+            time: '',
+            sort: 'newest'
+        };
+        
+        this.init();
+    }
+    
+    async init() {
+        await this.loadPosts();
+        this.setupEventListeners();
+        this.populateFilters();
+        this.renderPosts();
+    }
+    
+    async loadPosts() {
+        try {
+            const response = await fetch('/api/posts');
+            this.posts = await response.json();
+            this.filteredPosts = [...this.posts];
+            this.updateStats();
+        } catch (error) {
+            console.error('Error loading posts:', error);
+            this.showError('Error al cargar las discusiones');
+        } finally {
+            document.getElementById('loading-state').style.display = 'none';
+        }
+    }
+    
+    setupEventListeners() {
+        // Search input
+        const searchInput = document.getElementById('post-search');
+        searchInput.addEventListener('input', this.debounce((e) => {
+            this.currentFilters.search = e.target.value.toLowerCase();
+            this.applyFilters();
+        }, 300));
+        
+        // Filter selects
+        document.getElementById('category-filter').addEventListener('change', (e) => {
+            this.currentFilters.category = e.target.value;
+            this.applyFilters();
+        });
+        
+        document.getElementById('author-filter').addEventListener('change', (e) => {
+            this.currentFilters.author = e.target.value;
+            this.applyFilters();
+        });
+        
+        document.getElementById('time-filter').addEventListener('change', (e) => {
+            this.currentFilters.time = e.target.value;
+            this.applyFilters();
+        });
+        
+        document.getElementById('sort-order').addEventListener('change', (e) => {
+            this.currentFilters.sort = e.target.value;
+            this.applySorting();
+            this.renderPosts();
+        });
+    }
+    
+    populateFilters() {
+        // Populate author filter
+        const authors = [...new Set(this.posts.map(post => post.author_name).filter(Boolean))];
+        const authorFilter = document.getElementById('author-filter');
+        
+        authors.forEach(author => {
+            const option = document.createElement('option');
+            option.value = author;
+            option.textContent = author;
+            authorFilter.appendChild(option);
+        });
+    }
+    
+    applyFilters() {
+        this.filteredPosts = this.posts.filter(post => {
+            // Search filter
+            if (this.currentFilters.search) {
+                const searchTerm = this.currentFilters.search;
+                const matchesSearch = 
+                    post.title.toLowerCase().includes(searchTerm) ||
+                    post.content.toLowerCase().includes(searchTerm) ||
+                    (post.author_name && post.author_name.toLowerCase().includes(searchTerm));
+                
+                if (!matchesSearch) return false;
+            }
+            
+            // Category filter
+            if (this.currentFilters.category && post.category !== this.currentFilters.category) {
+                return false;
+            }
+            
+            // Author filter
+            if (this.currentFilters.author && post.author_name !== this.currentFilters.author) {
+                return false;
+            }
+            
+            // Time filter
+            if (this.currentFilters.time) {
+                const postDate = new Date(post.created_at);
+                const now = new Date();
+                const timeDiff = now - postDate;
+                
+                switch (this.currentFilters.time) {
+                    case 'today':
+                        if (timeDiff > 24 * 60 * 60 * 1000) return false;
+                        break;
+                    case 'week':
+                        if (timeDiff > 7 * 24 * 60 * 60 * 1000) return false;
+                        break;
+                    case 'month':
+                        if (timeDiff > 30 * 24 * 60 * 60 * 1000) return false;
+                        break;
+                    case 'year':
+                        if (timeDiff > 365 * 24 * 60 * 60 * 1000) return false;
+                        break;
+                }
+            }
+            
+            return true;
+        });
+        
+        this.applySorting();
+        this.updateStats();
+        this.renderPosts();
+    }
+    
+    applySorting() {
+        this.filteredPosts.sort((a, b) => {
+            switch (this.currentFilters.sort) {
+                case 'newest':
+                    return new Date(b.created_at) - new Date(a.created_at);
+                case 'oldest':
+                    return new Date(a.created_at) - new Date(b.created_at);
+                case 'popular':
+                    return (b.like_count + b.comment_count) - (a.like_count + a.comment_count);
+                case 'likes':
+                    return b.like_count - a.like_count;
+                case 'comments':
+                    return b.comment_count - a.comment_count;
+                case 'title':
+                    return a.title.localeCompare(b.title);
+                case 'title-desc':
+                    return b.title.localeCompare(a.title);
+                default:
+                    return 0;
+            }
+        });
+    }
+    
+    renderPosts() {
+        const grid = document.getElementById('posts-grid');
+        const emptyState = document.getElementById('empty-state');
+        
+        if (this.filteredPosts.length === 0) {
+            grid.innerHTML = '';
+            emptyState.style.display = 'block';
+            return;
+        }
+        
+        emptyState.style.display = 'none';
+        
+        const template = document.getElementById('post-card-template');
+        grid.innerHTML = '';
+        
+        this.filteredPosts.forEach(post => {
+            const card = this.createPostCard(post, template);
+            grid.appendChild(card);
+        });
+        
+        // Add stagger animation
+        this.animateCards();
+    }
+    
+    createPostCard(post, template) {
+        const card = template.content.cloneNode(true);
+        const cardElement = card.querySelector('.post-card');
+        
+        // Set data
+        cardElement.dataset.postId = post.id;
+        
+        // Set category
+        const categoryBadge = card.querySelector('.category-badge');
+        categoryBadge.textContent = post.category || 'General';
+        categoryBadge.className = `category-badge category-${post.category || 'general'}`;
+        
+        // Set title and link
+        const titleLink = card.querySelector('.post-link');
+        titleLink.textContent = post.title;
+        titleLink.href = `/posts/${post.id}`;
+        
+        // Set preview
+        const previewText = card.querySelector('.preview-text');
+        const preview = post.content.substring(0, 200);
+        previewText.textContent = preview + (post.content.length > 200 ? '...' : '');
+        
+        // Set author info
+        const authorAvatar = card.querySelector('.author-avatar img');
+        const authorName = card.querySelector('.author-name');
+        const postDate = card.querySelector('.post-date');
+        
+        authorAvatar.src = post.author_avatar || '/static/images/default-avatar.jpg';
+        authorAvatar.alt = post.author_name || 'Usuario';
+        authorName.textContent = post.author_name || 'Usuario anónimo';
+        postDate.textContent = this.formatDate(post.created_at);
+        
+        // Set stats
+        card.querySelector('.likes-stat .count').textContent = post.like_count || 0;
+        card.querySelector('.comments-stat .count').textContent = post.comment_count || 0;
+        card.querySelector('.views-stat .count').textContent = post.view_count || 0;
+        
+        // Set read more link
+        const readMoreBtn = card.querySelector('.read-more-btn');
+        readMoreBtn.href = `/posts/${post.id}`;
+        
+        // Set up event listeners
+        this.setupCardEvents(cardElement, post);
+        
+        return card;
+    }
+    
+    setupCardEvents(cardElement, post) {
+        // Like button
+        const likeBtn = cardElement.querySelector('.like-btn');
+        if (likeBtn) {
+            likeBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.toggleLike(post.id, likeBtn);
+            });
+        }
+        
+        // Bookmark button
+        const bookmarkBtn = cardElement.querySelector('.bookmark-btn');
+        if (bookmarkBtn) {
+            bookmarkBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.toggleBookmark(post.id, bookmarkBtn);
+            });
+        }
+        
+        // Share button
+        const shareBtn = cardElement.querySelector('.share-btn');
+        shareBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.sharePost(post);
+        });
+    }
+    
+    async toggleLike(postId, button) {
+        try {
+            const response = await fetch(`/api/posts/${postId}/like`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                const icon = button.querySelector('i');
+                const countElement = button.closest('.post-card').querySelector('.likes-stat .count');
+                
+                if (data.is_liked) {
+                    icon.className = 'fas fa-heart';
+                    button.classList.add('liked');
+                } else {
+                    icon.className = 'far fa-heart';
+                    button.classList.remove('liked');
+                }
+                
+                countElement.textContent = data.like_count;
+                this.showNotification(data.message, 'success');
+            }
+        } catch (error) {
+            console.error('Error toggling like:', error);
+            this.showNotification('Error al actualizar like', 'error');
+        }
+    }
+    
+    async toggleBookmark(postId, button) {
+        try {
+            const response = await fetch(`/api/posts/${postId}/bookmark`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                const icon = button.querySelector('i');
+                
+                if (data.is_bookmarked) {
+                    icon.className = 'fas fa-bookmark';
+                    button.classList.add('bookmarked');
+                } else {
+                    icon.className = 'far fa-bookmark';
+                    button.classList.remove('bookmarked');
+                }
+                
+                this.showNotification(data.message, 'success');
+            }
+        } catch (error) {
+            console.error('Error toggling bookmark:', error);
+            this.showNotification('Error al actualizar guardado', 'error');
+        }
+    }
+    
+    sharePost(post) {
+        if (navigator.share) {
+            navigator.share({
+                title: post.title,
+                text: post.content.substring(0, 100) + '...',
+                url: window.location.origin + `/posts/${post.id}`
+            });
+        } else {
+            // Fallback to clipboard
+            const url = window.location.origin + `/posts/${post.id}`;
+            navigator.clipboard.writeText(url).then(() => {
+                this.showNotification('Enlace copiado al portapapeles', 'success');
+            }).catch(() => {
+                this.showNotification('No se pudo compartir el enlace', 'error');
+            });
+        }
+    }
+    
+    updateStats() {
+        document.getElementById('total-posts').textContent = this.posts.length;
+        document.getElementById('filtered-posts').textContent = this.filteredPosts.length;
+        
+        // Calculate active users (unique authors in last 30 days)
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        
+        const activeUsers = new Set(
+            this.posts
+                .filter(post => new Date(post.created_at) > thirtyDaysAgo)
+                .map(post => post.author_name)
+                .filter(Boolean)
+        );
+        
+        document.getElementById('active-users').textContent = activeUsers.size;
+    }
+    
+    animateCards() {
+        const cards = document.querySelectorAll('.post-card');
+        cards.forEach((card, index) => {
+            setTimeout(() => {
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, index * 100);
+        });
+    }
+    
+    formatDate(dateString) {
+        const date = new Date(dateString);
+        const now = new Date();
+        const diff = now - date;
+        
+        const minutes = Math.floor(diff / 60000);
+        const hours = Math.floor(diff / 3600000);
+        const days = Math.floor(diff / 86400000);
+        
+        if (minutes < 1) return 'Ahora mismo';
+        if (minutes < 60) return `Hace ${minutes} min`;
+        if (hours < 24) return `Hace ${hours}h`;
+        if (days < 7) return `Hace ${days}d`;
+        
+        return date.toLocaleDateString('es-ES', {
+            day: 'numeric',
+            month: 'short',
+            year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
+        });
+    }
+    
+    showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type}`;
+        notification.innerHTML = `
+            <div class="notification-content">
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                <span>${message}</span>
+            </div>
+            <button class="notification-close">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            notification.remove();
+        }, 5000);
+        
+        // Close button
+        notification.querySelector('.notification-close').addEventListener('click', () => {
+            notification.remove();
+        });
+    }
+    
+    showError(message) {
+        const grid = document.getElementById('posts-grid');
+        grid.innerHTML = `
+            <div class="error-state">
+                <div class="error-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <h3>Error al cargar las discusiones</h3>
+                <p>${message}</p>
+                <button class="btn btn-primary" onclick="location.reload()">
+                    <i class="fas fa-redo"></i>
+                    Reintentar
+                </button>
+            </div>
+        `;
+    }
+    
+    debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+}
+
+// Search Suggestions Manager
+class SearchSuggestionsManager {
+    constructor(postsManager) {
+        this.postsManager = postsManager;
+        this.searchInput = document.getElementById('post-search');
+        this.suggestionsContainer = document.getElementById('search-suggestions');
+        this.currentSuggestions = [];
+        this.selectedIndex = -1;
+        
+        this.setupEventListeners();
+    }
+    
+    setupEventListeners() {
+        this.searchInput.addEventListener('input', this.debounce((e) => {
+            const query = e.target.value.trim();
+            if (query.length >= 2) {
+                this.showSuggestions(query);
+            } else {
+                this.hideSuggestions();
+            }
+        }, 200));
+        
+        this.searchInput.addEventListener('keydown', (e) => {
+            this.handleKeyNavigation(e);
+        });
+        
+        this.searchInput.addEventListener('blur', () => {
+            // Delay hiding to allow clicking on suggestions
+            setTimeout(() => this.hideSuggestions(), 200);
+        });
+        
+        this.searchInput.addEventListener('focus', () => {
+            const query = this.searchInput.value.trim();
+            if (query.length >= 2) {
+                this.showSuggestions(query);
+            }
+        });
+    }
+    
+    showSuggestions(query) {
+        const suggestions = this.generateSuggestions(query);
+        this.currentSuggestions = suggestions;
+        this.selectedIndex = -1;
+        
+        if (suggestions.length === 0) {
+            this.hideSuggestions();
+            return;
+        }
+        
+        this.suggestionsContainer.innerHTML = suggestions.map((suggestion, index) => `
+            <div class="suggestion-item" data-index="${index}">
+                <div class="suggestion-content">
+                    <i class="fas fa-${suggestion.icon}"></i>
+                    <span class="suggestion-text">${this.highlightMatch(suggestion.text, query)}</span>
+                    <span class="suggestion-type">${suggestion.type}</span>
+                </div>
+            </div>
+        `).join('');
+        
+        // Add click event listeners
+        this.suggestionsContainer.querySelectorAll('.suggestion-item').forEach((item, index) => {
+            item.addEventListener('click', () => {
+                this.selectSuggestion(suggestions[index]);
+            });
+        });
+        
+        this.suggestionsContainer.style.display = 'block';
+    }
+    
+    hideSuggestions() {
+        this.suggestionsContainer.style.display = 'none';
+        this.currentSuggestions = [];
+        this.selectedIndex = -1;
+    }
+    
+    generateSuggestions(query) {
+        const suggestions = [];
+        const queryLower = query.toLowerCase();
+        
+        // Search in post titles
+        this.postsManager.posts.forEach(post => {
+            if (post.title.toLowerCase().includes(queryLower)) {
+                suggestions.push({
+                    text: post.title,
+                    type: 'Título',
+                    icon: 'file-alt',
+                    action: () => {
+                        this.searchInput.value = post.title;
+                        this.postsManager.currentFilters.search = post.title.toLowerCase();
+                        this.postsManager.applyFilters();
+                        this.hideSuggestions();
+                    }
+                });
+            }
+        });
+        
+        // Search in authors
+        const authors = [...new Set(this.postsManager.posts.map(p => p.author_name).filter(Boolean))];
+        authors.forEach(author => {
+            if (author.toLowerCase().includes(queryLower)) {
+                suggestions.push({
+                    text: author,
+                    type: 'Autor',
+                    icon: 'user',
+                    action: () => {
+                        document.getElementById('author-filter').value = author;
+                        this.postsManager.currentFilters.author = author;
+                        this.postsManager.applyFilters();
+                        this.searchInput.value = '';
+                        this.hideSuggestions();
+                    }
+                });
+            }
+        });
+        
+        // Search in categories
+        const categories = {
+            'teoria': 'Teorías',
+            'analisis': 'Análisis', 
+            'debate': 'Debates',
+            'personaje': 'Personajes',
+            'casa': 'Casas',
+            'evento': 'Eventos',
+            'libro': 'Libros',
+            'serie': 'Serie TV'
+        };
+        
+        Object.entries(categories).forEach(([key, value]) => {
+            if (value.toLowerCase().includes(queryLower)) {
+                suggestions.push({
+                    text: value,
+                    type: 'Categoría',
+                    icon: 'tag',
+                    action: () => {
+                        document.getElementById('category-filter').value = key;
+                        this.postsManager.currentFilters.category = key;
+                        this.postsManager.applyFilters();
+                        this.searchInput.value = '';
+                        this.hideSuggestions();
+                    }
+                });
+            }
+        });
+        
+        // Popular search terms
+        const popularTerms = ['Jon Snow', 'Daenerys', 'Tyrion', 'Arya', 'Game of Thrones', 'House Stark', 'House Lannister', 'Iron Throne'];
+        popularTerms.forEach(term => {
+            if (term.toLowerCase().includes(queryLower)) {
+                suggestions.push({
+                    text: term,
+                    type: 'Popular',
+                    icon: 'fire',
+                    action: () => {
+                        this.searchInput.value = term;
+                        this.postsManager.currentFilters.search = term.toLowerCase();
+                        this.postsManager.applyFilters();
+                        this.hideSuggestions();
+                    }
+                });
+            }
+        });
+        
+        return suggestions.slice(0, 8); // Limit to 8 suggestions
+    }
+    
+    highlightMatch(text, query) {
+        const regex = new RegExp(`(${query})`, 'gi');
+        return text.replace(regex, '<mark>$1</mark>');
+    }
+    
+    handleKeyNavigation(e) {
+        if (this.currentSuggestions.length === 0) return;
+        
+        switch (e.key) {
+            case 'ArrowDown':
+                e.preventDefault();
+                this.selectedIndex = Math.min(this.selectedIndex + 1, this.currentSuggestions.length - 1);
+                this.updateSelection();
+                break;
+            case 'ArrowUp':
+                e.preventDefault();
+                this.selectedIndex = Math.max(this.selectedIndex - 1, -1);
+                this.updateSelection();
+                break;
+            case 'Enter':
+                e.preventDefault();
+                if (this.selectedIndex >= 0) {
+                    this.selectSuggestion(this.currentSuggestions[this.selectedIndex]);
+                }
+                break;
+            case 'Escape':
+                this.hideSuggestions();
+                break;
+        }
+    }
+    
+    updateSelection() {
+        this.suggestionsContainer.querySelectorAll('.suggestion-item').forEach((item, index) => {
+            item.classList.toggle('active', index === this.selectedIndex);
+        });
+    }
+    
+    selectSuggestion(suggestion) {
+        suggestion.action();
+    }
+    
+    debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+}
+
+// Keyboard Shortcuts Manager
+class KeyboardShortcutsManager {
+    constructor(postsManager) {
+        this.postsManager = postsManager;
+        this.shortcuts = {
+            '/': () => document.getElementById('post-search').focus(),
+            'c': () => this.createNewPost(),
+            'r': () => this.resetFilters(),
+            'h': () => this.toggleKeyboardHints()
+        };
+        
+        this.setupEventListeners();
+        this.createKeyboardHints();
+    }
+    
+    setupEventListeners() {
+        document.addEventListener('keydown', (e) => {
+            // Don't trigger shortcuts when typing in inputs
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                return;
+            }
+            
+            const key = e.key.toLowerCase();
+            if (this.shortcuts[key]) {
+                e.preventDefault();
+                this.shortcuts[key]();
+            }
+        });
+    }
+    
+    createNewPost() {
+        if (document.querySelector('a[href*="create_post"]')) {
+            window.location.href = '/posts/create';
+        }
+    }
+    
+    resetFilters() {
+        document.getElementById('post-search').value = '';
+        document.getElementById('category-filter').value = '';
+        document.getElementById('author-filter').value = '';
+        document.getElementById('time-filter').value = '';
+        document.getElementById('sort-order').value = 'newest';
+        
+        this.postsManager.currentFilters = {
+            search: '',
+            category: '',
+            author: '',
+            time: '',
+            sort: 'newest'
+        };
+        
+        this.postsManager.applyFilters();
+    }
+    
+    createKeyboardHints() {
+        const hintsContainer = document.createElement('div');
+        hintsContainer.className = 'keyboard-hints';
+        hintsContainer.style.display = 'none';
+        hintsContainer.innerHTML = `
+            <div class="hint-item">
+                <kbd>/</kbd>
+                <span>Buscar</span>
+            </div>
+            <div class="hint-item">
+                <kbd>C</kbd>
+                <span>Crear post</span>
+            </div>
+            <div class="hint-item">
+                <kbd>R</kbd>
+                <span>Reset filtros</span>
+            </div>
+            <div class="hint-item">
+                <kbd>H</kbd>
+                <span>Ayuda</span>
+            </div>
+        `;
+        
+        document.body.appendChild(hintsContainer);
+        this.hintsContainer = hintsContainer;
+        
+        // Show hints for a few seconds on page load
+        setTimeout(() => {
+            this.showKeyboardHints();
+            setTimeout(() => this.hideKeyboardHints(), 3000);
+        }, 1000);
+    }
+    
+    toggleKeyboardHints() {
+        if (this.hintsContainer.style.display === 'none') {
+            this.showKeyboardHints();
+            setTimeout(() => this.hideKeyboardHints(), 5000);
+        } else {
+            this.hideKeyboardHints();
+        }
+    }
+    
+    showKeyboardHints() {
+        this.hintsContainer.style.display = 'flex';
+    }
+    
+    hideKeyboardHints() {
+        this.hintsContainer.style.display = 'none';
+    }
+}
+
+// Advanced Features Manager
+class AdvancedFeaturesManager {
+    constructor(postsManager) {
+        this.postsManager = postsManager;
+        this.init();
+    }
+    
+    init() {
+        this.setupInfiniteScroll();
+        this.setupFloatingActionButton();
+        this.setupAdvancedAnimations();
+        this.setupThemeToggle();
+        this.setupShareAndExport();
+        this.setupAccessibility();
+    }
+    
+    setupInfiniteScroll() {
+        let isLoading = false;
+        let page = 1;
+        const postsPerPage = 10;
+        
+        const observer = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting && !isLoading) {
+                if (page * postsPerPage < this.postsManager.filteredPosts.length) {
+                    this.loadMorePosts();
+                    isLoading = true;
+                    page++;
+                }
+            }
+        }, { rootMargin: '0px 0px 600px 0px' });
+        
+        // Observe a sentinel element at the bottom of the grid
+        const sentinel = document.createElement('div');
+        sentinel.className = 'scroll-sentinel';
+        document.getElementById('posts-grid').appendChild(sentinel);
+        observer.observe(sentinel);
+    }
+    
+    async loadMorePosts() {
+        // Create loading indicator
+        const loadingIndicator = document.createElement('div');
+        loadingIndicator.className = 'loading-more';
+        loadingIndicator.innerHTML = `
+            <div class="loading-spinner">
+                <i class="fas fa-spinner fa-spin"></i>
+            </div>
+            <span>Cargando más discusiones...</span>
+        `;
+        
+        document.getElementById('posts-grid').appendChild(loadingIndicator);
+        
+        try {
+            // Simulate loading delay (would be an API call in production)
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            // Remove loading indicator
+            loadingIndicator.remove();
+            
+            // In a real implementation, you would load the next page of posts from an API
+            // For this demo, we'll just render more of the filteredPosts array
+        } catch (error) {
+            console.error('Error loading more posts:', error);
+            loadingIndicator.innerHTML = `
+                <div class="error-message">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>Error al cargar más discusiones</span>
+                </div>
+                <button class="btn btn-outline retry-btn">
+                    <i class="fas fa-redo"></i>
+                    Reintentar
+                </button>
+            `;
+            
+            loadingIndicator.querySelector('.retry-btn').addEventListener('click', () => {
+                loadingIndicator.remove();
+                this.loadMorePosts();
+            });
+        } finally {
+            // Re-enable loading after a short delay
+            setTimeout(() => {
+                isLoading = false;
+            }, 500);
+        }
+    }
+    
+    setupFloatingActionButton() {
+        // Only show if user is authenticated
+        if (!document.querySelector('a[href*="create_post"]')) return;
+        
+        const fab = document.createElement('div');
+        fab.className = 'floating-create';
+        fab.setAttribute('aria-label', 'Crear nueva discusión');
+        fab.innerHTML = '<i class="fas fa-plus"></i>';
+        fab.addEventListener('click', () => {
+            window.location.href = '/posts/create';
+        });
+        
+        // Add tooltip
+        const tooltip = document.createElement('div');
+        tooltip.className = 'fab-tooltip';
+        tooltip.textContent = 'Nueva discusión';
+        fab.appendChild(tooltip);
+        
+        document.body.appendChild(fab);
+        
+        // Hide/show on scroll
+        let lastScrollTop = 0;
+        window.addEventListener('scroll', () => {
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            
+            if (scrollTop > lastScrollTop && scrollTop > 100) {
+                fab.classList.add('fab-hidden');
+            } else {
+                fab.classList.remove('fab-hidden');
+            }
+            
+            lastScrollTop = scrollTop;
+        });
+    }
+    
+    setupAdvancedAnimations() {
+        // Intersection Observer for scroll animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate-in');
+                }
+            });
+        }, {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        });
+        
+        // Observe all post cards (both existing and dynamically added)
+        const observeCards = () => {
+            document.querySelectorAll('.post-card:not(.observed)').forEach(card => {
+                observer.observe(card);
+                card.classList.add('observed');
+            });
+        };
+        
+        // Check for new cards periodically
+        observeCards();
+        setInterval(observeCards, 1000);
+        
+        // Also add hover effects for touch devices
+        document.querySelectorAll('.post-card').forEach(card => {
+            card.addEventListener('touchstart', () => {
+                card.classList.add('touch-hover');
+            }, { passive: true });
+            
+            card.addEventListener('touchend', () => {
+                setTimeout(() => {
+                    card.classList.remove('touch-hover');
+                }, 300);
+            }, { passive: true });
+        });
+    }
+    
+    setupThemeToggle() {
+        const themeToggle = document.createElement('div');
+        themeToggle.className = 'theme-toggle';
+        themeToggle.setAttribute('aria-label', 'Cambiar tema');
+        themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+        themeToggle.title = 'Cambiar tema';
+        
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('light-theme');
+            const icon = themeToggle.querySelector('i');
+            
+            if (document.body.classList.contains('light-theme')) {
+                icon.className = 'fas fa-sun';
+                localStorage.setItem('theme', 'light');
+                this.postsManager.showNotification('Tema claro activado', 'info');
+            } else {
+                icon.className = 'fas fa-moon';
+                localStorage.setItem('theme', 'dark');
+                this.postsManager.showNotification('Tema oscuro activado', 'info');
+            }
+        });
+        
+        // Load saved theme
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'light') {
+            document.body.classList.add('light-theme');
+            themeToggle.querySelector('i').className = 'fas fa-sun';
+        }
+        
+        document.body.appendChild(themeToggle);
+    }
+    
+    setupShareAndExport() {
+        // Add export options to the controls section
+        const controlsHeader = document.querySelector('.controls-header');
+        const exportButton = document.createElement('button');
+        exportButton.className = 'btn btn-secondary export-btn';
+        exportButton.innerHTML = '<i class="fas fa-download"></i> Exportar';
+        
+        // Create dropdown for export options
+        const exportDropdown = document.createElement('div');
+        exportDropdown.className = 'export-dropdown';
+        exportDropdown.innerHTML = `
+            <div class="dropdown-item" data-format="json">
+                <i class="fas fa-code"></i> Exportar como JSON
+            </div>
+            <div class="dropdown-item" data-format="csv">
+                <i class="fas fa-file-csv"></i> Exportar como CSV
+            </div>
+            <div class="dropdown-item" data-format="print">
+                <i class="fas fa-print"></i> Imprimir vista
+            </div>
+        `;
+        
+        exportButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            exportDropdown.classList.toggle('show');
+        });
+        
+        document.addEventListener('click', () => {
+            exportDropdown.classList.remove('show');
+        });
+        
+        exportDropdown.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const format = e.target.closest('.dropdown-item').dataset.format;
+            
+            switch(format) {
+                case 'json':
+                    this.exportJSON();
+                    break;
+                case 'csv':
+                    this.exportCSV();
+                    break;
+                case 'print':
+                    window.print();
+                    break;
+            }
+            
+            exportDropdown.classList.remove('show');
+        });
+        
+        const exportContainer = document.createElement('div');
+        exportContainer.className = 'export-container';
+        exportContainer.appendChild(exportButton);
+        exportContainer.appendChild(exportDropdown);
+        
+        if (controlsHeader) {
+            controlsHeader.appendChild(exportContainer);
+        }
+    }
+    
+    exportJSON() {
+        const data = JSON.stringify(this.postsManager.filteredPosts, null, 2);
+        this.downloadFile(data, 'westeros-posts.json', 'application/json');
+        this.postsManager.showNotification('Discusiones exportadas como JSON', 'success');
+    }
+    
+    exportCSV() {
+        // Create CSV header
+        let csv = 'ID,Título,Autor,Categoría,Fecha,Likes,Comentarios,Vistas\n';
+        
+        // Add each post as a row
+        this.postsManager.filteredPosts.forEach(post => {
+            const row = [
+                post.id,
+                `"${post.title.replace(/"/g, '""')}"`,
+                `"${post.author_name || 'Anónimo'}"`,
+                post.category || 'general',
+                post.created_at,
+                post.like_count || 0,
+                post.comment_count || 0,
+                post.view_count || 0
+            ];
+            
+            csv += row.join(',') + '\n';
+        });
+        
+        this.downloadFile(csv, 'westeros-posts.csv', 'text/csv');
+        this.postsManager.showNotification('Discusiones exportadas como CSV', 'success');
+    }
+    
+    downloadFile(content, fileName, contentType) {
+        const blob = new Blob([content], { type: contentType });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        
+        link.href = url;
+        link.download = fileName;
+        link.click();
+        
+        URL.revokeObjectURL(url);
+    }
+    
+    setupAccessibility() {
+        // Add aria labels to all interactive elements
+        document.querySelectorAll('button, a, select, input').forEach(el => {
+            if (!el.getAttribute('aria-label') && !el.getAttribute('aria-labelledby')) {
+                if (el.textContent.trim()) {
+                    el.setAttribute('aria-label', el.textContent.trim());
+                } else if (el.querySelector('i')) {
+                    const iconClass = el.querySelector('i').className;
+                    if (iconClass.includes('heart')) {
+                        el.setAttribute('aria-label', 'Me gusta');
+                    } else if (iconClass.includes('bookmark')) {
+                        el.setAttribute('aria-label', 'Guardar');
+                    } else if (iconClass.includes('share')) {
+                        el.setAttribute('aria-label', 'Compartir');
+                    }
+                }
+            }
+        });
+        
+        // Add focus outline styles
+        const style = document.createElement('style');
+        style.textContent = `
+            :focus-visible {
+                outline: 3px solid var(--accent-gold);
+                outline-offset: 2px;
+            }
+            
+            .skip-link {
+                position: absolute;
+                top: -40px;
+                left: 0;
+                background: var(--accent-gold);
+                color: var(--primary-black);
+                padding: 8px;
+                z-index: 9999;
+                transition: top 0.2s;
+            }
+            
+            .skip-link:focus {
+                top: 0;
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Add skip link for keyboard users
+        const skipLink = document.createElement('a');
+        skipLink.href = '#posts-grid';
+        skipLink.className = 'skip-link';
+        skipLink.textContent = 'Saltar al contenido principal';
+        document.body.prepend(skipLink);
+        
+        // Check for reduced motion preference
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            document.body.classList.add('reduced-motion');
+        }
+    }
+}
+
+// Initialize everything when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    const postsManager = new PostsManager();
+    const searchManager = new SearchSuggestionsManager(postsManager);
+    const keyboardManager = new KeyboardShortcutsManager(postsManager);
+    const featuresManager = new AdvancedFeaturesManager(postsManager);
+});
+</script>
+
+<!-- Additional CSS for new features -->
+<style>
+/* Floating Action Button */
+.floating-create {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    background: var(--accent-red);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-heavy);
+    cursor: pointer;
+    z-index: 1000;
+    transition: all 0.3s ease;
+}
+
+.floating-create:hover {
+    transform: scale(1.1) rotate(90deg);
+    background: var(--accent-gold);
+}
+
+.floating-create i {
+    color: var(--pure-white);
+    font-size: 24px;
+}
+
+.fab-hidden {
+    transform: translateY(100px);
+}
+
+.fab-tooltip {
+    position: absolute;
+    top: -40px;
+    background: var(--secondary-black);
+    color: var(--pure-white);
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.floating-create:hover .fab-tooltip {
+    opacity: 1;
+}
+
+/* Export Menu */
+.export-container {
+    position: relative;
+}
+
+.export-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: var(--secondary-black);
+    border: 1px solid var(--tertiary-black);
+    border-radius: 8px;
+    box-shadow: var(--shadow-heavy);
+    display: none;
+    min-width: 200px;
+    z-index: 1000;
+}
+
+.export-dropdown.show {
+    display: block;
+    animation: fadeIn 0.2s ease;
+}
+
+.dropdown-item {
+    padding: 12px 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--off-white);
+    transition: all var(--transition-fast);
+}
+
+.dropdown-item:hover {
+    background: var(--tertiary-black);
+    color: var(--accent-gold);
+}
+
+.dropdown-item i {
+    width: 20px;
+    text-align: center;
+}
+
+/* Touch hover effect */
+.post-card.touch-hover {
+    border-color: var(--accent-red);
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-heavy);
+}
+
+/* Additional loading states */
+.loading-more {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 40px 0;
+}
+
+.retry-btn {
+    margin-top: 10px;
+}
+
+/* Scroll sentinel */
+.scroll-sentinel {
+    height: 1px;
+    grid-column: 1 / -1;
+}
+
+/* Accessibility */
+.reduced-motion * {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+}
+
+/* Fade in animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Print styles */
+@media print {
+    .posts-hero,
+    .posts-controls,
+    .posts-stats,
+    .empty-state,
+    .loading-state,
+    .floating-create,
+    .theme-toggle,
+    .keyboard-hints {
+        display: none !important;
+    }
+    
+    .posts-grid {
+        display: block;
+    }
+    
+    .post-card {
+        page-break-inside: avoid;
+        break-inside: avoid;
+        margin-bottom: 30px;
+        border: 1px solid #000;
+    }
+    
+    body {
+        background: #fff !important;
+        color: #000 !important;
+    }
+    
+    .post-link, 
+    .author-name,
+    .post-title,
+    .post-date {
+        color: #000 !important;
+    }
+    
+    .category-badge {
+        background: #eee !important;
+        color: #000 !important;
+    }
+}
+</style>
+{% endblock %}

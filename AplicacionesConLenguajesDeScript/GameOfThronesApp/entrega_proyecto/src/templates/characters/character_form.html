@@ -1,0 +1,232 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if character %}Editar Personaje{% else %}Crear Personaje{% endif %} - WesterosTracker
+{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/characters.css') }}?v={{ range(1000, 9999) | random }}">
+{% endblock %}
+
+{% block content %}
+<div class="form-container" 
+     data-edit-mode="{% if character %}true{% else %}false{% endif %}"
+     data-character-name="{% if character %}{{ character.name|replace('"', '&quot;') }}{% else %}{% endif %}"
+     data-initial-rating="{% if character and character.average_rating %}{{ character.average_rating }}{% else %}0{% endif %}">
+    <div class="form-background">
+        <div class="form-overlay"></div>
+    </div>
+    
+    <div class="form-content">
+        <div class="form-header">
+            <h1 class="form-title">
+                <i class="fas fa-user-friends"></i>
+                {% if character %}
+                    <span>Editar Personaje</span>
+                {% else %}
+                    <span>Crear Nuevo Personaje</span>
+                {% endif %}
+            </h1>
+            <p class="form-subtitle">
+                {% if character %}
+                    Modifica los detalles de {{ character.name }}
+                {% else %}
+                    Añade un nuevo personaje al universo de Poniente
+                {% endif %}
+            </p>
+        </div>
+
+        <form class="character-form" method="POST" enctype="multipart/form-data" id="characterForm">
+            <div class="form-grid">
+                <!-- Información Principal -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-user"></i>
+                        Información Principal
+                    </h3>
+                    
+                    <div class="form-group">
+                        <label for="name" class="form-label">
+                            <i class="fas fa-signature"></i>
+                            Nombre del Personaje *
+                        </label>
+                        <input 
+                            type="text" 
+                            id="name" 
+                            name="name" 
+                            class="form-input" 
+                            value="{{ character.name if character else '' }}" 
+                            required
+                            placeholder="Ej: Jon Snow, Daenerys Targaryen..."
+                        >
+                        <div class="input-feedback"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="status" class="form-label">
+                            <i class="fas fa-heartbeat"></i>
+                            Estado *
+                        </label>
+                        <select id="status" name="status" class="form-select" required>
+                            <option value="">Selecciona el estado</option>
+                            <option value="Vivo" {{ 'selected' if character and character.status == 'Vivo' else '' }}>
+                                🟢 Vivo
+                            </option>
+                            <option value="Muerto" {{ 'selected' if character and character.status == 'Muerto' else '' }}>
+                                🔴 Muerto
+                            </option>
+                            <option value="Desconocido" {{ 'selected' if character and character.status == 'Desconocido' else '' }}>
+                                ❓ Desconocido
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="house_affiliation" class="form-label">
+                            <i class="fas fa-shield-alt"></i>
+                            Afiliación de Casa
+                        </label>
+                        <select id="house_affiliation" name="house_affiliation" class="form-select">
+                            <option value="">Sin afiliación específica</option>
+                            {% for house in houses %}
+                                <option value="{{ house.__oid__ }}" 
+                                    {{ 'selected' if character and character.house_affiliation == house.__oid__ else '' }}>
+                                    {{ house.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <div class="help-text">
+                            Selecciona la casa noble a la que pertenece o sirve este personaje
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description" class="form-label">
+                            <i class="fas fa-scroll"></i>
+                            Descripción del Personaje *
+                        </label>
+                        <textarea 
+                            id="description" 
+                            name="description" 
+                            class="form-textarea" 
+                            rows="6" 
+                            required
+                            placeholder="Describe la personalidad, historia y características importantes de este personaje..."
+                        >{{ character.description if character else '' }}</textarea>
+                        <div class="char-counter">
+                            <span id="desc-count">{{ character.description|length if character else 0 }}</span>/1500 caracteres
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Imagen y Características -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-portrait"></i>
+                        Imagen y Detalles
+                    </h3>
+                    
+                    <div class="form-group">
+                        <label for="image" class="form-label">
+                            <i class="fas fa-image"></i>
+                            Imagen del Personaje
+                        </label>
+                        <div class="image-upload-container">
+                            <input type="file" id="image" name="image" class="file-input" accept="image/*">
+                            <label for="image" class="file-label">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <span>Subir retrato</span>
+                            </label>
+                            <div class="file-info">
+                                Formatos: JPG, PNG, GIF (máx. 5MB)
+                            </div>
+                        </div>
+                        {% if character and character.image_url %}
+                            <div class="current-image">
+                                <p class="image-label">Imagen actual:</p>
+                                <img src="{{ character.image_url }}" alt="{{ character.name }}" class="preview-image">
+                            </div>
+                        {% endif %}
+                        <div id="image-preview" class="image-preview" style="display: none;">
+                            <img id="preview-img" src="" alt="Preview">
+                            <button type="button" class="remove-preview" id="removePreview">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Información adicional -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-info-circle"></i>
+                            Información Adicional
+                        </label>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <label for="title" class="info-label">Título/Rango</label>
+                                <input 
+                                    type="text" 
+                                    id="title" 
+                                    name="title" 
+                                    class="form-input-small" 
+                                    value="{{ character.title if character else '' }}"
+                                    placeholder="Ej: Rey en el Norte, Khaleesi..."
+                                >
+                            </div>
+                            <div class="info-item">
+                                <label for="origin" class="info-label">Lugar de Origen</label>
+                                <input 
+                                    type="text" 
+                                    id="origin" 
+                                    name="origin" 
+                                    class="form-input-small" 
+                                    value="{{ character.origin if character else '' }}"
+                                    placeholder="Ej: Winterfell, Dragonstone..."
+                                >
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Valoración inicial (opcional) -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-star"></i>
+                            Valoración Inicial (Opcional)
+                        </label>
+                        <div class="rating-display">
+                            <div class="star-rating" id="initial-rating">
+                                {% for i in range(1, 6) %}
+                                    <span class="star" data-rating="{{ i }}">
+                                        <i class="far fa-star"></i>
+                                    </span>
+                                {% endfor %}
+                            </div>
+                            <input type="hidden" id="initial_rating_value" name="initial_rating" value="{{ character.average_rating if character else '' }}">
+                            <div class="rating-text">
+                                <span id="rating-display">Sin valoración</span>
+                            </div>
+                        </div>
+                        <div class="help-text">
+                            Esta será tu valoración inicial del personaje (1-5 estrellas)
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botones de Acción -->
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="history.back()">
+                    <i class="fas fa-arrow-left"></i>
+                    Cancelar
+                </button>
+                <button type="submit" class="btn btn-primary" id="submitBtn">
+                    <i class="fas fa-save"></i>
+                    {% if character %}Actualizar Personaje{% else %}Crear Personaje{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/character_form.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+
+{% block title %}{{ character.name }} - Personajes - WesterosTracker{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Inicio</a></li>
+    <li class="breadcrumb-item"><a href="{{ url_for('characters.character_list') }}">Personajes</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{{ character.name }}</li>
+  </ol>
+</nav>
+
+<div class="row">
+    <div class="col-lg-4 mb-4">
+        <div class="card shadow">
+            {% if character.image_url %}
+            <img src="{{ character.image_url }}" class="img-fluid rounded-top" alt="{{ character.name }}">
+            {% else %}
+            <div class="bg-light d-flex align-items-center justify-content-center p-5">
+                <i class="fas fa-user-circle fa-7x text-muted"></i>
+            </div>
+            {% endif %}
+            <div class="card-body text-center">
+                <h2 class="card-title">{{ character.name }}</h2>
+                {% if character.title %}
+                <h5 class="card-subtitle mb-3 text-muted">{{ character.title }}</h5>
+                {% endif %}
+                
+                <div class="mb-3">
+                    <span class="badge rounded-pill px-3 py-2 fs-6
+                          {% if character.status == 'Vivo' %}bg-success
+                          {% elif character.status == 'Muerto' %}bg-danger
+                          {% else %}bg-secondary{% endif %}">
+                        {{ character.status }}
+                    </span>
+                </div>
+                
+                {% if house %}
+                <div class="d-flex justify-content-center align-items-center mb-3">
+                    <span class="me-2">Casa:</span>
+                    <a href="{{ url_for('houses.house_detail', house_id=house.get_id()) }}" class="text-decoration-none">
+                        <span class="badge bg-primary px-3 py-2">{{ house.name }}</span>
+                    </a>
+                </div>
+                {% endif %}
+                
+                {% if is_authenticated %}
+                <div class="d-flex justify-content-center mb-3">
+                    <button class="btn btn-outline-secondary me-2 favorite-btn {% if character.get_id() in current_user.favorites.characters %}active{% endif %}" 
+                            data-id="{{ character.get_id() }}" 
+                            data-type="characters">
+                        <i class="{% if character.get_id() in current_user.favorites.characters %}fas{% else %}far{% endif %} fa-heart me-1"></i> 
+                        Favorito
+                    </button>
+                    <a href="{{ url_for('characters.character_edit', character_id=character.get_id()) }}" class="btn btn-outline-primary">
+                        <i class="fas fa-edit me-1"></i> Editar
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-8">
+        <div class="card shadow mb-4">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0">Acerca de {{ character.name }}</h3>
+            </div>
+            <div class="card-body">
+                <div class="character-description">
+                    {{ character.description|safe }}
+                </div>
+            </div>
+        </div>
+        
+        {% if house %}
+        <div class="card shadow mb-4">
+            <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
+                <h3 class="mb-0">Casa {{ house.name }}</h3>
+                <a href="{{ url_for('houses.house_detail', house_id=house.get_id()) }}" class="btn btn-outline-light btn-sm">Ver detalles</a>
+            </div>
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-4 text-center mb-3 mb-md-0">
+                        {% if house.image_url %}
+                        <img src="{{ house.image_url }}" alt="{{ house.name }}" class="img-fluid rounded" style="max-height: 150px;">
+                        {% else %}
+                        <div class="bg-light d-flex align-items-center justify-content-center p-4 rounded">
+                            <i class="fas fa-flag fa-5x text-muted"></i>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-8">
+                        <h4>{{ house.words }}</h4>
+                        <p><strong>Región:</strong> {{ house.region }}</p>
+                        <p>{{ house.description|truncate(150) }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Aquí se podrían añadir secciones adicionales como: 
+             - Eventos relevantes en los que participa el personaje
+             - Relaciones con otros personajes
+             - Historia del personaje
+        -->
+    </div>
+</div>
+
+<style>
+    .character-description {
+        font-size: 1.1rem;
+        line-height: 1.7;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const ratingStars = document.querySelectorAll('.rating-star');
+    const ratingInput = document.querySelector('.rating-input input[type="hidden"]');
+    
+    if (ratingStars.length > 0) {
+        ratingStars.forEach((star, index) => {
+            star.addEventListener('click', function() {
+                const rating = index + 1;
+                
+                // Actualizar estrellas visuales
+                ratingStars.forEach((s, i) => {
+                    if (i < rating) {
+                        s.classList.add('fas');
+                        s.classList.remove('far');
+                    } else {
+                        s.classList.add('far');
+                        s.classList.remove('fas');
+                    }
+                });
+                
+                // Actualizar valor del input
+                ratingInput.value = rating;
+            });
+            
+            star.addEventListener('mouseenter', function() {
+                const hoverRating = index + 1;
+                
+                // Actualizar estrellas visuales durante hover
+                ratingStars.forEach((s, i) => {
+                    if (i < hoverRating) {
+                        s.classList.add('text-warning');
+                    } else {
+                        s.classList.remove('text-warning');
+                    }
+                });
+            });
+        });
+        
+        document.querySelector('.rating-input').addEventListener('mouseleave', function() {
+            ratingStars.forEach((s) => {
+                s.classList.remove('text-warning');
+            });
+        });
+    }
+});
+</script>
+{% endblock %}
