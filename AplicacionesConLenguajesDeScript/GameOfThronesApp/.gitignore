@@ -1,0 +1,33 @@
+# Archivos grandes - Videos de fondo
+*.mp4
+got_background.*
+
+# Archivos de sistema
+.DS_Store
+__pycache__/
+*.pyc
+*.pyo
+
+# Archivos de configuración específicos del entorno
+config_local.py
+.env
+
+# Archivos temporales
+*.tmp
+*.temp
+
+# Archivos de respaldo
+*.bak
+*.backup
+
+# Logs
+*.log
+
+# Archivos comprimidos grandes
+*.zip
+*.rar
+*.7z
+
+# Imágenes muy grandes (opcional - ajustar según necesidad)
+# *.mov
+# *.avi
