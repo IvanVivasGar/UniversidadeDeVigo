@@ -1,6 +1,3 @@
-# Archivos grandes - Videos de fondo
-got_background.*
-
 # Archivos de sistema
 .DS_Store
 __pycache__/
