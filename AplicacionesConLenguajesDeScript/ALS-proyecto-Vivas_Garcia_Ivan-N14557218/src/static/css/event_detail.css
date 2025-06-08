@@ -1,0 +1,1060 @@
+/* ========================================================================
+   EVENT DETAIL PAGE - EPIC STYLING
+   ======================================================================== */
+
+.event-detail-page {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #0f1419 0%, #1a202c 50%, #2d3748 100%);
+    color: #e2e8f0;
+}
+
+/* Animated Background */
+.animated-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, 
+        var(--primary-gold), 
+        var(--secondary-crimson), 
+        var(--accent-steel), 
+        var(--primary-gold));
+    background-size: 400% 400%;
+    animation: gradientShift 15s ease infinite;
+    opacity: 0.8;
+}
+
+@keyframes gradientShift {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* Epic Event Header */
+.event-detail-hero {
+    position: relative;
+    height: 70vh;
+    min-height: 600px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.hero-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+.hero-bg-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: brightness(0.4) blur(2px);
+    transform: scale(1.1);
+    display: none; /* Hide event image, use animation instead */
+}
+
+.hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        45deg,
+        rgba(15, 20, 25, 0.9) 0%,
+        rgba(26, 32, 44, 0.7) 50%,
+        rgba(45, 55, 72, 0.9) 100%
+    );
+    z-index: 2;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 3;
+    text-align: center;
+    max-width: 1200px;
+    padding: 2rem;
+}
+
+.event-breadcrumb {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    font-size: 1rem;
+    color: #a0aec0;
+}
+
+.event-breadcrumb a {
+    color: #d4a574;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.event-breadcrumb a:hover {
+    color: #f7d794;
+    transform: translateX(-2px);
+}
+
+.event-title-section {
+    margin-bottom: 3rem;
+}
+
+.event-main-title {
+    font-size: 4rem;
+    font-weight: 900;
+    color: #f7fafc;
+    margin-bottom: 1.5rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+    background: linear-gradient(135deg, #d4a574, #f7d794, #d4a574);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.2;
+}
+
+.event-meta-info {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+    margin-bottom: 2rem;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(26, 32, 44, 0.8);
+    padding: 0.75rem 1.5rem;
+    border-radius: 25px;
+    border: 1px solid rgba(212, 165, 116, 0.3);
+    backdrop-filter: blur(10px);
+    font-weight: 600;
+}
+
+.meta-item i {
+    color: #d4a574;
+    font-size: 1.1rem;
+}
+
+.event-actions-hero {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.rating-section {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: rgba(26, 32, 44, 0.9);
+    padding: 1rem 2rem;
+    border-radius: 30px;
+    border: 2px solid rgba(212, 165, 116, 0.3);
+    backdrop-filter: blur(10px);
+}
+
+.rating-label {
+    font-weight: 600;
+    color: #cbd5e0;
+}
+
+.user-rating-epic {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.epic-star {
+    font-size: 1.5rem;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.epic-star:hover {
+    transform: scale(1.1);
+}
+
+.epic-star.fas {
+    color: #d4a574;
+}
+
+.epic-star::before {
+    position: relative;
+    z-index: 1;
+}
+
+/* Remove Rating Button */
+.btn-remove-rating {
+    background: linear-gradient(135deg, #dc2626, #ef4444);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-left: 10px;
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+}
+
+.btn-remove-rating:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
+    background: linear-gradient(135deg, #b91c1c, #dc2626);
+}
+
+.btn-remove-rating:active {
+    transform: translateY(0) scale(0.95);
+}
+
+.btn-remove-rating i {
+    font-size: 0.9rem;
+}
+
+/* Content Main */
+.event-content-main {
+    position: relative;
+    z-index: 2;
+    margin-top: -100px;
+    padding: 0 2rem 4rem;
+}
+
+.content-wrapper {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 3rem;
+}
+
+/* Left Column */
+.content-left {
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+}
+
+/* Image Gallery Epic */
+.event-gallery-epic {
+    background: rgba(26, 32, 44, 0.95);
+    border-radius: 20px;
+    padding: 2rem;
+    border: 2px solid rgba(212, 165, 116, 0.3);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+}
+
+.main-image-container {
+    position: relative;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s ease;
+}
+
+.main-image-container:hover {
+    transform: scale(1.02);
+}
+
+.main-image-epic {
+    width: 100%;
+    height: 500px;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.main-image-epic:hover {
+    transform: scale(1.05);
+}
+
+.image-counter {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: rgba(0, 0, 0, 0.8);
+    color: var(--primary-gold);
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+}
+
+.image-overlay-effects {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        45deg,
+        rgba(212, 165, 116, 0.1) 0%,
+        transparent 50%,
+        rgba(212, 165, 116, 0.1) 100%
+    );
+    pointer-events: none;
+}
+
+.overlay-pattern {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        repeating-linear-gradient(
+            45deg,
+            transparent,
+            transparent 2px,
+            rgba(212, 165, 116, 0.1) 2px,
+            rgba(212, 165, 116, 0.1) 4px
+        );
+    opacity: 0.3;
+}
+
+.image-thumbnails-epic {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+    padding: 0 5px;
+    overflow-x: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary-gold) transparent;
+}
+
+.thumbnail-epic {
+    position: relative;
+    min-width: 80px;
+    height: 80px;
+    border-radius: 10px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.thumbnail-epic:hover {
+    transform: scale(1.1);
+    border-color: var(--primary-gold);
+}
+
+.thumbnail-epic.active {
+    border-color: var(--primary-gold);
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+}
+
+.thumbnail-epic img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.thumbnail-epic:hover img {
+    transform: scale(1.1);
+}
+
+.thumbnail-number {
+    position: absolute;
+    bottom: 3px;
+    right: 3px;
+    background: rgba(0, 0, 0, 0.8);
+    color: var(--primary-gold);
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 600;
+    border: 1px solid rgba(255, 215, 0, 0.3);
+}
+
+/* Event Description */
+.event-description-epic {
+    background: rgba(26, 32, 44, 0.95);
+    border-radius: 20px;
+    padding: 2.5rem;
+    border: 2px solid rgba(212, 165, 116, 0.3);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+}
+
+.description-header h2 {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 2rem;
+    color: #d4a574;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid rgba(212, 165, 116, 0.3);
+}
+
+.description-text {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #e2e8f0;
+    text-align: justify;
+}
+
+/* Right Column */
+.content-right {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+/* Event Stats Card */
+.event-stats-card {
+    background: rgba(26, 32, 44, 0.95);
+    border-radius: 20px;
+    padding: 2rem;
+    border: 2px solid rgba(212, 165, 116, 0.3);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+}
+
+.stats-header h3 {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: #d4a574;
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+}
+
+.stats-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.stats-content-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    padding: 20px;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: rgba(45, 55, 72, 0.5);
+    border-radius: 10px;
+    border: 1px solid rgba(212, 165, 116, 0.2);
+    transition: all 0.3s ease;
+}
+
+.stat-item:hover {
+    transform: translateX(5px);
+    border-color: rgba(212, 165, 116, 0.5);
+}
+
+.stat-item-improved {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+.stat-item-improved:hover {
+    background: rgba(255, 215, 0, 0.1);
+    border-color: rgba(255, 215, 0, 0.4);
+    transform: translateY(-2px);
+}
+
+.stat-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #d4a574, #f7d794);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #1a202c;
+    font-weight: bold;
+}
+
+.stat-icon-improved {
+    flex-shrink: 0;
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--gradient-gold);
+    border-radius: 50%;
+    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+}
+
+.stat-icon-improved i {
+    font-size: 1.2rem;
+    color: var(--text-dark);
+}
+
+.stat-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-content-improved {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    min-width: 0;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #f7fafc;
+}
+
+.stat-value-improved {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-gold);
+    line-height: 1;
+    margin-bottom: 2px;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: #a0aec0;
+}
+
+.stat-label-improved {
+    font-size: 0.85rem;
+    color: var(--text-light);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Related Sections */
+.related-section-epic {
+    background: rgba(26, 32, 44, 0.95);
+    border-radius: 20px;
+    padding: 2rem;
+    border: 2px solid rgba(212, 165, 116, 0.3);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+}
+
+.section-header h3 {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: #d4a574;
+    margin-bottom: 1.5rem;
+    font-size: 1.3rem;
+}
+
+.related-entities-epic {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+}
+
+.related-entity-epic {
+    position: relative;
+    border-radius: 10px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.related-entity-epic:hover {
+    transform: translateY(-5px);
+}
+
+.related-entity-epic a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.entity-image-epic {
+    position: relative;
+    width: 100%;
+    height: 120px;
+    overflow: hidden;
+}
+
+.entity-image-epic img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.related-entity-epic:hover .entity-image-epic img {
+    transform: scale(1.1);
+}
+
+.placeholder-entity {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #2d3748, #4a5568);
+    color: #d4a574;
+    font-size: 2rem;
+}
+
+.entity-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        to bottom,
+        transparent 0%,
+        rgba(26, 32, 44, 0.8) 100%
+    );
+}
+
+.entity-name-epic {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 0.75rem;
+    background: rgba(26, 32, 44, 0.9);
+    color: #f7fafc;
+    font-weight: 600;
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+.empty-related-epic {
+    text-align: center;
+    padding: 2rem;
+    color: #a0aec0;
+}
+
+.empty-related-epic i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: #4a5568;
+}
+
+/* Comments Section */
+.comments-section-epic {
+    background: rgba(26, 32, 44, 0.95);
+    margin: 4rem 2rem 0;
+    border-radius: 20px 20px 0 0;
+    border: 2px solid rgba(212, 165, 116, 0.3);
+    border-bottom: none;
+}
+
+.comments-wrapper {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 3rem;
+}
+
+.comments-header h2 {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: #d4a574;
+    margin-bottom: 2rem;
+    font-size: 2rem;
+}
+
+.comment-form-epic {
+    margin-bottom: 3rem;
+    padding: 2rem;
+    background: rgba(45, 55, 72, 0.5);
+    border-radius: 15px;
+    border: 1px solid rgba(212, 165, 116, 0.2);
+}
+
+.form-group-epic {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+}
+
+.user-avatar-comment {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: linear-gradient(135deg, #d4a574, #f7d794);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.user-avatar-comment img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.user-avatar-comment i {
+    color: #1a202c;
+    font-size: 1.5rem;
+}
+
+.comment-input-container {
+    flex: 1;
+    position: relative;
+}
+
+.comment-input-container textarea {
+    width: 100%;
+    padding: 1rem;
+    border: 2px solid rgba(212, 165, 116, 0.3);
+    border-radius: 10px;
+    background: rgba(26, 32, 44, 0.8);
+    color: #e2e8f0;
+    font-size: 1rem;
+    resize: vertical;
+    min-height: 100px;
+    transition: all 0.3s ease;
+}
+
+.comment-input-container textarea:focus {
+    outline: none;
+    border-color: #d4a574;
+    box-shadow: 0 0 0 3px rgba(212, 165, 116, 0.2);
+}
+
+.btn-comment-submit {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background: linear-gradient(135deg, #d4a574, #f7d794);
+    color: #1a202c;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.btn-comment-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(212, 165, 116, 0.3);
+}
+
+/* Comment Items */
+.comment-item-epic {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding: 1.5rem;
+    background: rgba(45, 55, 72, 0.3);
+    border-radius: 15px;
+    border: 1px solid rgba(212, 165, 116, 0.1);
+    transition: all 0.3s ease;
+}
+
+.comment-item-epic:hover {
+    border-color: rgba(212, 165, 116, 0.3);
+    transform: translateY(-2px);
+}
+
+.comment-avatar {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: linear-gradient(135deg, #d4a574, #f7d794);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.comment-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.comment-avatar i {
+    color: #1a202c;
+    font-size: 1.2rem;
+}
+
+.comment-content-epic {
+    flex: 1;
+}
+
+.comment-header-epic {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.commenter-name {
+    font-weight: 600;
+    color: #d4a574;
+}
+
+.comment-date {
+    font-size: 0.9rem;
+    color: #a0aec0;
+}
+
+.comment-text {
+    color: #e2e8f0;
+    line-height: 1.6;
+}
+
+.empty-comments-epic {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #a0aec0;
+}
+
+.empty-comments-epic i {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    color: #4a5568;
+}
+
+/* Notification System */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    max-width: 400px;
+    background: rgba(26, 32, 44, 0.95);
+    border-radius: 10px;
+    padding: 0;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 10000;
+    transform: translateX(100%);
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.notification.show {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.notification-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 15px 20px;
+    color: #e2e8f0;
+}
+
+.notification-success {
+    border-left: 4px solid #10b981;
+}
+
+.notification-error {
+    border-left: 4px solid #ef4444;
+}
+
+.notification-success .notification-content i {
+    color: #10b981;
+    font-size: 1.2rem;
+}
+
+.notification-error .notification-content i {
+    color: #ef4444;
+    font-size: 1.2rem;
+}
+
+.notification-content span {
+    flex: 1;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+/* Rating Stars Animation */
+@keyframes starPulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.epic-star.rated {
+    animation: starPulse 0.3s ease;
+}
+
+/* Enhanced Button Styles */
+.btn-epic {
+    background: linear-gradient(135deg, #d4a574, #f7d794);
+    color: #1a202c;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 25px;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(212, 165, 116, 0.3);
+}
+
+.btn-epic:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(212, 165, 116, 0.4);
+    color: #1a202c;
+    text-decoration: none;
+}
+
+.btn-epic:active {
+    transform: translateY(-1px);
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .content-wrapper {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+    
+    .content-right {
+        order: -1;
+    }
+}
+
+@media (max-width: 768px) {
+    .event-main-title {
+        font-size: 2.5rem;
+    }
+    
+    .event-meta-info {
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .event-actions-hero {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .content-wrapper,
+    .comments-wrapper {
+        padding: 1rem;
+    }
+    
+    .related-entities-epic {
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    }
+    
+    .form-group-epic {
+        flex-direction: column;
+    }
+    
+    .user-avatar-comment {
+        align-self: center;
+    }
+    
+    .stats-content-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        padding: 15px;
+    }
+    
+    .stat-item-improved {
+        padding: 12px;
+        gap: 12px;
+    }
+    
+    .stat-icon-improved {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .stat-icon-improved i {
+        font-size: 1rem;
+    }
+    
+    .stat-value-improved {
+        font-size: 1.3rem;
+    }
+    
+    .image-thumbnails-epic {
+        gap: 8px;
+    }
+    
+    .thumbnail-epic {
+        min-width: 70px;
+        height: 70px;
+    }
+    
+    .rating-section {
+        flex-direction: column;
+        gap: 0.5rem;
+        padding: 1rem 1.5rem;
+    }
+    
+    .btn-remove-rating {
+        width: 35px;
+        height: 35px;
+        margin-left: 0;
+        margin-top: 5px;
+    }
+    
+    .epic-star {
+        font-size: 1.3rem;
+    }
+    
+    .notification {
+        right: 10px;
+        left: 10px;
+        max-width: none;
+    }
+}

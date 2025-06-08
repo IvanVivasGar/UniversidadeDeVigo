@@ -1,0 +1,23 @@
+Título del proyecto: WesterosTracker - Aplicación Web Game of Thrones
+URL del proyecto: http://localhost:3000 (aplicación web local Flask)
+Apellidos y nombre: VIVAS_GARCIA_IVAN
+DNI: N14557218
+
+Descripción:
+Aplicación web Flask para el seguimiento y gestión de información sobre Game of Thrones.
+Incluye gestión de personajes, casas nobles, eventos, sistema de posts/foros, 
+autenticación de usuarios y sistema de calificaciones.
+
+Tecnologías utilizadas:
+- Backend: Flask, Flask-Login
+- Base de Datos: Redis + Sirope (ORM)
+- Frontend: HTML5, CSS3, JavaScript
+- Autenticación: Flask-Login con hashing de contraseñas
+
+Instrucciones de ejecución:
+1. Instalar Redis: brew install redis && brew services start redis
+2. Instalar dependencias: pip install -r requirements.txt
+3. Ejecutar: python app.py
+4. Acceder a: http://localhost:3000
+
+Repositorio Git: https://github.com/IvanVivasGar/UniversidadeDeVigo

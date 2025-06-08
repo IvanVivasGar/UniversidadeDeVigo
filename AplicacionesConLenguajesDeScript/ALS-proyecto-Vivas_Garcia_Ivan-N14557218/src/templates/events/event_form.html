@@ -1,0 +1,263 @@
+{% extends "base.html" %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/events.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/event_form.css') }}">
+{% endblock %}
+
+{% block title %}
+    {% if event %}Editar Evento{% else %}Crear Evento{% endif %} - WesterosTracker
+{% endblock %}
+
+{% block content %}
+<div class="form-container"
+     data-edit-mode="{% if event %}true{% else %}false{% endif %}"
+     data-event-name="{% if event %}{{ event.name|replace('"', '&quot;') }}{% else %}{% endif %}">
+    <div class="form-background">
+        <div class="form-overlay"></div>
+    </div>
+    
+    <div class="form-content">
+        <div class="form-header">
+            <h1 class="form-title">
+                <i class="fas fa-calendar-alt"></i>
+                {% if event %}
+                    <span>Editar Evento Histórico</span>
+                {% else %}
+                    <span>Registrar Nuevo Evento</span>
+                {% endif %}
+            </h1>
+            <p class="form-subtitle">
+                {% if event %}
+                    Modifica los detalles del evento "{{ event.name }}"
+                {% else %}
+                    Documenta un momento crucial en la historia de Poniente
+                {% endif %}
+            </p>
+        </div>
+
+        <form class="event-form" method="POST" enctype="multipart/form-data" id="eventForm">
+            <div class="form-grid">
+                <!-- Información Principal -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-bookmark"></i>
+                        Información del Evento
+                    </h3>
+                    
+                    <div class="form-group">
+                        <label for="name" class="form-label">
+                            <i class="fas fa-flag"></i>
+                            Nombre del Evento *
+                        </label>
+                        <input 
+                            type="text" 
+                            id="name" 
+                            name="name" 
+                            class="form-input" 
+                            value="{{ event.name if event else '' }}" 
+                            required
+                            placeholder="Ej: Batalla de los Bastardos, Boda Roja..."
+                        >
+                        <div class="input-feedback"></div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="season" class="form-label">
+                                <i class="fas fa-tv"></i>
+                                Temporada *
+                            </label>
+                            <select id="season" name="season" class="form-select" required>
+                                <option value="">Selecciona temporada</option>
+                                {% for i in range(1, 9) %}
+                                    <option value="{{ i }}" {{ 'selected' if event and event.season == i else '' }}>
+                                        Temporada {{ i }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="episode" class="form-label">
+                                <i class="fas fa-film"></i>
+                                Episodio *
+                            </label>
+                            <select id="episode" name="episode" class="form-select" required>
+                                <option value="">Selecciona episodio</option>
+                                {% for i in range(1, 11) %}
+                                    <option value="{{ i }}" {{ 'selected' if event and event.episode == i else '' }}>
+                                        Episodio {{ i }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="importance_rating" class="form-label">
+                            <i class="fas fa-star"></i>
+                            Rating de Importancia *
+                        </label>
+                        <div class="rating-input">
+                            <select id="importance_rating" name="importance_rating" class="form-select" required>
+                                <option value="">Selecciona importancia</option>
+                                <option value="1" {{ 'selected' if event and event.importance_rating == 1 else '' }}>
+                                    ⭐ Menor importancia
+                                </option>
+                                <option value="2" {{ 'selected' if event and event.importance_rating == 2 else '' }}>
+                                    ⭐⭐ Importancia baja
+                                </option>
+                                <option value="3" {{ 'selected' if event and event.importance_rating == 3 else '' }}>
+                                    ⭐⭐⭐ Importancia media
+                                </option>
+                                <option value="4" {{ 'selected' if event and event.importance_rating == 4 else '' }}>
+                                    ⭐⭐⭐⭐ Muy importante
+                                </option>
+                                <option value="5" {{ 'selected' if event and event.importance_rating == 5 else '' }}>
+                                    ⭐⭐⭐⭐⭐ Crucial para la historia
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description" class="form-label">
+                            <i class="fas fa-scroll"></i>
+                            Descripción del Evento *
+                        </label>
+                        <textarea 
+                            id="description" 
+                            name="description" 
+                            class="form-textarea" 
+                            rows="6" 
+                            required
+                            placeholder="Describe lo que sucedió en este evento, su contexto e importancia..."
+                        >{{ event.description if event else '' }}</textarea>
+                        <div class="char-counter">
+                            <span id="desc-count">{{ event.description|length if event else 0 }}</span>/2000 caracteres
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Relaciones e Imágenes -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-users"></i>
+                        Participantes e Imágenes
+                    </h3>
+                    
+                    <div class="form-group">
+                        <label for="character_ids" class="form-label">
+                            <i class="fas fa-user-friends"></i>
+                            Personajes Involucrados
+                        </label>
+                        <select id="character_ids" name="character_ids" class="form-select" multiple>
+                            {% for character in characters %}
+                                <option value="{{ character.__oid__ }}" 
+                                    {{ 'selected' if event and character.__oid__ in (event.characters_involved or []) else '' }}>
+                                    {{ character.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <div class="help-text">
+                            Mantén Ctrl/Cmd presionado para seleccionar múltiples personajes
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="house_ids" class="form-label">
+                            <i class="fas fa-shield-alt"></i>
+                            Casas Involucradas
+                        </label>
+                        <select id="house_ids" name="house_ids" class="form-select" multiple>
+                            {% for house in houses %}
+                                <option value="{{ house.__oid__ }}" 
+                                    {{ 'selected' if event and house.__oid__ in (event.houses_involved or []) else '' }}>
+                                    {{ house.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <div class="help-text">
+                            Mantén Ctrl/Cmd presionado para seleccionar múltiples casas
+                        </div>
+                    </div>
+
+                    <!-- Imagen Principal -->
+                    <div class="form-group">
+                        <label for="image" class="form-label">
+                            <i class="fas fa-image"></i>
+                            Imagen Principal del Evento
+                        </label>
+                        <div class="image-upload-container">
+                            <input type="file" id="image" name="image" class="file-input" accept="image/*">
+                            <label for="image" class="file-label">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <span>Subir imagen del evento</span>
+                            </label>
+                            <div class="file-info">
+                                Formatos: JPG, PNG, GIF (máx. 5MB)
+                            </div>
+                        </div>
+                        {% if event and event.image_urls and event.image_urls|length > 0 %}
+                            <div class="current-image">
+                                <p class="image-label">Imagen actual:</p>
+                                <img src="{{ event.image_urls[0] }}" alt="{{ event.name }}" class="preview-image">
+                            </div>
+                        {% endif %}
+                        <div id="image-preview" class="image-preview" style="display: none;">
+                            <img id="preview-img" src="" alt="Preview">
+                            <button type="button" class="remove-preview" id="removePreview">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Imágenes Adicionales -->
+                    <div class="form-group">
+                        <label for="additional_images" class="form-label">
+                            <i class="fas fa-images"></i>
+                            Imágenes Adicionales
+                        </label>
+                        <div class="image-upload-container">
+                            <input type="file" id="additional_images" name="additional_images" class="file-input" accept="image/*" multiple>
+                            <label for="additional_images" class="file-label">
+                                <i class="fas fa-plus-circle"></i>
+                                <span>Agregar más imágenes</span>
+                            </label>
+                            <div class="file-info">
+                                Puedes seleccionar múltiples imágenes (máx. 4 adicionales)
+                            </div>
+                        </div>
+                        {% if event and event.image_urls and event.image_urls|length > 1 %}
+                            <div class="additional-images">
+                                <p class="image-label">Imágenes adicionales actuales:</p>
+                                <div class="image-grid">
+                                    {% for img_url in event.image_urls[1:] %}
+                                        <img src="{{ img_url }}" alt="{{ event.name }}" class="additional-image">
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endif %}
+                        <div id="additional-preview" class="additional-preview"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botones de Acción -->
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="history.back()">
+                    <i class="fas fa-arrow-left"></i>
+                    Cancelar
+                </button>
+                <button type="submit" class="btn btn-primary" id="submitBtn">
+                    <i class="fas fa-save"></i>
+                    {% if event %}Actualizar Evento{% else %}Crear Evento{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/event_form.js') }}"></script>
+{% endblock %}

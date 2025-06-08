@@ -1,0 +1,780 @@
+{% extends "base.html" %}
+
+{% block title %}Personajes - WesterosTracker{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/characters.css') }}?v={{ range(1000, 9999) | random }}">
+{% endblock %}
+
+{% block content %}
+<div class="characters-container">
+    <!-- Hero Section -->
+    <div class="characters-hero">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <div class="hero-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <h1 class="hero-title">Personajes de Westeros</h1>
+            <p class="hero-subtitle">Descubre a los héroes y villanos que forjaron el destino de los Siete Reinos</p>
+        </div>
+        <div class="floating-swords">
+            <div class="sword sword-1"><i class="fas fa-sword"></i></div>
+            <div class="sword sword-2"><i class="fas fa-sword"></i></div>
+            <div class="sword sword-3"><i class="fas fa-sword"></i></div>
+        </div>
+    </div>
+
+    <!-- Search and Controls -->
+    <div class="characters-controls">
+        <div class="container">
+            <div class="controls-header">
+                <div class="search-section">
+                    <div class="search-container">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" id="character-search" placeholder="Buscar personajes..." 
+                               class="search-input">
+                        <div class="search-border"></div>
+                    </div>
+                    <div class="search-suggestions" id="search-suggestions"></div>
+                </div>
+                
+                {% if current_user.is_authenticated %}
+                <div class="action-section">
+                    <a href="{{ url_for('characters.create_character') }}" class="btn btn-primary create-btn">
+                        <i class="fas fa-plus-circle"></i>
+                        <span>Crear Personaje</span>
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Filters -->
+            <div class="filters-section">
+                <div class="filter-group">
+                    <label class="filter-label">
+                        <i class="fas fa-filter"></i>
+                        Filtrar por:
+                    </label>
+                    <div class="filter-options">
+                        <select id="status-filter" class="filter-select">
+                            <option value="">Todos los estados</option>
+                            <option value="vivo">Vivo</option>
+                            <option value="muerto">Muerto</option>
+                            <option value="desconocido">Desconocido</option>
+                        </select>
+                        
+                        <select id="house-filter" class="filter-select">
+                            <option value="">Todas las casas</option>
+                            <!-- Will be populated dynamically -->
+                        </select>
+                        
+                        <select id="rating-filter" class="filter-select">
+                            <option value="">Todas las valoraciones</option>
+                            <option value="5">5 estrellas</option>
+                            <option value="4">4+ estrellas</option>
+                            <option value="3">3+ estrellas</option>
+                            <option value="2">2+ estrellas</option>
+                            <option value="1">1+ estrellas</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="sort-group">
+                    <label class="filter-label">
+                        <i class="fas fa-sort"></i>
+                        Ordenar por:
+                    </label>
+                    <select id="sort-order" class="filter-select">
+                        <option value="name">Nombre (A-Z)</option>
+                        <option value="name-desc">Nombre (Z-A)</option>
+                        <option value="rating">Mejor valorados</option>
+                        <option value="rating-asc">Menor valorados</option>
+                        <option value="newest">Más recientes</option>
+                        <option value="oldest">Más antiguos</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Characters Grid -->
+    <div class="characters-main">
+        <div class="container">
+            <div class="characters-stats">
+                <div class="stats-item">
+                    <span class="stats-number" id="total-characters">0</span>
+                    <span class="stats-label">Personajes</span>
+                </div>
+                <div class="stats-item">
+                    <span class="stats-number" id="filtered-characters">0</span>
+                    <span class="stats-label">Mostrados</span>
+                </div>
+            </div>
+
+            <div class="characters-grid" id="characters-grid">
+                <!-- Characters will be loaded here -->
+            </div>
+
+            <!-- Loading State -->
+            <div class="loading-state" id="loading-state">
+                <div class="loading-spinner">
+                    <i class="fas fa-dragon"></i>
+                </div>
+                <p>Cargando personajes...</p>
+            </div>
+
+            <!-- Empty State -->
+            <div class="empty-state" id="empty-state" style="display: none;">
+                <div class="empty-icon">
+                    <i class="fas fa-user-slash"></i>
+                </div>
+                <h3>No se encontraron personajes</h3>
+                <p>Intenta ajustar los filtros de búsqueda o crear un nuevo personaje.</p>
+                {% if current_user.is_authenticated %}
+                <a href="{{ url_for('characters.create_character') }}" class="btn btn-secondary">
+                    <i class="fas fa-plus"></i>
+                    Crear primer personaje
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Character Card Template -->
+<template id="character-card-template">
+    <div class="character-card" data-character-id="">
+        <div class="card-inner">
+            <div class="card-front">
+                <div class="character-image">
+                    <img src="" alt="" class="character-photo">
+                    <div class="image-overlay">
+                        <div class="character-status">
+                            <span class="status-badge"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="character-info">
+                    <h3 class="character-name"></h3>
+                    <p class="character-house">
+                        <i class="fas fa-shield-alt"></i>
+                        <span></span>
+                    </p>
+                    
+                    <div class="character-rating">
+                        {% if current_user.is_authenticated %}
+                        <div class="stars-container interactive-rating" data-character-id="">
+                            <div class="stars-interactive">
+                                <i class="fas fa-star" data-rating="1"></i>
+                                <i class="fas fa-star" data-rating="2"></i>
+                                <i class="fas fa-star" data-rating="3"></i>
+                                <i class="fas fa-star" data-rating="4"></i>
+                                <i class="fas fa-star" data-rating="5"></i>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="stars-container">
+                            <div class="stars-background">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <div class="stars-filled">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                        {% endif %}
+                        <span class="rating-value"></span>
+                        <span class="rating-count">(<span class="count"></span> votos)</span>
+                    </div>
+                    
+                    <div class="character-actions">
+                        {% if current_user.is_authenticated %}
+                        <button class="btn-icon edit-btn" title="Editar personaje">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn-icon favorite-btn" title="Agregar a favoritos">
+                            <i class="far fa-heart"></i>
+                        </button>
+                        {% endif %}
+                        
+                        <!-- Admin controls -->
+                        {% if current_user.is_authenticated and current_user.is_administrator() %}
+                        <button class="btn-icon admin-delete-btn" 
+                                data-entity-type="character" 
+                                data-entity-id="" 
+                                data-entity-name=""
+                                title="Eliminar personaje">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card-back">
+                <div class="character-description">
+                    <h4>Descripción</h4>
+                    <p class="description-text"></p>
+                </div>
+                <button class="flip-back-btn">
+                    <i class="fas fa-arrow-left"></i>
+                    Volver
+                </button>
+            </div>
+        </div>
+    </div>
+</template>
+{% endblock %}
+
+{% block scripts %}
+<script>
+class CharactersManager {
+    constructor() {
+        this.characters = [];
+        this.filteredCharacters = [];
+        this.currentFilters = {
+            search: '',
+            status: '',
+            house: '',
+            rating: '',
+            sort: 'name'
+        };
+        
+        this.init();
+    }
+    
+    async init() {
+        await this.loadCharacters();
+        this.setupEventListeners();
+        this.populateFilters();
+        this.renderCharacters();
+    }
+    
+    async loadCharacters() {
+        try {
+            const response = await fetch('/api/characters');
+            this.characters = await response.json();
+            this.filteredCharacters = [...this.characters];
+            this.updateStats();
+        } catch (error) {
+            console.error('Error loading characters:', error);
+            this.showError('Error al cargar los personajes');
+        } finally {
+            document.getElementById('loading-state').style.display = 'none';
+        }
+    }
+    
+    setupEventListeners() {
+        // Search input
+        const searchInput = document.getElementById('character-search');
+        searchInput.addEventListener('input', this.debounce((e) => {
+            this.currentFilters.search = e.target.value.toLowerCase();
+            this.applyFilters();
+        }, 300));
+        
+        // Filter selects
+        document.getElementById('status-filter').addEventListener('change', (e) => {
+            this.currentFilters.status = e.target.value;
+            this.applyFilters();
+        });
+        
+        document.getElementById('house-filter').addEventListener('change', (e) => {
+            this.currentFilters.house = e.target.value;
+            this.applyFilters();
+        });
+        
+        document.getElementById('rating-filter').addEventListener('change', (e) => {
+            this.currentFilters.rating = e.target.value;
+            this.applyFilters();
+        });
+        
+        document.getElementById('sort-order').addEventListener('change', (e) => {
+            this.currentFilters.sort = e.target.value;
+            this.applySorting();
+            this.renderCharacters();
+        });
+    }
+    
+    populateFilters() {
+        // Populate house filter
+        const houses = [...new Set(this.characters.map(char => char.house).filter(Boolean))];
+        const houseFilter = document.getElementById('house-filter');
+        
+        houses.forEach(house => {
+            const option = document.createElement('option');
+            option.value = house;
+            option.textContent = house;
+            houseFilter.appendChild(option);
+        });
+    }
+    
+    applyFilters() {
+        this.filteredCharacters = this.characters.filter(character => {
+            // Search filter
+            if (this.currentFilters.search) {
+                const searchTerm = this.currentFilters.search;
+                const matchesSearch = 
+                    character.name.toLowerCase().includes(searchTerm) ||
+                    character.description.toLowerCase().includes(searchTerm) ||
+                    (character.house && character.house.toLowerCase().includes(searchTerm));
+                
+                if (!matchesSearch) return false;
+            }
+            
+            // Status filter
+            if (this.currentFilters.status && character.status !== this.currentFilters.status) {
+                return false;
+            }
+            
+            // House filter
+            if (this.currentFilters.house && character.house !== this.currentFilters.house) {
+                return false;
+            }
+            
+            // Rating filter
+            if (this.currentFilters.rating) {
+                const minRating = parseInt(this.currentFilters.rating);
+                if (character.average_rating < minRating) {
+                    return false;
+                }
+            }
+            
+            return true;
+        });
+        
+        this.applySorting();
+        this.updateStats();
+        this.renderCharacters();
+    }
+    
+    applySorting() {
+        this.filteredCharacters.sort((a, b) => {
+            switch (this.currentFilters.sort) {
+                case 'name':
+                    return a.name.localeCompare(b.name);
+                case 'name-desc':
+                    return b.name.localeCompare(a.name);
+                case 'rating':
+                    return b.average_rating - a.average_rating;
+                case 'rating-asc':
+                    return a.average_rating - b.average_rating;
+                case 'newest':
+                    return new Date(b.created_at) - new Date(a.created_at);
+                case 'oldest':
+                    return new Date(a.created_at) - new Date(b.created_at);
+                default:
+                    return 0;
+            }
+        });
+    }
+    
+    renderCharacters() {
+        const grid = document.getElementById('characters-grid');
+        const emptyState = document.getElementById('empty-state');
+        
+        if (this.filteredCharacters.length === 0) {
+            grid.innerHTML = '';
+            emptyState.style.display = 'block';
+            return;
+        }
+        
+        emptyState.style.display = 'none';
+        
+        const template = document.getElementById('character-card-template');
+        grid.innerHTML = '';
+        
+        this.filteredCharacters.forEach(character => {
+            const card = this.createCharacterCard(character, template);
+            grid.appendChild(card);
+        });
+        
+        // Add stagger animation
+        this.animateCards();
+    }
+    
+    createCharacterCard(character, template) {
+        const card = template.content.cloneNode(true);
+        const cardElement = card.querySelector('.character-card');
+        
+        // Set data
+        cardElement.dataset.characterId = character.id;
+        
+        // Set image
+        const img = card.querySelector('.character-photo');
+        img.src = character.image_url || '/static/images/default-character.jpg';
+        img.alt = character.name;
+        
+        // Set basic info
+        card.querySelector('.character-name').textContent = character.name;
+        card.querySelector('.character-house span').textContent = character.house || 'Sin casa';
+        
+        // Set status
+        const statusBadge = card.querySelector('.status-badge');
+        statusBadge.textContent = character.status;
+        statusBadge.className = `status-badge status-${character.status}`;
+        
+        // Set rating
+        this.setRating(card, character);
+        
+        // Set description
+        card.querySelector('.description-text').textContent = character.description;
+        
+        // Check and set favorite status for authenticated users
+        const favoriteBtn = card.querySelector('.favorite-btn');
+        if (favoriteBtn) {
+            this.checkFavoriteStatus(character.id, favoriteBtn);
+        }
+        
+        // Set up event listeners
+        this.setupCardEvents(cardElement, character);
+        
+        return card;
+    }
+    
+    async checkFavoriteStatus(characterId, favoriteBtn) {
+        try {
+            const response = await fetch(`/characters/${characterId}/favorite-status`);
+            if (response.ok) {
+                const data = await response.json();
+                const icon = favoriteBtn.querySelector('i');
+                
+                if (data.is_favorite) {
+                    icon.className = 'fas fa-heart';
+                    favoriteBtn.classList.add('favorited');
+                } else {
+                    icon.className = 'far fa-heart';
+                    favoriteBtn.classList.remove('favorited');
+                }
+            }
+        } catch (error) {
+            console.error('Error checking favorite status:', error);
+        }
+    }
+    
+    setRating(card, character) {
+        const interactiveRating = card.querySelector('.interactive-rating');
+        const starsContainer = card.querySelector('.stars-filled');
+        const ratingValue = card.querySelector('.rating-value');
+        const ratingCount = card.querySelector('.count');
+        
+        // Set rating display values
+        ratingValue.textContent = character.average_rating ? character.average_rating.toFixed(1) : '0.0';
+        ratingCount.textContent = character.rating_count || 0;
+        
+        if (interactiveRating) {
+            // For authenticated users - interactive stars
+            interactiveRating.dataset.characterId = character.id;
+            this.setupInteractiveRating(interactiveRating, character);
+        } else if (starsContainer) {
+            // For non-authenticated users - static stars
+            const percentage = (character.average_rating / 5) * 100;
+            starsContainer.style.width = percentage + '%';
+        }
+    }
+    
+    async setupInteractiveRating(container, character) {
+        const stars = container.querySelectorAll('.stars-interactive i');
+        const characterId = character.id;
+        
+        // Load user's current rating
+        let userRating = 0;
+        try {
+            const response = await fetch(`/characters/${characterId}/user-rating`);
+            if (response.ok) {
+                const data = await response.json();
+                userRating = data.user_rating || 0;
+            }
+        } catch (error) {
+            console.error('Error loading user rating:', error);
+        }
+        
+        // Set initial star display
+        this.updateStarDisplay(stars, character.average_rating || 0, userRating);
+        
+        // Add event listeners to stars
+        stars.forEach((star, index) => {
+            const rating = index + 1;
+            
+            star.addEventListener('mouseenter', () => {
+                this.highlightStars(stars, rating);
+            });
+            
+            star.addEventListener('mouseleave', () => {
+                this.updateStarDisplay(stars, character.average_rating || 0, userRating);
+            });
+            
+            star.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                const result = await this.rateCharacter(characterId, rating, stars, character);
+                if (result.success) {
+                    userRating = rating;
+                    // Actualizar inmediatamente la visualización con la nueva valoración del usuario
+                    this.updateStarDisplay(stars, character.average_rating, userRating);
+                }
+            });
+        });
+    }
+    
+    updateStarDisplay(stars, averageRating, userRating) {
+        stars.forEach((star, index) => {
+            const position = index + 1;
+            star.className = 'fas fa-star';
+            
+            if (userRating > 0) {
+                // Mostrar la valoración del usuario cuando existe
+                if (position <= userRating) {
+                    star.classList.add('user-rated');
+                } else {
+                    star.classList.add('unrated');
+                }
+            } else {
+                // Mostrar el promedio general cuando el usuario no ha valorado
+                if (position <= Math.floor(averageRating)) {
+                    star.classList.add('rated');
+                } else if (position === Math.ceil(averageRating) && averageRating % 1 >= 0.5) {
+                    star.classList.add('half-rated');
+                } else {
+                    star.classList.add('unrated');
+                }
+            }
+        });
+    }
+    
+    highlightStars(stars, rating) {
+        stars.forEach((star, index) => {
+            const position = index + 1;
+            star.className = 'fas fa-star';
+            
+            if (position <= rating) {
+                star.classList.add('highlighted');
+            } else {
+                star.classList.add('unrated');
+            }
+        });
+    }
+    
+    async rateCharacter(characterId, rating, stars, character) {
+        try {
+            const response = await fetch(`/characters/${characterId}/rate`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ rating: rating })
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                
+                // Update character data
+                character.average_rating = data.new_average;
+                character.rating_count = data.total_ratings;
+                
+                // Update display
+                const card = stars[0].closest('.character-card');
+                const ratingValue = card.querySelector('.rating-value');
+                const ratingCount = card.querySelector('.count');
+                
+                ratingValue.textContent = data.new_average.toFixed(1);
+                ratingCount.textContent = data.total_ratings;
+                
+                // Show success message
+                this.showSuccessMessage(data.message);
+                
+                // Update the character in our data array
+                const charIndex = this.characters.findIndex(c => c.id === characterId);
+                if (charIndex !== -1) {
+                    this.characters[charIndex] = character;
+                }
+                
+                return { success: true, userRating: data.user_rating };
+                
+            } else {
+                const errorData = await response.json();
+                this.showError(errorData.message || 'Error al enviar valoración');
+                return { success: false };
+            }
+        } catch (error) {
+            console.error('Error rating character:', error);
+            this.showError('Error de conexión');
+            return { success: false };
+        }
+    }
+    
+    setupCardEvents(cardElement, character) {
+        // Card flip on click
+        cardElement.addEventListener('click', (e) => {
+            if (!e.target.closest('.character-actions') && 
+                !e.target.closest('.flip-back-btn') && 
+                !e.target.closest('.interactive-rating')) {
+                cardElement.classList.toggle('flipped');
+            }
+        });
+        
+        // Flip back button
+        const flipBackBtn = cardElement.querySelector('.flip-back-btn');
+        flipBackBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            cardElement.classList.remove('flipped');
+        });
+        
+        // Edit button (if authenticated)
+        const editBtn = cardElement.querySelector('.edit-btn');
+        if (editBtn) {
+            editBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                window.location.href = `/characters/${character.id}/edit`;
+            });
+        }
+        
+        // Favorite button (if authenticated)
+        const favoriteBtn = cardElement.querySelector('.favorite-btn');
+        if (favoriteBtn) {
+            favoriteBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.toggleFavorite(character.id, favoriteBtn);
+            });
+        }
+    }
+    
+    async toggleFavorite(characterId, button) {
+        try {
+            const response = await fetch(`/characters/${characterId}/favorite`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                const icon = button.querySelector('i');
+                if (data.is_favorite) {
+                    icon.className = 'fas fa-heart';
+                    button.classList.add('favorited');
+                } else {
+                    icon.className = 'far fa-heart';
+                    button.classList.remove('favorited');
+                }
+                
+                this.showNotification(data.message, 'success');
+            }
+        } catch (error) {
+            console.error('Error toggling favorite:', error);
+            this.showNotification('Error al actualizar favoritos', 'error');
+        }
+    }
+    
+    updateStats() {
+        document.getElementById('total-characters').textContent = this.characters.length;
+        document.getElementById('filtered-characters').textContent = this.filteredCharacters.length;
+    }
+    
+    animateCards() {
+        const cards = document.querySelectorAll('.character-card');
+        cards.forEach((card, index) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(30px)';
+            
+            setTimeout(() => {
+                card.style.transition = 'all 0.5s ease';
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, index * 100);
+        });
+    }
+    
+    showSuccessMessage(message) {
+        this.showNotification(message, 'success');
+    }
+    
+    showNotification(message, type) {
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.textContent = message;
+        
+        // Add to page
+        document.body.appendChild(notification);
+        
+        // Show notification
+        setTimeout(() => notification.classList.add('show'), 100);
+        
+        // Remove notification after 3 seconds
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 300);
+        }, 3000);
+    }
+    
+    showError(message) {
+        this.showNotification(message, 'error');
+    }
+    
+    debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+    
+    confirmDeleteCharacter(characterId, characterName) {
+        if (confirm(`¿Estás seguro de que deseas eliminar el personaje "${characterName}"? Esta acción no se puede deshacer.`)) {
+            this.deleteCharacter(characterId);
+        }
+    }
+    
+    async deleteCharacter(characterId) {
+        try {
+            const response = await fetch(`/api/characters/${characterId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                this.showSuccessMessage(data.message);
+                
+                // Remove the deleted character from local data
+                this.characters = this.characters.filter(char => char.id !== characterId);
+                this.filteredCharacters = this.filteredCharacters.filter(char => char.id !== characterId);
+                this.updateStats();
+                this.renderCharacters();
+            } else {
+                const errorData = await response.json();
+                this.showError(errorData.message || 'Error al eliminar el personaje');
+            }
+        } catch (error) {
+            console.error('Error eliminando personaje:', error);
+            this.showError('Error de conexión');
+        }
+    }
+}
+
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    new CharactersManager();
+});
+</script>
+{% endblock %}

@@ -1,0 +1,595 @@
+{% extends "base.html" %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/events.css') }}">
+{% endblock %}
+
+{% block title %}Eventos Épicos - WesterosTracker{% endblock %}
+
+{% block content %}
+<div class="events-page">
+    <!-- Epic Hero Section -->
+    <div class="events-hero">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <div class="hero-icon">
+                <i class="fas fa-scroll"></i>
+            </div>
+            <h1 class="hero-title">Crónicas de Westeros</h1>
+            <p class="hero-subtitle">Los eventos que forjaron el destino de los Siete Reinos</p>
+        </div>
+        
+        <!-- Floating chronicles -->
+        <div class="floating-chronicles">
+            <div class="chronicle chronicle-1"><i class="fas fa-dragon"></i></div>
+            <div class="chronicle chronicle-2"><i class="fas fa-crown"></i></div>
+            <div class="chronicle chronicle-3"><i class="fas fa-fire"></i></div>
+            <div class="chronicle chronicle-4"><i class="fas fa-shield-alt"></i></div>
+        </div>
+    </div>
+
+    <!-- Epic Controls & Filters -->
+    <div class="events-controls">
+        <div class="controls-wrapper">
+            <div class="controls-header">
+                <div class="search-section">
+                    <div class="search-container">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" id="event-search" class="search-input" 
+                               placeholder="Buscar por nombre, descripción..." 
+                               oninput="filterEvents()">
+                    </div>
+                </div>
+                
+                {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('events.create_event') }}" class="create-event-btn">
+                        <i class="fas fa-feather-alt"></i>
+                        <span>Escribir Nueva Crónica</span>
+                    </a>
+                {% endif %}
+            </div>
+            
+            <div class="filters-section">
+                <div class="filter-group">
+                    <label class="filter-label">
+                        <i class="fas fa-tv"></i>
+                        Temporada
+                    </label>
+                    <div class="filter-options">
+                        <select id="season-select" class="filter-select" onchange="filterEvents()">
+                            <option value="0">Todas las temporadas</option>
+                            {% for i in range(1, 9) %}
+                                <option value="{{ i }}">Temporada {{ i }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="sort-group">
+                    <label class="filter-label">
+                        <i class="fas fa-sort"></i>
+                        Ordenar
+                    </label>
+                    <div class="filter-options">
+                        <select id="sort-select" class="filter-select" onchange="sortEvents()">
+                            <option value="name">Nombre</option>
+                            <option value="season">Temporada</option>
+                            <option value="importance">Importancia</option>
+                            <option value="newest">Más reciente</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Events Area -->
+    <div class="events-main">
+        <div class="main-wrapper">
+            <!-- Events Statistics -->
+            <div class="events-stats">
+                <div class="stats-item">
+                    <span class="stats-number">{{ events|length }}</span>
+                    <span class="stats-label">Eventos Documentados</span>
+                </div>
+                <div class="stats-item">
+                    <span class="stats-number">8</span>
+                    <span class="stats-label">Temporadas</span>
+                </div>
+                <div class="stats-item">
+                    <span class="stats-number">{{ (events|sum(attribute='importance_rating') / events|length)|round(1) if events else 0 }}</span>
+                    <span class="stats-label">Importancia Promedio</span>
+                </div>
+            </div>
+            
+            <!-- Events Grid -->
+            <div class="events-grid" id="events-grid">
+                {% if events %}
+                    {% for event in events %}
+                        <div class="event-card" 
+                             data-name="{{ event.name|lower }}" 
+                             data-season="{{ event.season }}"
+                             data-importance="{{ event.importance_rating }}"
+                             data-description="{{ event.description|lower }}">
+                            
+                            <div class="card-inner">
+                                <!-- Front of the card -->
+                                <div class="card-front">
+                                    <div class="event-image">
+                                        {% if event.image_urls and event.image_urls|length > 0 %}
+                                            <img src="{{ event.image_urls[0] }}" alt="{{ event.name }}" class="event-poster">
+                                        {% else %}
+                                            <div class="event-poster" style="background: var(--gradient-parchment); display: flex; align-items: center; justify-content: center;">
+                                                <i class="fas fa-scroll" style="font-size: 4rem; color: var(--event-ancient-bronze);"></i>
+                                            </div>
+                                        {% endif %}
+                                        <div class="image-overlay"></div>
+                                        
+                                        <div class="event-season">S{{ event.season }}E{{ event.episode }}</div>
+                                    </div>
+                                    
+                                    <div class="event-info">
+                                        <h3 class="event-name">{{ event.name }}</h3>
+                                        
+                                        <div class="event-type">
+                                            <i class="fas fa-bookmark"></i>
+                                            <span>Temporada {{ event.season }}</span>
+                                        </div>
+                                        
+                                        <div class="event-location">
+                                            <i class="fas fa-map-marker-alt"></i>
+                                            <span>Episodio {{ event.episode }}</span>
+                                        </div>
+                                        
+                                        <div class="event-importance">
+                                            <div class="importance-swords">
+                                                <div class="swords-background">
+                                                    {% for i in range(5) %}
+                                                        <i class="fas fa-sword"></i>
+                                                    {% endfor %}
+                                                </div>
+                                                <div class="swords-filled" style="width: {{ event.importance_rating * 20 }}%;">
+                                                    {% for i in range(5) %}
+                                                        <i class="fas fa-sword"></i>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                            <span class="importance-value">{{ event.importance_rating }}</span>
+                                            <span class="importance-count">/5</span>
+                                        </div>
+                                        
+                                        <div class="event-actions">
+                                            {% if current_user.is_authenticated %}
+                                                <a href="{{ url_for('events.edit_event', event_id=event.__oid__) }}" 
+                                                   class="btn-epic tooltip" 
+                                                   data-tooltip="Editar Evento">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                            {% endif %}
+                                            {% if event.__oid__ %}
+                                                <a href="{{ url_for('events.event_detail', event_id=event.__oid__) }}" 
+                                                   class="btn-epic tooltip event-read-btn" 
+                                                   data-tooltip="Leer Evento Completo"
+                                                   style="position: relative; z-index: 999;">
+                                                    <i class="fas fa-book-open"></i>
+                                                </a>
+                                            {% else %}
+                                                <span class="btn-epic tooltip disabled" data-tooltip="Error: ID no disponible">
+                                                    <i class="fas fa-book-open"></i>
+                                                </span>
+                                            {% endif %}
+                                            
+                                            <!-- Admin controls -->
+                                            {% if current_user.is_authenticated and current_user.is_administrator() %}
+                                                <button class="admin-delete-btn btn-epic tooltip" 
+                                                        data-entity-type="event" 
+                                                        data-entity-id="{{ event.__oid__.split('@')[1] if '@' in event.__oid__ else event.__oid__ }}" 
+                                                        data-entity-name="{{ event.name }}"
+                                                        data-tooltip="Eliminar evento"
+                                                        title="Eliminar evento">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                </button>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Back of the card -->
+                                <div class="card-back">
+                                    <div class="event-description">
+                                        <h4>{{ event.name }}</h4>
+                                        <div class="description-text">
+                                            {{ event.description|truncate(300) }}
+                                        </div>
+                                        <button class="flip-back-btn" onclick="flipCard(this); event.stopPropagation();">
+                                            <i class="fas fa-arrow-left"></i>
+                                            Volver
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="fas fa-scroll"></i>
+                        </div>
+                        <h3>No hay eventos registrados</h3>
+                        <p>Aún no se han documentado eventos en las crónicas de Westeros</p>
+                        
+                        {% if current_user.is_authenticated %}
+                            <a href="{{ url_for('events.create_event') }}" class="btn-epic" style="width: auto; height: auto; padding: 1rem 2rem; border-radius: 15px;">
+                                <i class="fas fa-feather-alt"></i>
+                                <span style="margin-left: 0.5rem;">Escribir el primer evento</span>
+                            </a>
+                        {% else %}
+                            <p class="login-prompt">
+                                <a href="{{ url_for('auth.login') }}">Inicia sesión</a> para documentar eventos históricos
+                            </p>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- No Results State -->
+            <div class="no-results" id="no-results" style="display: none;">
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <h3>No se encontraron eventos</h3>
+                    <p>No hay eventos que coincidan con tus criterios de búsqueda</p>
+                    <button class="btn-epic" onclick="clearAllFilters()" style="width: auto; height: auto; padding: 1rem 2rem; border-radius: 15px;">
+                        <i class="fas fa-undo"></i>
+                        <span style="margin-left: 0.5rem;">Limpiar filtros</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+class EventsManager {
+    constructor() {
+        this.allEvents = Array.from(document.querySelectorAll('.event-card'));
+        this.currentStep = 1;
+        this.selectedImages = [];
+        
+        this.init();
+    }
+    
+    init() {
+        this.setupEventListeners();
+        this.setupCardFlips();
+        this.updateStats();
+        this.initializeModal();
+    }
+    
+    setupEventListeners() {
+        // Search and filter
+        const searchInput = document.getElementById('event-search');
+        const seasonSelect = document.getElementById('season-select');
+        const sortSelect = document.getElementById('sort-select');
+        
+        if (searchInput) {
+            searchInput.addEventListener('input', () => this.filterEvents());
+        }
+        if (seasonSelect) {
+            seasonSelect.addEventListener('change', () => this.filterEvents());
+        }
+        if (sortSelect) {
+            sortSelect.addEventListener('change', () => this.sortEvents());
+        }
+        
+        // Manejar clics en tarjetas sin interferir con enlaces
+        document.querySelectorAll('.event-card').forEach(card => {
+            card.addEventListener('click', function(e) {
+                // Solo procesar si NO es un enlace, botón o elemento interactivo
+                if (!e.target.closest('a, button, .event-actions, .btn-epic')) {
+                    // Aquí podrías agregar lógica para flipear la carta o mostrar detalles
+                    console.log('Click en tarjeta:', this.dataset.name);
+                }
+            });
+        });
+    }
+    
+    setupCardFlips() {
+        // Solo configurar el flip para botones específicos de "Ver más" si existen
+        document.querySelectorAll('.flip-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const card = btn.closest('.event-card');
+                card.classList.add('flipped');
+            });
+        });
+        
+        document.querySelectorAll('.flip-back-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const card = btn.closest('.event-card');
+                card.classList.remove('flipped');
+            });
+        });
+    }
+    
+    filterEvents() {
+        const searchTerm = document.getElementById('event-search')?.value.toLowerCase() || '';
+        const selectedSeason = parseInt(document.getElementById('season-select')?.value || '0');
+        
+        let visibleCount = 0;
+        
+        this.allEvents.forEach(card => {
+            const name = card.dataset.name || '';
+            const description = card.dataset.description || '';
+            const season = parseInt(card.dataset.season || '0');
+            
+            const matchesSearch = !searchTerm || 
+                                name.includes(searchTerm) || 
+                                description.includes(searchTerm);
+            const matchesSeason = selectedSeason === 0 || season === selectedSeason;
+            
+            if (matchesSearch && matchesSeason) {
+                card.style.display = 'block';
+                visibleCount++;
+                // Add stagger animation
+                setTimeout(() => {
+                    card.style.animation = 'cardSlideIn 0.5s ease forwards';
+                }, visibleCount * 50);
+            } else {
+                card.style.display = 'none';
+            }
+        });
+        
+        this.toggleNoResults(visibleCount === 0 && this.allEvents.length > 0);
+    }
+    
+    sortEvents() {
+        const sortBy = document.getElementById('sort-select')?.value || 'name';
+        const container = document.getElementById('events-grid');
+        
+        if (!container) return;
+        
+        const sortedEvents = [...this.allEvents].sort((a, b) => {
+            switch (sortBy) {
+                case 'name':
+                    return (a.dataset.name || '').localeCompare(b.dataset.name || '');
+                case 'season':
+                    return parseInt(a.dataset.season || '0') - parseInt(b.dataset.season || '0');
+                case 'importance':
+                    return parseInt(b.dataset.importance || '0') - parseInt(a.dataset.importance || '0');
+                default:
+                    return 0;
+            }
+        });
+        
+        // Re-append in new order
+        sortedEvents.forEach(card => container.appendChild(card));
+        
+        // Re-apply stagger animation
+        sortedEvents.forEach((card, index) => {
+            if (card.style.display !== 'none') {
+                setTimeout(() => {
+                    card.style.animation = 'cardSlideIn 0.3s ease forwards';
+                }, index * 30);
+            }
+        });
+    }
+    
+    toggleNoResults(show) {
+        const noResults = document.getElementById('no-results');
+        if (noResults) {
+            noResults.style.display = show ? 'block' : 'none';
+        }
+    }
+    
+    clearAllFilters() {
+        const searchInput = document.getElementById('event-search');
+        const seasonSelect = document.getElementById('season-select');
+        const sortSelect = document.getElementById('sort-select');
+        
+        if (searchInput) searchInput.value = '';
+        if (seasonSelect) seasonSelect.value = '0';
+        if (sortSelect) sortSelect.value = 'name';
+        
+        this.filterEvents();
+    }
+    
+    updateStats() {
+        // Could add live statistics here
+    }
+    
+    initializeModal() {
+        if (!document.getElementById('create-event-modal')) return;
+        
+        this.setupModalSteps();
+        this.setupImageUpload();
+        this.setupFormValidation();
+    }
+    
+    setupModalSteps() {
+        document.querySelectorAll('.next-step').forEach(btn => {
+            btn.addEventListener('click', () => this.nextStep());
+        });
+        
+        document.querySelectorAll('.prev-step').forEach(btn => {
+            btn.addEventListener('click', () => this.prevStep());
+        });
+    }
+    
+    nextStep() {
+        if (this.validateCurrentStep()) {
+            const currentStepEl = document.querySelector(`.form-step[data-step="${this.currentStep}"]`);
+            const nextStepEl = document.querySelector(`.form-step[data-step="${this.currentStep + 1}"]`);
+            
+            if (nextStepEl) {
+                currentStepEl?.classList.remove('active');
+                nextStepEl.classList.add('active');
+                this.currentStep++;
+            }
+        }
+    }
+    
+    prevStep() {
+        const currentStepEl = document.querySelector(`.form-step[data-step="${this.currentStep}"]`);
+        const prevStepEl = document.querySelector(`.form-step[data-step="${this.currentStep - 1}"]`);
+        
+        if (prevStepEl) {
+            currentStepEl?.classList.remove('active');
+            prevStepEl.classList.add('active');
+            this.currentStep--;
+        }
+    }
+    
+    validateCurrentStep() {
+        const currentStepEl = document.querySelector(`.form-step[data-step="${this.currentStep}"]`);
+        if (!currentStepEl) return true;
+        
+        const inputs = currentStepEl.querySelectorAll('input[required], select[required], textarea[required]');
+        let isValid = true;
+        
+        inputs.forEach(input => {
+            if (!input.value.trim()) {
+                input.classList.add('error');
+                isValid = false;
+            } else {
+                input.classList.remove('error');
+            }
+        });
+        
+        return isValid;
+    }
+    
+    setupImageUpload() {
+        const uploadArea = document.getElementById('image-upload-area');
+        const fileInput = document.getElementById('event-images');
+        const previewsContainer = document.getElementById('image-previews');
+        
+        if (!uploadArea || !fileInput) return;
+        
+        uploadArea.addEventListener('click', () => fileInput.click());
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('drag-over');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('drag-over');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('drag-over');
+            this.handleImageFiles(e.dataTransfer.files);
+        });
+        
+        fileInput.addEventListener('change', (e) => {
+            this.handleImageFiles(e.target.files);
+        });
+    }
+    
+    handleImageFiles(files) {
+        const maxFiles = 5;
+        const remainingSlots = maxFiles - this.selectedImages.length;
+        
+        for (let i = 0; i < Math.min(files.length, remainingSlots); i++) {
+            const file = files[i];
+            if (file.type.startsWith('image/')) {
+                this.addImagePreview(file);
+            }
+        }
+    }
+    
+    addImagePreview(file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const previewsContainer = document.getElementById('image-previews');
+            if (!previewsContainer) return;
+            
+            const preview = document.createElement('div');
+            preview.className = 'image-preview-item';
+            preview.innerHTML = `
+                <img src="${e.target.result}" alt="Preview">
+                <button type="button" class="remove-image">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            preview.querySelector('.remove-image').addEventListener('click', () => {
+                preview.remove();
+                this.selectedImages = this.selectedImages.filter(f => f !== file);
+            });
+            
+            previewsContainer.appendChild(preview);
+            this.selectedImages.push(file);
+        };
+        reader.readAsDataURL(file);
+    }
+    
+    setupFormValidation() {
+        const descriptionTextarea = document.getElementById('event-description');
+        const charCountEl = document.getElementById('desc-char-count');
+        
+        if (descriptionTextarea && charCountEl) {
+            descriptionTextarea.addEventListener('input', (e) => {
+                const count = e.target.value.length;
+                charCountEl.textContent = count;
+                
+                if (count > 2000) {
+                    e.target.value = e.target.value.substring(0, 2000);
+                    charCountEl.textContent = 2000;
+                }
+            });
+        }
+    }
+}
+
+// Global functions for template
+function flipCard(button) {
+    const card = button.closest('.event-card');
+    if (card.classList.contains('flipped')) {
+        card.classList.remove('flipped');
+    } else {
+        card.classList.add('flipped');
+    }
+}
+
+function clearAllFilters() {
+    if (window.eventsManager) {
+        window.eventsManager.clearAllFilters();
+    }
+}
+
+function filterEvents() {
+    if (window.eventsManager) {
+        window.eventsManager.filterEvents();
+    }
+}
+
+function sortEvents() {
+    if (window.eventsManager) {
+        window.eventsManager.sortEvents();
+    }
+}
+
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    window.eventsManager = new EventsManager();
+    
+    // Debug: verificar si los botones existen
+    const readButtons = document.querySelectorAll('.event-read-btn');
+    console.log(`Encontrados ${readButtons.length} botones de leer`);
+    
+    // Verificar las URLs generadas
+    readButtons.forEach((btn, index) => {
+        console.log(`Botón ${index + 1}: URL = ${btn.href}`);
+    });
+});
+</script>
+{% endblock %}
